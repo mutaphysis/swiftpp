@@ -1,0 +1,42 @@
+##
+# All the step to get a working clang C++ compiler with standard libraries.
+##
+
+
+BUILD_DIR=/opt/llvm_build
+INSTALL_DIR=/opt/llvm
+
+mkdir -p "$BUILD_DIR"
+mkdir -p "$INSTALL_DIR"
+
+# get the sources
+cd "$BUILD_DIR"
+svn co http://llvm.org/svn/llvm-project/llvm/trunk llvm
+cd "$BUILD_DIR/llvm/tools"
+svn co http://llvm.org/svn/llvm-project/cfe/trunk clang
+cd "$BUILD_DIR/llvm/tools/clang/tools"
+svn co http://llvm.org/svn/llvm-project/clang-tools-extra/trunk extra
+cd "$BUILD_DIR/llvm/projects"
+svn co http://llvm.org/svn/llvm-project/compiler-rt/trunk compiler-rt
+cd "$BUILD_DIR"
+svn co http://llvm.org/svn/llvm-project/libcxx/trunk libcxx
+
+# build/install llvm
+cd "$BUILD_DIR/llvm"
+./configure --prefix="$INSTALL_DIR" # add --enable-optimized for release build
+make
+make install
+
+# build/install libc++
+cd "$BUILD_DIR/libcxx/lib"
+export TRIPLE=-apple-
+export CXX="$INSTALL_DIR/bin/clang++"
+export CC="$INSTALL_DIR/bin/clang"
+./buildit
+cd ../include
+mkdir -p "$INSTALL_DIR/include/c++/v1/ext"
+tar cf - --exclude=support . |  (cd "$INSTALL_DIR/include/c++/v1" && tar xf -)
+cd ..
+ditto lib/libc++.1.dylib "$INSTALL_DIR/lib/libc++.1.dylib"
+cd "$INSTALL_DIR/lib"
+ln -s libc++.1.dylib libc++.dylib

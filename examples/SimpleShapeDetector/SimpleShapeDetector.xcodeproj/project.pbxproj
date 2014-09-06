@@ -1,0 +1,326 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		263B31D719BB2912006F7D14 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263B31D619BB2912006F7D14 /* main.swift */; };
+		263B31D919BB2912006F7D14 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263B31D819BB2912006F7D14 /* AppDelegate.swift */; };
+		263B31DB19BB2912006F7D14 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 263B31DA19BB2912006F7D14 /* Images.xcassets */; };
+		263B31DE19BB2912006F7D14 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 263B31DC19BB2912006F7D14 /* MainMenu.xib */; };
+		263B31FC19BB2CAF006F7D14 /* DetectCorners.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 263B31F419BB2CAF006F7D14 /* DetectCorners.cpp */; };
+		263B31FD19BB2CAF006F7D14 /* GeometryUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 263B31F619BB2CAF006F7D14 /* GeometryUtils.cpp */; };
+		263B31FE19BB2CAF006F7D14 /* Path2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 263B31F819BB2CAF006F7D14 /* Path2D.cpp */; };
+		263B31FF19BB2CAF006F7D14 /* ShapeDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 263B31FA19BB2CAF006F7D14 /* ShapeDetector.cpp */; };
+		263B320119BB2CD7006F7D14 /* ShapeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263B320019BB2CD7006F7D14 /* ShapeView.swift */; };
+		263B320519BB2D76006F7D14 /* cpp-converter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 263B320419BB2D76006F7D14 /* cpp-converter.mm */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		263B31D119BB2912006F7D14 /* SimpleShapeDetector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleShapeDetector.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		263B31D519BB2912006F7D14 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		263B31D619BB2912006F7D14 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		263B31D819BB2912006F7D14 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		263B31DA19BB2912006F7D14 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		263B31DD19BB2912006F7D14 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		263B31F319BB2CAF006F7D14 /* SimpleShapeDetector-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SimpleShapeDetector-Bridging-Header.h"; sourceTree = "<group>"; };
+		263B31F419BB2CAF006F7D14 /* DetectCorners.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DetectCorners.cpp; sourceTree = "<group>"; };
+		263B31F519BB2CAF006F7D14 /* DetectCorners.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DetectCorners.h; sourceTree = "<group>"; };
+		263B31F619BB2CAF006F7D14 /* GeometryUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GeometryUtils.cpp; sourceTree = "<group>"; };
+		263B31F719BB2CAF006F7D14 /* GeometryUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GeometryUtils.h; sourceTree = "<group>"; };
+		263B31F819BB2CAF006F7D14 /* Path2D.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Path2D.cpp; sourceTree = "<group>"; };
+		263B31F919BB2CAF006F7D14 /* Path2D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Path2D.h; sourceTree = "<group>"; };
+		263B31FA19BB2CAF006F7D14 /* ShapeDetector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShapeDetector.cpp; sourceTree = "<group>"; };
+		263B31FB19BB2CAF006F7D14 /* ShapeDetector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShapeDetector.h; sourceTree = "<group>"; };
+		263B320019BB2CD7006F7D14 /* ShapeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShapeView.swift; sourceTree = "<group>"; };
+		263B320219BB2D5E006F7D14 /* SimpleShapeDetector-cpp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SimpleShapeDetector-cpp-Bridging-Header.h"; sourceTree = "<group>"; };
+		263B320319BB2D76006F7D14 /* cpp-converter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cpp-converter.h"; sourceTree = "<group>"; };
+		263B320419BB2D76006F7D14 /* cpp-converter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "cpp-converter.mm"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		263B31CE19BB2912006F7D14 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		263B31C819BB2912006F7D14 = {
+			isa = PBXGroup;
+			children = (
+				263B31D319BB2912006F7D14 /* SimpleShapeDetector */,
+				263B31D219BB2912006F7D14 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		263B31D219BB2912006F7D14 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				263B31D119BB2912006F7D14 /* SimpleShapeDetector.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		263B31D319BB2912006F7D14 /* SimpleShapeDetector */ = {
+			isa = PBXGroup;
+			children = (
+				263B320319BB2D76006F7D14 /* cpp-converter.h */,
+				263B320419BB2D76006F7D14 /* cpp-converter.mm */,
+				263B31F419BB2CAF006F7D14 /* DetectCorners.cpp */,
+				263B31F519BB2CAF006F7D14 /* DetectCorners.h */,
+				263B31F619BB2CAF006F7D14 /* GeometryUtils.cpp */,
+				263B31F719BB2CAF006F7D14 /* GeometryUtils.h */,
+				263B31F819BB2CAF006F7D14 /* Path2D.cpp */,
+				263B31F919BB2CAF006F7D14 /* Path2D.h */,
+				263B31FA19BB2CAF006F7D14 /* ShapeDetector.cpp */,
+				263B31FB19BB2CAF006F7D14 /* ShapeDetector.h */,
+				263B320019BB2CD7006F7D14 /* ShapeView.swift */,
+				263B31D819BB2912006F7D14 /* AppDelegate.swift */,
+				263B31DA19BB2912006F7D14 /* Images.xcassets */,
+				263B31DC19BB2912006F7D14 /* MainMenu.xib */,
+				263B31D419BB2912006F7D14 /* Supporting Files */,
+				263B31F319BB2CAF006F7D14 /* SimpleShapeDetector-Bridging-Header.h */,
+				263B320219BB2D5E006F7D14 /* SimpleShapeDetector-cpp-Bridging-Header.h */,
+			);
+			path = SimpleShapeDetector;
+			sourceTree = "<group>";
+		};
+		263B31D419BB2912006F7D14 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				263B31D519BB2912006F7D14 /* Info.plist */,
+				263B31D619BB2912006F7D14 /* main.swift */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		263B31D019BB2912006F7D14 /* SimpleShapeDetector */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 263B31ED19BB2912006F7D14 /* Build configuration list for PBXNativeTarget "SimpleShapeDetector" */;
+			buildPhases = (
+				263B31CD19BB2912006F7D14 /* Sources */,
+				263B31CE19BB2912006F7D14 /* Frameworks */,
+				263B31CF19BB2912006F7D14 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SimpleShapeDetector;
+			productName = SimpleShapeDetector;
+			productReference = 263B31D119BB2912006F7D14 /* SimpleShapeDetector.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		263B31C919BB2912006F7D14 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0600;
+				ORGANIZATIONNAME = sm;
+				TargetAttributes = {
+					263B31D019BB2912006F7D14 = {
+						CreatedOnToolsVersion = 6.0;
+					};
+				};
+			};
+			buildConfigurationList = 263B31CC19BB2912006F7D14 /* Build configuration list for PBXProject "SimpleShapeDetector" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 263B31C819BB2912006F7D14;
+			productRefGroup = 263B31D219BB2912006F7D14 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				263B31D019BB2912006F7D14 /* SimpleShapeDetector */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		263B31CF19BB2912006F7D14 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				263B31DB19BB2912006F7D14 /* Images.xcassets in Resources */,
+				263B31DE19BB2912006F7D14 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		263B31CD19BB2912006F7D14 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				263B320519BB2D76006F7D14 /* cpp-converter.mm in Sources */,
+				263B31D919BB2912006F7D14 /* AppDelegate.swift in Sources */,
+				263B31FF19BB2CAF006F7D14 /* ShapeDetector.cpp in Sources */,
+				263B31D719BB2912006F7D14 /* main.swift in Sources */,
+				263B31FC19BB2CAF006F7D14 /* DetectCorners.cpp in Sources */,
+				263B31FE19BB2CAF006F7D14 /* Path2D.cpp in Sources */,
+				263B31FD19BB2CAF006F7D14 /* GeometryUtils.cpp in Sources */,
+				263B320119BB2CD7006F7D14 /* ShapeView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		263B31DC19BB2912006F7D14 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				263B31DD19BB2912006F7D14 /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		263B31EB19BB2912006F7D14 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		263B31EC19BB2912006F7D14 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		263B31EE19BB2912006F7D14 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = SimpleShapeDetector/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SimpleShapeDetector/SimpleShapeDetector-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		263B31EF19BB2912006F7D14 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = SimpleShapeDetector/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SimpleShapeDetector/SimpleShapeDetector-Bridging-Header.h";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		263B31CC19BB2912006F7D14 /* Build configuration list for PBXProject "SimpleShapeDetector" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				263B31EB19BB2912006F7D14 /* Debug */,
+				263B31EC19BB2912006F7D14 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		263B31ED19BB2912006F7D14 /* Build configuration list for PBXNativeTarget "SimpleShapeDetector" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				263B31EE19BB2912006F7D14 /* Debug */,
+				263B31EF19BB2912006F7D14 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 263B31C919BB2912006F7D14 /* Project object */;
+}
