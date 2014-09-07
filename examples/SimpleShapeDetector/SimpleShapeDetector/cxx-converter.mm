@@ -6,7 +6,7 @@
 //  Copyright (c) 2014年 Sandy Martel. All rights reserved.
 //
 
-#import "cpp-converter.h"
+#import "cxx-converter.h"
 
 namespace swift_converter
 {

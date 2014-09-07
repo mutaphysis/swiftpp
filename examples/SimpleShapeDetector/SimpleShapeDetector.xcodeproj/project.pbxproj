@@ -16,7 +16,7 @@
 		263B31FE19BB2CAF006F7D14 /* Path2D.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 263B31F819BB2CAF006F7D14 /* Path2D.cpp */; };
 		263B31FF19BB2CAF006F7D14 /* ShapeDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 263B31FA19BB2CAF006F7D14 /* ShapeDetector.cpp */; };
 		263B320119BB2CD7006F7D14 /* ShapeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263B320019BB2CD7006F7D14 /* ShapeView.swift */; };
-		263B320519BB2D76006F7D14 /* cpp-converter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 263B320419BB2D76006F7D14 /* cpp-converter.mm */; };
+		263B320519BB2D76006F7D14 /* cxx-converter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 263B320419BB2D76006F7D14 /* cxx-converter.mm */; };
 		26B20BDA19BB359700763063 /* cxx-objc-proxies.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26B20BD819BB359700763063 /* cxx-objc-proxies.mm */; };
 		26B20BDB19BB359700763063 /* cxx-subclasses.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26B20BD919BB359700763063 /* cxx-subclasses.mm */; };
 /* End PBXBuildFile section */
@@ -48,9 +48,9 @@
 		263B31FA19BB2CAF006F7D14 /* ShapeDetector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShapeDetector.cpp; sourceTree = "<group>"; };
 		263B31FB19BB2CAF006F7D14 /* ShapeDetector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShapeDetector.h; sourceTree = "<group>"; };
 		263B320019BB2CD7006F7D14 /* ShapeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShapeView.swift; sourceTree = "<group>"; };
-		263B320219BB2D5E006F7D14 /* cpp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "cpp-Bridging-Header.h"; sourceTree = "<group>"; };
-		263B320319BB2D76006F7D14 /* cpp-converter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cpp-converter.h"; sourceTree = "<group>"; };
-		263B320419BB2D76006F7D14 /* cpp-converter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "cpp-converter.mm"; sourceTree = "<group>"; };
+		263B320219BB2D5E006F7D14 /* cxx-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "cxx-Bridging-Header.h"; sourceTree = "<group>"; };
+		263B320319BB2D76006F7D14 /* cxx-converter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cxx-converter.h"; sourceTree = "<group>"; };
+		263B320419BB2D76006F7D14 /* cxx-converter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "cxx-converter.mm"; sourceTree = "<group>"; };
 		26B20BD619BB359700763063 /* cxx-objc-protocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cxx-objc-protocols.h"; sourceTree = "<group>"; };
 		26B20BD719BB359700763063 /* cxx-objc-proxies.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cxx-objc-proxies.h"; sourceTree = "<group>"; };
 		26B20BD819BB359700763063 /* cxx-objc-proxies.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "cxx-objc-proxies.mm"; sourceTree = "<group>"; };
@@ -87,8 +87,8 @@
 		263B31D319BB2912006F7D14 /* SimpleShapeDetector */ = {
 			isa = PBXGroup;
 			children = (
-				263B320319BB2D76006F7D14 /* cpp-converter.h */,
-				263B320419BB2D76006F7D14 /* cpp-converter.mm */,
+				263B320319BB2D76006F7D14 /* cxx-converter.h */,
+				263B320419BB2D76006F7D14 /* cxx-converter.mm */,
 				263B31F419BB2CAF006F7D14 /* DetectCorners.cpp */,
 				263B31F519BB2CAF006F7D14 /* DetectCorners.h */,
 				263B31F619BB2CAF006F7D14 /* GeometryUtils.cpp */,
@@ -103,7 +103,7 @@
 				263B31DC19BB2912006F7D14 /* MainMenu.xib */,
 				263B31D419BB2912006F7D14 /* Supporting Files */,
 				263B31F319BB2CAF006F7D14 /* SimpleShapeDetector-Bridging-Header.h */,
-				263B320219BB2D5E006F7D14 /* cpp-Bridging-Header.h */,
+				263B320219BB2D5E006F7D14 /* cxx-Bridging-Header.h */,
 				26B20BD519BB359700763063 /* cxx-bridge */,
 			);
 			path = SimpleShapeDetector;
@@ -132,17 +132,17 @@
 /* End PBXGroup section */
 
 /* Begin PBXLegacyTarget section */
-		26B20BCF19BB33CC00763063 /* cpp-bridge */ = {
+		26B20BCF19BB33CC00763063 /* cxx-bridge */ = {
 			isa = PBXLegacyTarget;
-			buildArgumentsString = "$(SRCROOT)/SimpleShapeDetector/cpp-Bridging-Header.h";
-			buildConfigurationList = 26B20BD019BB33CC00763063 /* Build configuration list for PBXLegacyTarget "cpp-bridge" */;
+			buildArgumentsString = "$(SRCROOT)/SimpleShapeDetector/cxx-Bridging-Header.h";
+			buildConfigurationList = 26B20BD019BB33CC00763063 /* Build configuration list for PBXLegacyTarget "cxx-bridge" */;
 			buildPhases = (
 			);
 			buildToolPath = "$(SRCROOT)/../../swiftpp";
 			buildWorkingDirectory = "";
 			dependencies = (
 			);
-			name = "cpp-bridge";
+			name = "cxx-bridge";
 			passBuildSettingsInEnvironment = 1;
 			productName = "cpp-bridge";
 		};
@@ -198,7 +198,7 @@
 			projectRoot = "";
 			targets = (
 				263B31D019BB2912006F7D14 /* SimpleShapeDetector */,
-				26B20BCF19BB33CC00763063 /* cpp-bridge */,
+				26B20BCF19BB33CC00763063 /* cxx-bridge */,
 			);
 		};
 /* End PBXProject section */
@@ -220,7 +220,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				263B320519BB2D76006F7D14 /* cpp-converter.mm in Sources */,
+				263B320519BB2D76006F7D14 /* cxx-converter.mm in Sources */,
 				263B31D919BB2912006F7D14 /* AppDelegate.swift in Sources */,
 				263B31FF19BB2CAF006F7D14 /* ShapeDetector.cpp in Sources */,
 				263B31D719BB2912006F7D14 /* main.swift in Sources */,
@@ -238,7 +238,7 @@
 /* Begin PBXTargetDependency section */
 		26B20BD419BB341400763063 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 26B20BCF19BB33CC00763063 /* cpp-bridge */;
+			target = 26B20BCF19BB33CC00763063 /* cxx-bridge */;
 			targetProxy = 26B20BD319BB341400763063 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -405,13 +405,14 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		26B20BD019BB33CC00763063 /* Build configuration list for PBXLegacyTarget "cpp-bridge" */ = {
+		26B20BD019BB33CC00763063 /* Build configuration list for PBXLegacyTarget "cxx-bridge" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				26B20BD119BB33CC00763063 /* Debug */,
 				26B20BD219BB33CC00763063 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
