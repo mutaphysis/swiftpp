@@ -21,15 +21,17 @@
 		26B20BDB19BB359700763063 /* cxx-subclasses.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26B20BD919BB359700763063 /* cxx-subclasses.mm */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		26B20BD319BB341400763063 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 263B31C919BB2912006F7D14 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 26B20BCF19BB33CC00763063;
-			remoteInfo = "cpp-bridge";
+/* Begin PBXCopyFilesBuildPhase section */
+		2653F77419BBFAA500A52D5E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
 		};
-/* End PBXContainerItemProxy section */
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		263B31D119BB2912006F7D14 /* SimpleShapeDetector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleShapeDetector.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -131,28 +133,13 @@
 		};
 /* End PBXGroup section */
 
-/* Begin PBXLegacyTarget section */
-		26B20BCF19BB33CC00763063 /* cxx-bridge */ = {
-			isa = PBXLegacyTarget;
-			buildArgumentsString = "$(SRCROOT)/SimpleShapeDetector/cxx-Bridging-Header.h";
-			buildConfigurationList = 26B20BD019BB33CC00763063 /* Build configuration list for PBXLegacyTarget "cxx-bridge" */;
-			buildPhases = (
-			);
-			buildToolPath = "$(SRCROOT)/../../swiftpp";
-			buildWorkingDirectory = "";
-			dependencies = (
-			);
-			name = "cxx-bridge";
-			passBuildSettingsInEnvironment = 1;
-			productName = "cpp-bridge";
-		};
-/* End PBXLegacyTarget section */
-
 /* Begin PBXNativeTarget section */
 		263B31D019BB2912006F7D14 /* SimpleShapeDetector */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 263B31ED19BB2912006F7D14 /* Build configuration list for PBXNativeTarget "SimpleShapeDetector" */;
 			buildPhases = (
+				2653F77519BBFAAB00A52D5E /* Run Script */,
+				2653F77419BBFAA500A52D5E /* CopyFiles */,
 				263B31CD19BB2912006F7D14 /* Sources */,
 				263B31CE19BB2912006F7D14 /* Frameworks */,
 				263B31CF19BB2912006F7D14 /* Resources */,
@@ -160,7 +147,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				26B20BD419BB341400763063 /* PBXTargetDependency */,
 			);
 			name = SimpleShapeDetector;
 			productName = SimpleShapeDetector;
@@ -179,9 +165,6 @@
 					263B31D019BB2912006F7D14 = {
 						CreatedOnToolsVersion = 6.0;
 					};
-					26B20BCF19BB33CC00763063 = {
-						CreatedOnToolsVersion = 6.0;
-					};
 				};
 			};
 			buildConfigurationList = 263B31CC19BB2912006F7D14 /* Build configuration list for PBXProject "SimpleShapeDetector" */;
@@ -198,7 +181,6 @@
 			projectRoot = "";
 			targets = (
 				263B31D019BB2912006F7D14 /* SimpleShapeDetector */,
-				26B20BCF19BB33CC00763063 /* cxx-bridge */,
 			);
 		};
 /* End PBXProject section */
@@ -214,6 +196,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2653F77519BBFAAB00A52D5E /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/SimpleShapeDetector/cxx-Bridging-Header.h",
+			);
+			name = "Run Script";
+			outputPaths = (
+				"$(SRCROOT)/SimpleShapeDetector/cxx-bridge/cxx-objc-protocols.h",
+				"$(SRCROOT)/SimpleShapeDetector/cxx-bridge/cxx-objc-proxies.h",
+				"$(SRCROOT)/SimpleShapeDetector/cxx-bridge/cxx-objc-proxies.mm",
+				"$(SRCROOT)/SimpleShapeDetector/cxx-bridge/cxx-subclasses.mm",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "echo \"swiftpp\"\n$PROJECT_DIR/../../swiftpp \"$SCRIPT_INPUT_FILE_0\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		263B31CD19BB2912006F7D14 /* Sources */ = {
@@ -235,14 +239,6 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		26B20BD419BB341400763063 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 26B20BCF19BB33CC00763063 /* cxx-bridge */;
-			targetProxy = 26B20BD319BB341400763063 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin PBXVariantGroup section */
 		263B31DC19BB2912006F7D14 /* MainMenu.xib */ = {
 			isa = PBXVariantGroup;
@@ -259,7 +255,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -301,7 +297,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -359,31 +355,6 @@
 			};
 			name = Release;
 		};
-		26B20BD119BB33CC00763063 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DEBUGGING_SYMBOLS = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		26B20BD219BB33CC00763063 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -401,15 +372,6 @@
 			buildConfigurations = (
 				263B31EE19BB2912006F7D14 /* Debug */,
 				263B31EF19BB2912006F7D14 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		26B20BD019BB33CC00763063 /* Build configuration list for PBXLegacyTarget "cxx-bridge" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				26B20BD119BB33CC00763063 /* Debug */,
-				26B20BD219BB33CC00763063 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
