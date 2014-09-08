@@ -9,7 +9,6 @@
 -swiftpp: simplify usage ?
 -examples: improve simple example, it's very lame now
 -examples: write a more complexe example
--better readme
 -detect std::shared_ptr<T> and make them work with ARC on the Objective-C/swift side
 
 much more I'm sure...

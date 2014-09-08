@@ -27,6 +27,7 @@ void SwiftppASTConsumer::HandleTranslationUnit( clang::ASTContext &i_ctx )
 	if ( _ci.getDiagnostics().hasErrorOccurred() )
 		return;
 
+	// find all C++ #include needed for the converted C++ types
 	auto collectInclude = [&]( clang::ASTContext &i_ctx, const clang::QualType &i_type )
 		{
 			auto decl = i_type->getAsCXXRecordDecl();
@@ -47,6 +48,7 @@ void SwiftppASTConsumer::HandleTranslationUnit( clang::ASTContext &i_ctx )
 		collectInclude( i_ctx, converter.from() );
 	}
 	
+	// select an output folder
 	auto outputFolder = _data.outputFolder();
 	if ( outputFolder.empty() )
 	{
@@ -56,6 +58,8 @@ void SwiftppASTConsumer::HandleTranslationUnit( clang::ASTContext &i_ctx )
 		
 		outputFolder += "cxx-bridge/";
 	}
+	
+	// write bridge code!
 	
 	auto ostr = _ci.createOutputFile( outputFolder + "cxx-objc-protocols.h", false, true, "", "", true, true );
 	if ( ostr )

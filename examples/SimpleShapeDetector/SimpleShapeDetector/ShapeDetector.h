@@ -22,7 +22,6 @@ class swift ShapeDetector
 	
 	protected:
 		virtual void shapeDetected( const std::string &i_name, const Path2D &i_path );
-		virtual std::string name() const = 0;
 	
 	private:
 		void report( const std::string &i_name, const std::vector<CGPoint> &i_path );

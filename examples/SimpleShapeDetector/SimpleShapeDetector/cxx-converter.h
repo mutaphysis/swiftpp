@@ -5,12 +5,10 @@
 #import <AppKit/AppKit.h>
 
 #include "Path2D.h"
-#include <string>
 
 namespace swift_converter
 {
 
-// add your converters here.
 //  converters take one argument and return a value
 
 NSBezierPath *to( const Path2D &s );

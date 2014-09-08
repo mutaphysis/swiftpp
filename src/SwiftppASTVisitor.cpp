@@ -13,6 +13,7 @@
 namespace
 {
 
+//! Handle individual classes
 class SwiftppClassVisitor : public clang::RecursiveASTVisitor<SwiftppClassVisitor>
 {
 	public:
@@ -30,24 +31,32 @@ SwiftppClassVisitor::SwiftppClassVisitor( CXXClass &io_class )
 
 bool SwiftppClassVisitor::VisitCXXMethodDecl( clang::CXXMethodDecl *i_decl )
 {
+	// just interrested in protected and public methods
 	if ( i_decl->getAccess() != clang::AS_public and i_decl->getAccess() != clang::AS_protected )
 		return true;
 	
+	// type of method
 	CXXMethod::type_t type = CXXMethod::type_t::kNormal;
 	if ( i_decl->isStatic() )
 		type = CXXMethod::type_t::kStatic;
 	else if ( i_decl->isVirtual() )
 		type = i_decl->isPure() ? CXXMethod::type_t::kPureVirtual : CXXMethod::type_t::kVirtual;
+	
+	// access
 	CXXMethod::access_t access = CXXMethod::access_t::kPublic;
 	if ( i_decl->getAccess() != clang::AS_public )
 		access = CXXMethod::access_t::kProtected;
+	
 	bool isConst = i_decl->isConst();
 	
 	auto returnType = i_decl->getReturnType();
 	
+	// the name has the form classname::methodname, remove 'classname::'
 	std::string qualName( i_decl->getQualifiedNameAsString() );
 	qualName = qualName.substr( _class.name().length() + 2 );
 	
+	// the clones trick will handle methods with default parameters as being multiple
+	// different methods.
 	unsigned numParams = i_decl->getNumParams();
 	int clones = numParams - i_decl->getMinRequiredArguments();
 	for ( int i = 0; i <= clones; ++i )
@@ -80,6 +89,7 @@ SwiftppASTVisitor::SwiftppASTVisitor( SwiftppData &io_data )
 
 bool SwiftppASTVisitor::VisitCXXRecordDecl( clang::CXXRecordDecl *i_decl )
 {
+	// look if this class has the 'swift' annotation
 	bool swiftAttrFound = false;
 	for ( auto attr = i_decl->specific_attr_begin<clang::AnnotateAttr>(); attr != i_decl->specific_attr_end<clang::AnnotateAttr>(); ++attr )
 	{
@@ -97,7 +107,7 @@ bool SwiftppASTVisitor::VisitCXXRecordDecl( clang::CXXRecordDecl *i_decl )
 	CXXClass c( qualName );
 	SwiftppClassVisitor classVisitor( c );
 	
-	// visit class and recursively visit call the base classes
+	// visit class and recursively visit all the base classes
 	std::set<clang::CXXRecordDecl *> alreadyVisited;
 	std::deque<clang::CXXRecordDecl *> todo;
 	todo.push_back( i_decl );
@@ -114,6 +124,7 @@ bool SwiftppASTVisitor::VisitCXXRecordDecl( clang::CXXRecordDecl *i_decl )
 
 		for ( auto base = decl->bases_begin(); base != decl->bases_end(); ++base )
 		{
+			// skip private bases
 			if ( base->getAccessSpecifier() != clang::AS_private and base->getAccessSpecifier() != clang::AS_none )
 			{
 				auto t = base->getType().getTypePtrOrNull();
@@ -134,13 +145,16 @@ bool SwiftppASTVisitor::VisitCXXRecordDecl( clang::CXXRecordDecl *i_decl )
 
 bool SwiftppASTVisitor::VisitFunctionDecl( clang::FunctionDecl *i_decl )
 {
-	if ( i_decl->getNumParams() != 1 )
+	// catch swift_converters
+	
+	if ( i_decl->getNumParams() != 1 ) // must take exactly 1 parameter
 		return true;
 	
 	auto returnType = i_decl->getReturnType();
-	if ( returnType->isVoidType() )
+	if ( returnType->isVoidType() ) // must return something
 		return true;
 	
+	// must be in swift_converter namespace
 	std::string qualName( i_decl->getQualifiedNameAsString() );
 	if ( qualName.compare( 0, 17, "swift_converter::" ) != 0 )
 		return true;

@@ -58,14 +58,15 @@ This is the complicated part! You can always refer to examples/SimpleShapeDetect
 1- swiftpp need to be run as a "Run Script" build phase before real compilation happen.
 2- simply adding a "Run Script" before "Compile Sources" doest not work in Xcode6-beta7, thanks to some bug. Add a dummy "Copy File" between "Run Script" and "Compile Sources". See examples/SimpleShapeDetector
 3- The "Run Script" should be:
-	path/to/swiftpp '-Dswift=__attribute__((annotate("swift")))' "$SCRIPT_INPUT_FILE_0"
-	and you set cxx-Bridging-Header.h as the input file.
+	path/to/swiftpp "$PROJECT_DIR/SimpleShapeDetector/cxx-Bridging-Header.h"
 4- swiftpp will output 4 source files (cxx-objc-protocols.h, cxx-objc-proxies.h, cxx-objc-proxies.mm and cxx-subclasses.mm). Those need to be added back to your project.
 5- cxx-bridge/cxx-objc-proxies.h need to be #imported in the Objective-C bridge header (PROJECT_NAME-Bridging-Header.h)
 
 Those are one-time project setup, should work from now on.
 
+Refer to examples/SimpleShapeDetector !
 
 Note
 ====
+
 
