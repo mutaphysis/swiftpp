@@ -1,8 +1,15 @@
 
--swiftpp: handle static method ?
--swiftpp: add tests
--swiftpp: handle collections
+-swiftpp: handle static method, there is code for it but I don't think it works ?
+-swiftpp: add tests:
+	virtual, non-virtual, pure virtual, static method,
+	methods with default parameters, overloads, const/non-const
+	inheritance, multiple inheritance, virtual inheritance
+	
+-swiftpp: handle collections automatically, vector to NSArray, map to NSDict
 -swiftpp: simplify usage ?
--examples: improve simple example
+-examples: improve simple example, it's very lame now
 -examples: write a more complexe example
 -better readme
+-detect std::shared_ptr<T> and make them work with ARC on the Objective-C/swift side
+
+much more I'm sure...

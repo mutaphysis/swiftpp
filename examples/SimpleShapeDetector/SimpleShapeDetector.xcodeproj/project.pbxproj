@@ -215,7 +215,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo \"swiftpp\"\n$PROJECT_DIR/../../swiftpp \"$SCRIPT_INPUT_FILE_0\"";
+			shellScript = "echo \"swiftpp\"\n$PROJECT_DIR/../../swiftpp '-Dswift=__attribute__((annotate(\"swift\")))' \"$SCRIPT_INPUT_FILE_0\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -334,6 +334,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"swift=__attribute__((annotate(\\\"swift\\\")))",
+				);
 				INFOPLIST_FILE = SimpleShapeDetector/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -348,6 +352,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = "swift=__attribute__((annotate(\\\"swift\\\")))";
 				INFOPLIST_FILE = SimpleShapeDetector/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";

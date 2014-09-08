@@ -68,8 +68,6 @@ bool SwiftppClassVisitor::VisitCXXMethodDecl( clang::CXXMethodDecl *i_decl )
 		_class.addMethod( m );
 	}
 	
-	//! @todo: collect methods on super classes as well
-	
 	return true;
 }
 

@@ -12,7 +12,7 @@
 #include "Path2D.h"
 #include <string>
 
-class __attribute__((annotate("swift"))) ShapeDetector
+class swift ShapeDetector
 {
 	public:
 		ShapeDetector();

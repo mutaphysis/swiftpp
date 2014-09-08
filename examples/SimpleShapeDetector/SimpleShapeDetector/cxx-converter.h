@@ -16,9 +16,6 @@ namespace swift_converter
 NSBezierPath *to( const Path2D &s );
 Path2D from( NSBezierPath *s );
 
-void toto();
-void toto2(int i);
-
 }
 
 #endif
