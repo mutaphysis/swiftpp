@@ -3,7 +3,7 @@
 //  ShapeDetect
 //
 //  Created by Sandy Martel on 2014/07/10.
-//  Copyright (c) 2014年 dootaini. All rights reserved.
+//  Copyright (c) 2014年. All rights reserved.
 //
 
 #include "GeometryUtils.h"

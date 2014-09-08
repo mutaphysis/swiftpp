@@ -56,6 +56,12 @@ std::string CXXParam::cleanName() const
 	return _name;
 }
 
+bool CXXParam::operator<( const CXXParam &i_other ) const
+{
+	return std::make_tuple(_name,clang::QualType::getAsString(_type.split()))
+			< std::make_tuple(i_other._name,clang::QualType::getAsString(i_other._type.split()));
+}
+
 #if 0
 #pragma mark-
 #endif
@@ -76,6 +82,11 @@ void CXXMethod::addParam( const CXXParam &i_param )
 	_params.push_back( i_param );
 }
 
+bool CXXMethod::operator<( const CXXMethod &i_other ) const
+{
+	return std::tie(_isConst,_name,_params) < std::tie(i_other._isConst,i_other._name,i_other._params);
+}
+
 #if 0
 #pragma mark-
 #endif
@@ -90,11 +101,11 @@ void CXXClass::addMethod( const CXXMethod &i_method )
 	if ( i_method.name()[0] == '~' )
 		return; // ignore destructor, they're called automatically
 	
-	_methods.push_back( i_method );
+	auto res = _methods.insert( i_method );
 	
 	// mark constructor
-	if ( _methods.back().name() == name() )
-		_methods.back().setIsConstructor();
+	if ( res.first->name() == name() )
+		res.first->setIsConstructor();
 }
 
 #if 0

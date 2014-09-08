@@ -1,0 +1,8 @@
+
+-swiftpp: handle static method ?
+-swiftpp: add tests
+-swiftpp: handle collections
+-swiftpp: simplify usage ?
+-examples: improve simple example
+-examples: write a more complexe example
+-better readme

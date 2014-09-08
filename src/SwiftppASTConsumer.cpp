@@ -7,20 +7,22 @@
 //
 
 #include "SwiftppASTConsumer.h"
+#include "SwiftppASTVisitor.h"
 #include <clang/AST/ASTContext.h>
 #include <iostream>
 
 SwiftppASTConsumer::SwiftppASTConsumer( clang::CompilerInstance &i_ci, const SwiftppOptions &i_options, llvm::StringRef i_inputFile )
 	: _ci( i_ci ),
 		_data( i_options ),
-		_visitor( _data ),
 		_inputFile( i_inputFile )
 {
 }
 
 void SwiftppASTConsumer::HandleTranslationUnit( clang::ASTContext &i_ctx )
 {
-	_visitor.TraverseDecl( i_ctx.getTranslationUnitDecl() );
+	SwiftppASTVisitor visitor( _data );
+	
+	visitor.TraverseDecl( i_ctx.getTranslationUnitDecl() );
 	
 	if ( _ci.getDiagnostics().hasErrorOccurred() )
 		return;

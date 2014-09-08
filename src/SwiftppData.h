@@ -11,6 +11,7 @@
 
 #include <string>
 #include <vector>
+#include <set>
 #include <clang/AST/Type.h>
 
 /*!
@@ -57,6 +58,8 @@ class CXXParam
 		//! attempt to get a clean name, without any notation prefix
 		std::string cleanName() const;
 
+		bool operator<( const CXXParam &i_other ) const;
+	
 	private:
 		clang::QualType _type; //!< parameter type
 		std::string _name; //!< parameter name
@@ -84,15 +87,17 @@ class CXXMethod
 		inline const std::vector<CXXParam> &params() const { return _params; }
 	
 		inline bool isConstructor() const { return _isConstructor; }
-		inline void setIsConstructor() { _isConstructor = true; }
+		inline void setIsConstructor() const { _isConstructor = true; }
 	
 		inline bool isStatic() const { return _type == type_t::kStatic; }
 		inline bool isVirtual() const { return _type == type_t::kVirtual or _type == type_t::kPureVirtual ; }
 		inline bool isPureVirtual() const { return _type == type_t::kPureVirtual ; }
 		inline bool isConst() const { return _isConst; }
 	
+		bool operator<( const CXXMethod &i_other ) const;
+	
 	private:
-		bool _isConstructor = false;
+		mutable bool _isConstructor = false;
 		bool _isConst = false;
 		type_t _type = type_t::kNormal; //!< see enum
 		access_t _access = access_t::kPublic;
@@ -114,11 +119,11 @@ class CXXClass
 		void addMethod( const CXXMethod &i_method );
 	
 		inline const std::string &name() const { return _name; }
-		inline const std::vector<CXXMethod> &methods() const { return _methods; }
+		inline const std::set<CXXMethod> &methods() const { return _methods; }
 	
 	private:
 		std::string _name;
-		std::vector<CXXMethod> _methods;
+		std::set<CXXMethod> _methods;
 };
 
 /*!

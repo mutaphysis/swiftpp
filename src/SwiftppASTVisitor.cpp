@@ -8,7 +8,7 @@
 
 #include "SwiftppASTVisitor.h"
 #include "SwiftppData.h"
-#include <iostream>
+#include <deque>
 
 namespace
 {
@@ -98,7 +98,36 @@ bool SwiftppASTVisitor::VisitCXXRecordDecl( clang::CXXRecordDecl *i_decl )
 	
 	CXXClass c( qualName );
 	SwiftppClassVisitor classVisitor( c );
-	classVisitor.TraverseDecl( i_decl );
+	
+	// visit class and recursively visit call the base classes
+	std::set<clang::CXXRecordDecl *> alreadyVisited;
+	std::deque<clang::CXXRecordDecl *> todo;
+	todo.push_back( i_decl );
+	while ( not todo.empty() )
+	{
+		auto decl = todo.back();
+		todo.pop_back();
+		if ( alreadyVisited.find( decl ) != alreadyVisited.end() )
+			continue;
+		
+		classVisitor.TraverseDecl( decl );
+		
+		alreadyVisited.insert( decl );
+
+		for ( auto base = decl->bases_begin(); base != decl->bases_end(); ++base )
+		{
+			if ( base->getAccessSpecifier() != clang::AS_private and base->getAccessSpecifier() != clang::AS_none )
+			{
+				auto t = base->getType().getTypePtrOrNull();
+				if ( t != nullptr )
+				{
+					auto super = t->getAsCXXRecordDecl();
+					if ( super != nullptr )
+						todo.push_back( super );
+				}
+			}
+		}
+	}
 	
 	_data.addClass( c );
 	
