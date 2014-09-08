@@ -39,11 +39,13 @@ swiftpp will also use every unary function defined in the namespace swift_conver
 
 example:
 
+```
 namespace swift_converter
 {
 NSBezierPath *to( const Path2D &s ); // Path2D is a C++ class that represent a Bezier path
 Path2D from( NSBezierPath *s );
 }
+```
 
 If your exported class (MyCXXClass) uses types that are not compatible with the swift world, they will be auto converted using those converters.  Converter names are not important, type inference is used to select the right one.  std::string converters are built-in.
 
@@ -55,18 +57,18 @@ Project setup
 
 This is the complicated part! You can always refer to examples/SimpleShapeDetector to see how it's done...
 
-1- swiftpp need to be run as a "Run Script" build phase before real compilation happen.
-2- simply adding a "Run Script" before "Compile Sources" doest not work in Xcode6-beta7, thanks to some bug. Add a dummy "Copy File" between "Run Script" and "Compile Sources". See examples/SimpleShapeDetector
-3- The "Run Script" should be:
+1. swiftpp need to be run as a "Run Script" build phase before real compilation happen.
+2. simply adding a "Run Script" before "Compile Sources" doest not work in Xcode6-beta7, thanks to some bug. Add a dummy "Copy File" between "Run Script" and "Compile Sources". See examples/SimpleShapeDetector
+3. The "Run Script" should be:
 	path/to/swiftpp "$PROJECT_DIR/SimpleShapeDetector/cxx-Bridging-Header.h"
-4- swiftpp will output 4 source files (cxx-objc-protocols.h, cxx-objc-proxies.h, cxx-objc-proxies.mm and cxx-subclasses.mm). Those need to be added back to your project.
-5- cxx-bridge/cxx-objc-proxies.h need to be #imported in the Objective-C bridge header (PROJECT_NAME-Bridging-Header.h)
+4. swiftpp will output 4 source files (cxx-objc-protocols.h, cxx-objc-proxies.h, cxx-objc-proxies.mm and cxx-subclasses.mm). Those need to be added back to your project.
+5. cxx-bridge/cxx-objc-proxies.h need to be #imported in the Objective-C bridge header (PROJECT_NAME-Bridging-Header.h)
 
 Those are one-time project setup, should work from now on.
 
 Refer to examples/SimpleShapeDetector !
 
-Note
-====
 
+Notes
+=====
 
