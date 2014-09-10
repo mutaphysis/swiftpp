@@ -1,52 +1,86 @@
 //
-//  SwiftppData_ouput.cpp
+//  SwiftppObjcOutput.cpp
 //  swiftpp
 //
-//  Created by Sandy Martel on 2014/08/30.
-//  Copyright (c) 2014年. All rights reserved.
+//  Created by Sandy Martel on 2014/09/10.
+//  Copyright (c) 2014年 dootaini. All rights reserved.
 //
 
-#include "SwiftppData.h"
-#include <iostream>
+#include "SwiftppObjcOutput.h"
+#include <clang/Frontend/CompilerInstance.h>
 
 namespace
 {
-
-/*!
-   @brief Iterate over the parameters of a C++ method.
-
-       Iterate over the parameters of a method, calling the f() for each
-	   and building a comma separated string with all results.
-   @param i_method      the method
-   @param i_commaPrefix should it start with a comma
-   @param f             function to apply
-*/
-std::string write_cxx_params_decl( const CXXMethod &i_method, bool i_commaPrefix, const std::function<std::string (const CXXParam &)> f )
-{
-	std::string result;
-	result.reserve( i_method.params().size() * 6 );
-	bool firstParam = true;
-	for ( auto p : i_method.params() )
+	
+	/*!
+	 @brief Iterate over the parameters of a C++ method.
+	 
+	 Iterate over the parameters of a method, calling the f() for each
+	 and building a comma separated string with all results.
+	 @param i_method      the method
+	 @param i_commaPrefix should it start with a comma
+	 @param f             function to apply
+	 */
+	std::string write_cxx_params_decl( const CXXMethod &i_method, bool i_commaPrefix, const std::function<std::string (const CXXParam &)> f )
 	{
-		if ( firstParam )
+		std::string result;
+		result.reserve( i_method.params().size() * 6 );
+		bool firstParam = true;
+		for ( auto p : i_method.params() )
 		{
-			if ( i_commaPrefix )
-				result.append( ", ", 2 );
+			if ( firstParam )
+			{
+				if ( i_commaPrefix )
+					result.append( ", ", 2 );
+				else
+					result.append( 1, ' ' );
+				firstParam = false;
+			}
 			else
-				result.append( 1, ' ' );
-			firstParam = false;
+				result.append( ", ", 2 );
+			result.append( f( p ) );
 		}
-		else
-			result.append( ", ", 2 );
-		result.append( f( p ) );
+		return result;
 	}
-	return result;
+	
 }
 
+void SwiftppObjcOutput::write_impl()
+{
+	// select an output folder
+	auto outputFolder = _data->outputFolder();
+	if ( outputFolder.empty() )
+	{
+		outputFolder = _inputFile;
+		auto pos = outputFolder.rfind( '.' );
+		if ( pos != std::string::npos )
+		{
+			outputFolder = outputFolder.substr( 0, pos );
+			outputFolder += "/";
+		}
+		else
+			outputFolder += "-cxx-bridge/";
+	}
+
+	auto ostr = _ci->createOutputFile( outputFolder + "cxx-objc-protocols.h", false, true, "", "", true, true );
+	if ( ostr )
+		write_cxx_objc_protocols_h( *ostr );
+	
+	ostr = _ci->createOutputFile( outputFolder + "cxx-objc-proxies.h", false, true, "", "", true, true );
+	if ( ostr )
+		write_cxx_objc_proxies_h( *ostr );
+	
+	ostr = _ci->createOutputFile( outputFolder + "cxx-objc-proxies.mm", false, true, "", "", true, true );
+	if ( ostr )
+		write_cxx_objc_proxies_mm( *ostr );
+	
+	ostr = _ci->createOutputFile( outputFolder + "cxx-subclasses.mm", false, true, "", "", true, true );
+	if ( ostr )
+		write_cxx_subclasses_mm( *ostr );
 }
 
 // write an Objective-C method declaration
-std::string SwiftppData::write_objc_method_decl( const CXXMethod &i_method ) const
+std::string SwiftppObjcOutput::write_objc_method_decl( const CXXMethod &i_method ) const
 {
 	std::string result;
 	result.reserve( i_method.params().size() * 6 );
@@ -54,7 +88,7 @@ std::string SwiftppData::write_objc_method_decl( const CXXMethod &i_method ) con
 		result.append( "+ ", 2 );
 	else
 		result.append( "- ", 2 );
-
+	
 	if ( i_method.isConstructor() )
 		result.append( "(instancetype)init" );
 	else
@@ -64,7 +98,7 @@ std::string SwiftppData::write_objc_method_decl( const CXXMethod &i_method ) con
 		result.append( 1, ')' );
 		result.append( i_method.name() );
 	}
-
+	
 	bool firstParam = true;
 	for ( auto p : i_method.params() )
 	{
@@ -77,7 +111,7 @@ std::string SwiftppData::write_objc_method_decl( const CXXMethod &i_method ) con
 		else
 		{
 			result.append( 1, ' ' );
-			if ( _options.usedNamedParams )
+			if ( _data->options().usedNamedParams )
 				result.append( p.cleanName() );
 		}
 		result.append( ":(", 2 );
@@ -92,7 +126,7 @@ std::string SwiftppData::write_objc_method_decl( const CXXMethod &i_method ) con
 #pragma mark-
 #endif
 
-void SwiftppData::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) const
+void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) const
 {
 	ostr << "// generated cxx-objc-protocols.h\n"
 	"//  pure Objective-C, cannot contain any C++\n"
@@ -106,7 +140,7 @@ void SwiftppData::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) const
 	"// Objective-C proxy protocols for each classes\n"
 	"\n";
 	
-	for ( auto oneClass : _classes )
+	for ( auto oneClass : _data->classes() )
 	{
 		ostr << "@protocol " << oneClass.name() << "_protocol\n";
 		
@@ -120,60 +154,60 @@ void SwiftppData::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) const
 	ostr << "@end\n\n#endif\n";
 }
 
-void SwiftppData::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) const
+void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) const
 {
 	ostr << "// generated cxx-objc-proxies.h\n"
-		"//  pure Objective-C, cannot contain any C++\n"
-		"\n"
-		"#ifndef H_CXX_OBJC_PROXIES\n"
-		"#define H_CXX_OBJC_PROXIES\n"
-		"\n"
-		"#import \"cxx-objc-protocols.h\"\n"
-		"\n"
-		"// Objective-C proxies for each classes\n"
-		"\n";
+	"//  pure Objective-C, cannot contain any C++\n"
+	"\n"
+	"#ifndef H_CXX_OBJC_PROXIES\n"
+	"#define H_CXX_OBJC_PROXIES\n"
+	"\n"
+	"#import \"cxx-objc-protocols.h\"\n"
+	"\n"
+	"// Objective-C proxies for each classes\n"
+	"\n";
 	
-	for ( auto oneClass : _classes )
+	for ( auto oneClass : _data->classes() )
 	{
 		ostr << "@interface " << oneClass.name() <<  " : NSObject<" << oneClass.name() << "_protocol>\n"
-			"{ void *_ptr; }\n"
-			"@end\n"
-			"\n";
+		"{ void *_ptr; }\n"
+		"@end\n"
+		"\n";
 	}
 	ostr << "#endif\n";
 }
 
-void SwiftppData::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) const
+void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) const
 {
 	ostr << "// generated cxx-objc-proxies.mm\n"
-		"\n"
-		"#import \"cxx-objc-proxies.h\"\n"
-		"\n";
+	"\n"
+	"#import \"cxx-objc-proxies.h\"\n"
+	"\n";
 	
 	ostr << "#include <string>\n";
 	ostr << "#include <vector>\n";
 	ostr << "#include <map>\n";
 	// type includes, all c++ types used in converters
-	for ( auto fi : _includesForCXXTypes )
-		ostr << "#include \"" << formatIncludeFileName( fi ) << "\"\n";
+	for ( auto fi : _data->includesForCXXTypes() )
+		ostr << "#include \"" << _data->formatIncludeFileName( fi ) << "\"\n";
 	
 	ostr << "\nnamespace swift_converter\n"
-		"{\n";
+	"{\n";
 	
-	for ( auto conv : _converters )
+	for ( auto conv : _data->converters() )
 	{
 		ostr << type2String(conv.to()) << " " << conv.name() << "( " << type2String(conv.from()) << " );\n";
 	}
 	ostr << "}\n\n";
 	
-	for ( auto oneClass : _classes )
+	for ( auto oneClass : _data->classes() )
 	{
 		ostr << "//********************************\n"
-			"// " << oneClass.name() << "\n"
-			"//********************************\n"
-			"\n"
-			"// C-style\n"
-			"\n";
+		"// " << oneClass.name() << "\n"
+		"//********************************\n"
+		"\n"
+		"// C-style\n"
+		"\n";
 		
 		ostr << "class " << oneClass.name() << "_subclass;\n";
 		ostr << "void " << oneClass.name() << "_subclass_delete( " << oneClass.name() << "_subclass *i_this );\n";
@@ -184,24 +218,24 @@ void SwiftppData::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) const
 				ostr << oneClass.name() << "_subclass *" << oneClass.name() << "_subclass_new( id<" << oneClass.name() << "_protocol> i_link";
 			else
 				ostr << type2String( method.returnType() ) << " " << oneClass.name() << "_subclass_" << method.name() << "( "
-					<< oneClass.name() << "_subclass *i_this";
+				<< oneClass.name() << "_subclass *i_this";
 			ostr << write_cxx_params_decl( method, true, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
 			ostr << " );\n";
 		}
 		ostr << "\n"
-			"// Objective-C proxy\n"
-			"\n";
-	
+		"// Objective-C proxy\n"
+		"\n";
+		
 		ostr << "#define _this ((" << oneClass.name() << "_subclass *)_ptr)\n\n";
-
+		
 		ostr << "@implementation " << oneClass.name() << "\n\n";
-
+		
 		ostr << "- (void)dealloc\n{\n";
 		ostr << "  " << oneClass.name() << "_subclass_delete( _this );\n";
 		ostr << "#if !__has_feature(objc_arc)\n"
-			"  [super dealloc];\n"
-			"#endif\n}\n";
-
+		"  [super dealloc];\n"
+		"#endif\n}\n";
+		
 		for ( auto method : oneClass.methods() )
 		{
 			ostr << write_objc_method_decl( method );
@@ -233,33 +267,33 @@ void SwiftppData::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) const
 				ostr << "}\n\n";
 			}
 		}
-
+		
 		ostr << "@end\n\n#undef _this\n\n";
 	}
 }
 
-void SwiftppData::write_cxx_subclasses_mm( llvm::raw_ostream &ostr, const std::string &i_inputFile ) const
+void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
 {
 	ostr << "// generated cxx-subclasses.mm\n"
-		"\n"
-		"#import \"cxx-objc-protocols.h\"\n";
+	"\n"
+	"#import \"cxx-objc-protocols.h\"\n";
 	
-	ostr << "#include \"" << formatIncludeFileName( i_inputFile ) << "\"\n";
+	ostr << "#include \"" << _data->formatIncludeFileName( _inputFile ) << "\"\n";
 	
 	ostr << "\ntemplate<typename T>\n"
-		"struct LinkSaver\n"
-		"{\n"
-		"  T saved, &link;\n"
-		"  LinkSaver( T &i_link ) : saved( i_link ), link( i_link ) { link = nil; }\n"
-		"  ~LinkSaver() { link = saved; }\n"
-		"};\n\n"
-		"// the wrapping sub-classes\n\n";
+	"struct LinkSaver\n"
+	"{\n"
+	"  T saved, &link;\n"
+	"  LinkSaver( T &i_link ) : saved( i_link ), link( i_link ) { link = nil; }\n"
+	"  ~LinkSaver() { link = saved; }\n"
+	"};\n\n"
+	"// the wrapping sub-classes\n\n";
 	
-	for ( auto oneClass : _classes )
+	for ( auto oneClass : _data->classes() )
 	{
 		ostr << "class " << oneClass.name() << "_subclass : public " << oneClass.name() << "\n";
 		ostr << "{\n"
-			"  public:\n";
+		"  public:\n";
 		ostr << "    id<" << oneClass.name() << "_protocol> _link;\n";
 		
 		for ( auto method : oneClass.methods() )
@@ -304,7 +338,7 @@ void SwiftppData::write_cxx_subclasses_mm( llvm::raw_ostream &ostr, const std::s
 					else
 					{
 						s.append( 1, ' ' );
-						if ( _options.usedNamedParams )
+						if ( _data->options().usedNamedParams )
 							s.append( p.cleanName() );
 					}
 					s.append( 1, ':' );
@@ -322,12 +356,12 @@ void SwiftppData::write_cxx_subclasses_mm( llvm::raw_ostream &ostr, const std::s
 		}
 		ostr << "};\n";
 	}
-
+	
 	ostr << "\n"
 	"// the c implementations\n"
 	"\n";
 	
-	for ( auto oneClass : _classes )
+	for ( auto oneClass : _data->classes() )
 	{
 		ostr << "void " << oneClass.name() << "_subclass_delete( " << oneClass.name() << "_subclass *i_this )\n{\n";
 		ostr << "  delete i_this;\n}\n\n";
@@ -362,4 +396,83 @@ void SwiftppData::write_cxx_subclasses_mm( llvm::raw_ostream &ostr, const std::s
 		}
 		ostr << "\n";
 	}
+}
+
+std::string SwiftppObjcOutput::type2String( const clang::QualType &i_type ) const
+{
+	return clang::QualType::getAsString(i_type.split());
+}
+
+std::string SwiftppObjcOutput::type2UndecoratedTypeString( const clang::QualType &i_type ) const
+{
+	clang::QualType type( i_type.getNonReferenceType() );
+	type.removeLocalConst();
+	return type2String( type );
+}
+
+std::string SwiftppObjcOutput::cxxType2ObjcTypeString( const clang::QualType &i_type ) const
+{
+	std::string s( type2UndecoratedTypeString( i_type ) );
+	
+	// is there a converter?
+	for ( auto it : _data->converters() )
+	{
+		if ( s == type2UndecoratedTypeString( it.from() ) )
+		{
+			// converter found, use the converted type
+			return type2UndecoratedTypeString( it.to() );
+		}
+	}
+	
+	// add a few default converters
+	if ( s == "std::string" )
+		return "NSString *";
+	
+	//! @todo: handle collections, vector<T>, map<string,T>, set<T>
+	
+	//! @todo: warn for unsupported types
+	
+	return s;
+}
+
+std::string SwiftppObjcOutput::converterForObjcType2CXXType( const clang::QualType &i_type, const std::string &i_code ) const
+{
+	std::string s( type2UndecoratedTypeString( i_type ) );
+	
+	// is there a converter?
+	for ( auto converter : _data->converters() )
+	{
+		if ( s == type2UndecoratedTypeString( converter.to() ) )
+		{
+			// converter found, use the converted type
+			return std::string("swift_converter::") + converter.name() + "( " + i_code + " )";
+		}
+	}
+	
+	// add a few default converters
+	if ( s == "std::string" )
+		return std::string("std::string( [") + i_code + " UTF8String] )";
+	
+	return i_code;
+}
+
+std::string SwiftppObjcOutput::converterForCXXType2ObjcType( const clang::QualType &i_type, const std::string &i_code ) const
+{
+	std::string s( type2UndecoratedTypeString( i_type ) );
+	
+	// is there a converter?
+	for ( auto converter : _data->converters() )
+	{
+		if ( s == type2UndecoratedTypeString( converter.from() ) )
+		{
+			// converter found, use the converted type
+			return std::string("swift_converter::") + converter.name() + "( " + i_code + " )";
+		}
+	}
+	
+	// add a few default converters
+	if ( s == "std::string" )
+		return std::string("[NSString stringWithUTF8String:") + i_code + ".c_str()]";
+	
+	return i_code;
 }

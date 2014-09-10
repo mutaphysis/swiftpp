@@ -8,12 +8,16 @@
 
 #include "SwiftppASTConsumer.h"
 #include "SwiftppASTVisitor.h"
+#include "SwiftppOutput.h"
 #include <clang/AST/ASTContext.h>
-#include <iostream>
 
-SwiftppASTConsumer::SwiftppASTConsumer( clang::CompilerInstance &i_ci, const SwiftppOptions &i_options, llvm::StringRef i_inputFile )
+SwiftppASTConsumer::SwiftppASTConsumer( clang::CompilerInstance &i_ci,
+										const SwiftppOptions &i_options,
+										const std::shared_ptr<SwiftppOutput> &i_output,
+										llvm::StringRef i_inputFile )
 	: _ci( i_ci ),
 		_data( i_options ),
+		_output( i_output ),
 		_inputFile( i_inputFile )
 {
 }
@@ -48,32 +52,6 @@ void SwiftppASTConsumer::HandleTranslationUnit( clang::ASTContext &i_ctx )
 		collectInclude( i_ctx, converter.from() );
 	}
 	
-	// select an output folder
-	auto outputFolder = _data.outputFolder();
-	if ( outputFolder.empty() )
-	{
-		auto pos = _inputFile.rfind( '/' );
-		if ( pos != std::string::npos )
-			outputFolder = _inputFile.substr( 0, pos + 1 );
-		
-		outputFolder += "cxx-bridge/";
-	}
-	
 	// write bridge code!
-	
-	auto ostr = _ci.createOutputFile( outputFolder + "cxx-objc-protocols.h", false, true, "", "", true, true );
-	if ( ostr )
-		_data.write_cxx_objc_protocols_h( *ostr );
-	
-	ostr = _ci.createOutputFile( outputFolder + "cxx-objc-proxies.h", false, true, "", "", true, true );
-	if ( ostr )
-		_data.write_cxx_objc_proxies_h( *ostr );
-
-	ostr = _ci.createOutputFile( outputFolder + "cxx-objc-proxies.mm", false, true, "", "", true, true );
-	if ( ostr )
-		_data.write_cxx_objc_proxies_mm( *ostr );
-
-	ostr = _ci.createOutputFile( outputFolder + "cxx-subclasses.mm", false, true, "", "", true, true );
-	if ( ostr )
-		_data.write_cxx_subclasses_mm( *ostr, _inputFile );
+	_output->write( _ci, _inputFile, _data );
 }

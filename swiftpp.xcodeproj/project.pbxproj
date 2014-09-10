@@ -12,8 +12,9 @@
 		26B8852C19ABFB8C00CCD8B3 /* libcurses.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B8852B19ABFB8C00CCD8B3 /* libcurses.dylib */; };
 		26DCA6BA19AE9FA800EDD4C7 /* SwiftppASTVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26DCA6B819AE9FA800EDD4C7 /* SwiftppASTVisitor.cpp */; };
 		26DCA6BD19AEB14D00EDD4C7 /* SwiftppData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26DCA6BB19AEB14D00EDD4C7 /* SwiftppData.cpp */; };
-		26DCA6BF19B14AAA00EDD4C7 /* SwiftppData_ouput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26DCA6BE19B14AAA00EDD4C7 /* SwiftppData_ouput.cpp */; };
 		26EB002A19AD549E0084507D /* SwiftppASTConsumer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26EB002819AD549E0084507D /* SwiftppASTConsumer.cpp */; };
+		26EE502719BFCD590072F1C4 /* SwiftppObjcOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26EE502519BFCD590072F1C4 /* SwiftppObjcOutput.cpp */; };
+		26EE502A19BFD1050072F1C4 /* SwiftppOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26EE502819BFD1050072F1C4 /* SwiftppOutput.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -38,9 +39,12 @@
 		26DCA6B919AE9FA800EDD4C7 /* SwiftppASTVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwiftppASTVisitor.h; sourceTree = "<group>"; };
 		26DCA6BB19AEB14D00EDD4C7 /* SwiftppData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SwiftppData.cpp; sourceTree = "<group>"; };
 		26DCA6BC19AEB14D00EDD4C7 /* SwiftppData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwiftppData.h; sourceTree = "<group>"; };
-		26DCA6BE19B14AAA00EDD4C7 /* SwiftppData_ouput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SwiftppData_ouput.cpp; sourceTree = "<group>"; };
 		26EB002819AD549E0084507D /* SwiftppASTConsumer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SwiftppASTConsumer.cpp; sourceTree = "<group>"; };
 		26EB002919AD549E0084507D /* SwiftppASTConsumer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwiftppASTConsumer.h; sourceTree = "<group>"; };
+		26EE502519BFCD590072F1C4 /* SwiftppObjcOutput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SwiftppObjcOutput.cpp; sourceTree = "<group>"; };
+		26EE502619BFCD590072F1C4 /* SwiftppObjcOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwiftppObjcOutput.h; sourceTree = "<group>"; };
+		26EE502819BFD1050072F1C4 /* SwiftppOutput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SwiftppOutput.cpp; sourceTree = "<group>"; };
+		26EE502919BFD1050072F1C4 /* SwiftppOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwiftppOutput.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,8 +86,11 @@
 				26DCA6B819AE9FA800EDD4C7 /* SwiftppASTVisitor.cpp */,
 				26DCA6B919AE9FA800EDD4C7 /* SwiftppASTVisitor.h */,
 				26DCA6BB19AEB14D00EDD4C7 /* SwiftppData.cpp */,
-				26DCA6BE19B14AAA00EDD4C7 /* SwiftppData_ouput.cpp */,
 				26DCA6BC19AEB14D00EDD4C7 /* SwiftppData.h */,
+				26EE502819BFD1050072F1C4 /* SwiftppOutput.cpp */,
+				26EE502919BFD1050072F1C4 /* SwiftppOutput.h */,
+				26EE502519BFCD590072F1C4 /* SwiftppObjcOutput.cpp */,
+				26EE502619BFCD590072F1C4 /* SwiftppObjcOutput.h */,
 				26D7915A19B9370200238401 /* Version.h */,
 			);
 			path = src;
@@ -173,9 +180,10 @@
 			files = (
 				26EB002A19AD549E0084507D /* SwiftppASTConsumer.cpp in Sources */,
 				26B8842919ABF54300CCD8B3 /* main.cpp in Sources */,
+				26EE502A19BFD1050072F1C4 /* SwiftppOutput.cpp in Sources */,
 				26DCA6BA19AE9FA800EDD4C7 /* SwiftppASTVisitor.cpp in Sources */,
 				26DCA6BD19AEB14D00EDD4C7 /* SwiftppData.cpp in Sources */,
-				26DCA6BF19B14AAA00EDD4C7 /* SwiftppData_ouput.cpp in Sources */,
+				26EE502719BFCD590072F1C4 /* SwiftppObjcOutput.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

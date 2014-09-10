@@ -14,6 +14,7 @@
 #include <iostream>
 
 #include "SwiftppASTConsumer.h"
+#include "SwiftppObjcOutput.h"
 #include "Version.h"
 
 namespace
@@ -38,7 +39,12 @@ std::unique_ptr<clang::ASTConsumer> SwiftppAction::CreateASTConsumer( clang::Com
 	ci.getLangOpts().CPlusPlus14 = true;
 	ci.getLangOpts().GNUMode = true;
 	
-	return std::unique_ptr<clang::ASTConsumer>( new SwiftppASTConsumer( ci, g_options, i_inputFile ) );
+	std::shared_ptr<SwiftppOutput> output( new SwiftppObjcOutput );
+	
+	return std::unique_ptr<clang::ASTConsumer>( new SwiftppASTConsumer( ci,
+																	g_options,
+																	output,
+																	i_inputFile ) );
 }
 
 void showVersion( int i_exitCode )
@@ -51,6 +57,7 @@ void showHelp( int i_exitCode )
 {
 	std::cerr << "Usage swiftpp: [options] header_file\n"
 	 	 	"  -o <path>                Write output files to this directory\n"
+			"  -swift                   Output swift bridge\n"
 			"  -named-params            Parameters of C++ methods exported to swift have\n"
 			"                           names (default)\n"
 			"  -no-named-params         Parameters of C++ methods exported to swift have\n"

@@ -13,17 +13,23 @@
 #include <clang/Frontend/CompilerInstance.h>
 #include "SwiftppData.h"
 
+class SwiftppOutput;
+
 class SwiftppASTConsumer : public clang::ASTConsumer
 {
 	private:
 		clang::CompilerInstance &_ci;
 		SwiftppData _data;
+		std::shared_ptr<SwiftppOutput> _output;
 		std::string _inputFile;
 	
 		virtual void HandleTranslationUnit( clang::ASTContext &i_ctx ) override;
 
 	public:
-		SwiftppASTConsumer( clang::CompilerInstance &i_ci, const SwiftppOptions &i_options, llvm::StringRef i_inputFile );
+		SwiftppASTConsumer( clang::CompilerInstance &i_ci,
+								const SwiftppOptions &i_options,
+								const std::shared_ptr<SwiftppOutput> &i_output,
+								llvm::StringRef i_inputFile );
 };
 
 #endif

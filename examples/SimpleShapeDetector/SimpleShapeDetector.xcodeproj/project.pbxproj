@@ -128,7 +128,8 @@
 				26B20BD819BB359700763063 /* cxx-objc-proxies.mm */,
 				26B20BD919BB359700763063 /* cxx-subclasses.mm */,
 			);
-			path = "cxx-bridge";
+			name = "cxx-bridge";
+			path = "cxx-Bridging-Header";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
