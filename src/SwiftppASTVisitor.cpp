@@ -62,10 +62,10 @@ bool SwiftppClassVisitor::VisitCXXMethodDecl( clang::CXXMethodDecl *i_decl )
 	for ( int i = 0; i <= clones; ++i )
 	{
 		CXXMethod m( type,
-						   access,
-						   isConst,
-						   qualName,
-						   returnType );
+					   access,
+					   isConst,
+					   qualName,
+					   returnType );
 	
 		for ( unsigned p = 0; p < numParams; ++p )
 		{
@@ -155,14 +155,17 @@ bool SwiftppASTVisitor::VisitFunctionDecl( clang::FunctionDecl *i_decl )
 		return true;
 	
 	// must be in swift_converter namespace
-	std::string qualName( i_decl->getQualifiedNameAsString() );
-	if ( qualName.compare( 0, 17, "swift_converter::" ) != 0 )
+	if ( not i_decl->getDeclContext()->isNamespace() )
 		return true;
-	qualName = qualName.substr( 17 );
+	auto namespaceContext = clang::dyn_cast<clang::NamespaceDecl>( i_decl->getDeclContext() );
+	assert( namespaceContext != nullptr );
+	if ( namespaceContext->getNameAsString() != "swift_converter" )
+		return true;
 	
+	std::string funcName( i_decl->getNameAsString() );
 	auto param = i_decl->getParamDecl( 0 );
 	
-	TypeConverter conv( qualName, returnType, param->getType() );
+	TypeConverter conv( funcName, returnType, param->getType() );
 	_data.addConverter( conv );
 	
 	return true;

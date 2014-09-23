@@ -21,18 +21,6 @@
 		26B20BDB19BB359700763063 /* cxx-subclasses.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26B20BD919BB359700763063 /* cxx-subclasses.mm */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		2653F77419BBFAA500A52D5E /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 7;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		263B31D119BB2912006F7D14 /* SimpleShapeDetector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleShapeDetector.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		263B31D519BB2912006F7D14 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -140,7 +128,6 @@
 			buildConfigurationList = 263B31ED19BB2912006F7D14 /* Build configuration list for PBXNativeTarget "SimpleShapeDetector" */;
 			buildPhases = (
 				2653F77519BBFAAB00A52D5E /* Run Script */,
-				2653F77419BBFAA500A52D5E /* CopyFiles */,
 				263B31CD19BB2912006F7D14 /* Sources */,
 				263B31CE19BB2912006F7D14 /* Frameworks */,
 				263B31CF19BB2912006F7D14 /* Resources */,
@@ -336,6 +323,7 @@
 				);
 				INFOPLIST_FILE = SimpleShapeDetector/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "SimpleShapeDetector/SimpleShapeDetector-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -351,6 +339,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = "swift=__attribute__((annotate(\\\"swift\\\")))";
 				INFOPLIST_FILE = SimpleShapeDetector/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "SimpleShapeDetector/SimpleShapeDetector-Bridging-Header.h";
 			};
