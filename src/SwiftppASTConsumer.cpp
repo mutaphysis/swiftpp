@@ -48,9 +48,24 @@ void SwiftppASTConsumer::HandleTranslationUnit( clang::ASTContext &i_ctx )
 	
 	for ( auto converter : _data.converters() )
 	{
-		collectInclude( i_ctx, converter.to() );
-		collectInclude( i_ctx, converter.from() );
+		if ( not converter.to().getCanonicalType()->isObjCObjectPointerType() )
+			collectInclude( i_ctx, converter.to() );
+		if ( not converter.from().getCanonicalType()->isObjCObjectPointerType() )
+			collectInclude( i_ctx, converter.from() );
 	}
+	
+	_data.addMissingConstructors();
+	
+	// synthesize missing converters
+//	for ( const auto &c : _data.classes() )
+//	{
+//		for ( const auto &m : c.methods() )
+//		{
+//			addMissingConverters( m.returnType() );
+//			for ( const auto &p : m.params() )
+//				addMissingConverters( p.type() );
+//		}
+//	}
 	
 	// write bridge code!
 	_output->write( _ci, _inputFile, _data );

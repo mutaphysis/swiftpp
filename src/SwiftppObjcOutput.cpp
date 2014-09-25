@@ -8,6 +8,10 @@
 
 #include "SwiftppObjcOutput.h"
 #include <clang/Frontend/CompilerInstance.h>
+#include <clang/AST/DeclCXX.h>
+#include <clang/AST/DeclTemplate.h>
+
+#include <iostream>
 
 namespace
 {
@@ -83,7 +87,7 @@ void SwiftppObjcOutput::write_impl()
 std::string SwiftppObjcOutput::write_objc_method_decl( const CXXMethod &i_method ) const
 {
 	std::string result;
-	result.reserve( i_method.params().size() * 6 );
+	result.reserve( i_method.params().size() * 6 ); // make some room
 	if ( i_method.isStatic() )
 		result.append( "+ ", 2 );
 	else
@@ -93,6 +97,7 @@ std::string SwiftppObjcOutput::write_objc_method_decl( const CXXMethod &i_method
 		result.append( "(instancetype)init" );
 	else
 	{
+		// (return type)methodName
 		result.append( 1, '(' );
 		result.append( cxxType2ObjcTypeString( i_method.returnType() ) );
 		result.append( 1, ')' );
@@ -104,16 +109,18 @@ std::string SwiftppObjcOutput::write_objc_method_decl( const CXXMethod &i_method
 	{
 		if ( firstParam )
 		{
-			if ( i_method.isConstructor() )
+			if ( i_method.isConstructor() ) // constructor with a param will by name initWith:
 				result.append( "With" );
 			firstParam = false;
 		}
 		else
 		{
 			result.append( 1, ' ' );
+			// if usedNamedParams, put a name for the param, like in [method:p1 nameOf2:p2 nameOf3:p3]
 			if ( _data->options().usedNamedParams )
 				result.append( p.cleanName() );
 		}
+		// :(type)name
 		result.append( ":(", 2 );
 		result.append( cxxType2ObjcTypeString( p.type() ) );
 		result.append( 1, ')' );
@@ -167,6 +174,15 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) cons
 	"// Objective-C proxies for each classes\n"
 	"\n";
 	
+	/*
+	 proxy classes are really simple:
+	 
+	 @interface ClassName : NSObject<Class_protocol>
+	 {
+	 	void *ptr; <-- a pointer to the C++ class
+	 }
+	 @end
+	*/
 	for ( auto oneClass : _data->classes() )
 	{
 		ostr << "@interface " << oneClass.name() <<  " : NSObject<" << oneClass.name() << "_protocol>\n"
@@ -187,10 +203,11 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) con
 	ostr << "#include <string>\n";
 	ostr << "#include <vector>\n";
 	ostr << "#include <map>\n";
-	// type includes, all c++ types used in converters
+	// type #includes, all c++ types used in converters
 	for ( auto fi : _data->includesForCXXTypes() )
 		ostr << "#include \"" << _data->formatIncludeFileName( fi ) << "\"\n";
 	
+	// wtite the converters prototype
 	ostr << "\nnamespace swift_converter\n"
 	"{\n";
 	
@@ -217,9 +234,12 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) con
 			if ( method.isConstructor() )
 				ostr << oneClass.name() << "_subclass *" << oneClass.name() << "_subclass_new( id<" << oneClass.name() << "_protocol> i_link";
 			else
-				ostr << type2String( method.returnType() ) << " " << oneClass.name() << "_subclass_" << method.name() << "( "
-				<< oneClass.name() << "_subclass *i_this";
-			ostr << write_cxx_params_decl( method, true, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+			{
+				ostr << type2String( method.returnType() ) << " " << oneClass.name() << "_subclass_" << method.name() << "( ";
+				if ( not method.isStatic() )
+					ostr << oneClass.name() << "_subclass *i_this";
+			}
+			ostr << write_cxx_params_decl( method, not method.isStatic(), [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
 			ostr << " );\n";
 		}
 		ostr << "\n"
@@ -253,8 +273,10 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) con
 				s.append( oneClass.name() );
 				s.append( "_subclass_" );
 				s.append( method.name() );
-				s.append( "( _this" );
-				s.append( write_cxx_params_decl( method, true, [&]( const CXXParam &p ){ return this->converterForObjcType2CXXType( p.type(), p.name() ); } ) );
+				s.append( "( " );
+				if ( not method.isStatic() )
+					s.append( "_this" );
+				s.append( write_cxx_params_decl( method, not method.isStatic(), [&]( const CXXParam &p ){ return this->converterForObjcType2CXXType( p.type(), p.name() ); } ) );
 				s.append( " )" );
 				if ( not method.returnType()->isVoidType() )
 				{
@@ -322,7 +344,10 @@ void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
 				}
 				else
 				{
-					ostr << "        " << oneClass.name() << "::" << method.name() << "(";
+					ostr << "        ";
+					if ( not method.returnType()->isVoidType() )
+						ostr << "return ";
+					ostr << oneClass.name() << "::" << method.name() << "(";
 					ostr << write_cxx_params_decl( method, false, [&]( const CXXParam &p ){ return p.name(); } );
 					ostr << " );\n";
 					ostr << "      else\n  ";
@@ -371,9 +396,12 @@ void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
 			if ( method.isConstructor() )
 				ostr << oneClass.name() << "_subclass *" << oneClass.name() << "_subclass_new( id<" << oneClass.name() << "_protocol> i_link";
 			else
-				ostr << type2String( method.returnType() ) << " " << oneClass.name() << "_subclass_" << method.name() << "( "
-				<< oneClass.name() << "_subclass *i_this";
-			ostr << write_cxx_params_decl( method, true, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+			{
+				ostr << type2String( method.returnType() ) << " " << oneClass.name() << "_subclass_" << method.name() << "( ";
+				if ( not method.isStatic() )
+					ostr << oneClass.name() << "_subclass *i_this";
+			}
+			ostr << write_cxx_params_decl( method, not method.isStatic(), [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
 			ostr << " )\n{\n";
 			if ( method.isConstructor() )
 			{
@@ -388,7 +416,11 @@ void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
 				ostr << "  ";
 				if ( not method.returnType()->isVoidType() )
 					ostr << "return ";
-				ostr << "i_this->" << method.name() << "(";
+				if ( method.isStatic() )
+					ostr << oneClass.name() << "::";
+				else
+					ostr << "i_this->";
+				ostr << method.name() << "(";
 				ostr << write_cxx_params_decl( method, false, [&]( const CXXParam &p ){ return p.name(); } );
 				ostr << " );\n";
 			}
@@ -410,14 +442,24 @@ std::string SwiftppObjcOutput::type2UndecoratedTypeString( const clang::QualType
 	return type2String( type );
 }
 
-std::string SwiftppObjcOutput::cxxType2ObjcTypeString( const clang::QualType &i_type ) const
+std::string SwiftppObjcOutput::typeNameForFunc( const clang::QualType &i_cxxtype ) const
 {
-	std::string s( type2UndecoratedTypeString( i_type ) );
+	std::string result( type2UndecoratedTypeString( i_cxxtype ) );
+	std::replace( std::begin(result), std::end(result), ' ', '_' );
+	std::replace( std::begin(result), std::end(result), ':', '_' );
+	std::replace( std::begin(result), std::end(result), '<', '_' );
+	std::replace( std::begin(result), std::end(result), '>', '_' );
+	return result;
+}
+
+std::string SwiftppObjcOutput::cxxType2ObjcTypeString( const clang::QualType &i_cxxtype ) const
+{
+	std::string cxxtype( type2UndecoratedTypeString( i_cxxtype ) );
 	
 	// is there a converter?
 	for ( auto it : _data->converters() )
 	{
-		if ( s == type2UndecoratedTypeString( it.from() ) )
+		if ( cxxtype == type2UndecoratedTypeString( it.from() ) )
 		{
 			// converter found, use the converted type
 			return type2UndecoratedTypeString( it.to() );
@@ -425,24 +467,29 @@ std::string SwiftppObjcOutput::cxxType2ObjcTypeString( const clang::QualType &i_
 	}
 	
 	// add a few default converters
-	if ( s == "std::string" )
+	if ( cxxtype == "std::string" )
 		return "NSString *";
 	
-	//! @todo: handle collections, vector<T>, map<string,T>, set<T>
+	if ( isCXXVectorType( i_cxxtype ) )
+		return "NSArray *";
+	if ( isCXXMapType( i_cxxtype ) )
+		return "NSDictionary *";
+	if ( isCXXSetType( i_cxxtype ) )
+		return "NSSet *";
 	
 	//! @todo: warn for unsupported types
 	
-	return s;
+	return cxxtype;
 }
 
-std::string SwiftppObjcOutput::converterForObjcType2CXXType( const clang::QualType &i_type, const std::string &i_code ) const
+std::string SwiftppObjcOutput::converterForObjcType2CXXType( const clang::QualType &i_cxxtype, const std::string &i_code ) const
 {
-	std::string s( type2UndecoratedTypeString( i_type ) );
+	std::string cxxtype( type2UndecoratedTypeString( i_cxxtype ) );
 	
 	// is there a converter?
 	for ( auto converter : _data->converters() )
 	{
-		if ( s == type2UndecoratedTypeString( converter.to() ) )
+		if ( cxxtype == type2UndecoratedTypeString( converter.to() ) )
 		{
 			// converter found, use the converted type
 			return std::string("swift_converter::") + converter.name() + "( " + i_code + " )";
@@ -450,20 +497,134 @@ std::string SwiftppObjcOutput::converterForObjcType2CXXType( const clang::QualTy
 	}
 	
 	// add a few default converters
-	if ( s == "std::string" )
+	if ( cxxtype == "std::string" )
 		return std::string("std::string( [") + i_code + " UTF8String] )";
+	
+	clang::QualType valueType;
+	if ( isCXXVectorType( i_cxxtype, &valueType ) )
+	{
+		return std::string("swift_converter::generated_to_vector_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
+	}
+	if ( isCXXMapType( i_cxxtype, &valueType ) )
+	{
+		return std::string("swift_converter::generated_to_map_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
+	}
+	if ( isCXXSetType( i_cxxtype, &valueType ) )
+	{
+		return std::string("swift_converter::generated_to_set_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
+	}
 	
 	return i_code;
 }
 
-std::string SwiftppObjcOutput::converterForCXXType2ObjcType( const clang::QualType &i_type, const std::string &i_code ) const
+bool SwiftppObjcOutput::isCXXVectorType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType ) const
 {
-	std::string s( type2UndecoratedTypeString( i_type ) );
+	auto type = i_cxxtype.getCanonicalType().getNonReferenceType().getTypePtrOrNull();
+	if ( type == nullptr )
+		return false;
+	
+	auto cxxdecl = type->getAsCXXRecordDecl();
+	if ( cxxdecl == nullptr or not cxxdecl->getDeclContext()->isStdNamespace() )
+		return false;
+	
+	auto templdecl = clang::dyn_cast<clang::ClassTemplateSpecializationDecl>( cxxdecl );
+	if ( templdecl == nullptr )
+		return false;
+	
+	if ( templdecl->getNameAsString() != "vector" )
+		return false;
+	
+	const auto &targs = templdecl->getTemplateArgs();
+	if ( targs.size() < 1 )
+		return false;
+	
+	const auto &arg = targs[0];
+	if ( arg.getKind() != clang::TemplateArgument::Type )
+		return false;
+	
+	if ( o_valueType )
+		*o_valueType = arg.getAsType();
+	
+	return true;
+}
+
+bool SwiftppObjcOutput::isCXXMapType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType ) const
+{
+	auto type = i_cxxtype.getCanonicalType().getNonReferenceType().getTypePtrOrNull();
+	if ( type == nullptr )
+		return false;
+	
+	auto cxxdecl = type->getAsCXXRecordDecl();
+	if ( cxxdecl == nullptr or not cxxdecl->getDeclContext()->isStdNamespace() )
+		return false;
+	
+	auto templdecl = clang::dyn_cast<clang::ClassTemplateSpecializationDecl>( cxxdecl );
+	if ( templdecl == nullptr )
+		return false;
+	
+	if ( templdecl->getNameAsString() != "map" )
+		return false;
+	
+	const auto &targs = templdecl->getTemplateArgs();
+	if ( targs.size() < 2 )
+		return false;
+	
+	const auto &arg1 = targs[0];
+	if ( arg1.getKind() != clang::TemplateArgument::Type )
+		return false;
+	
+	if ( type2UndecoratedTypeString( arg1.getAsType() ) != "std::string" )
+		return false;
+	
+	const auto &arg2 = targs[1];
+	if ( arg2.getKind() != clang::TemplateArgument::Type )
+		return false;
+	
+	if ( o_valueType )
+		*o_valueType = arg2.getAsType();
+
+	return true;
+}
+
+bool SwiftppObjcOutput::isCXXSetType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType ) const
+{
+	auto type = i_cxxtype.getCanonicalType().getNonReferenceType().getTypePtrOrNull();
+	if ( type == nullptr )
+		return false;
+	
+	auto cxxdecl = type->getAsCXXRecordDecl();
+	if ( cxxdecl == nullptr or not cxxdecl->getDeclContext()->isStdNamespace() )
+		return false;
+	
+	auto templdecl = clang::dyn_cast<clang::ClassTemplateSpecializationDecl>( cxxdecl );
+	if ( templdecl == nullptr )
+		return false;
+	
+	if ( templdecl->getNameAsString() != "set" )
+		return false;
+	
+	const auto &targs = templdecl->getTemplateArgs();
+	if ( targs.size() < 1 )
+		return false;
+	
+	const auto &arg = targs[0];
+	if ( arg.getKind() != clang::TemplateArgument::Type )
+		return false;
+	
+	if ( o_valueType )
+		*o_valueType = arg.getAsType();
+
+	return true;
+}
+
+std::string SwiftppObjcOutput::converterForCXXType2ObjcType( const clang::QualType &i_cxxtype, const std::string &i_code ) const
+{
+	std::string cxxtype( type2UndecoratedTypeString( i_cxxtype ) );
 	
 	// is there a converter?
 	for ( auto converter : _data->converters() )
 	{
-		if ( s == type2UndecoratedTypeString( converter.from() ) )
+		if ( cxxtype == type2UndecoratedTypeString( converter.from() ) )
 		{
 			// converter found, use the converted type
 			return std::string("swift_converter::") + converter.name() + "( " + i_code + " )";
@@ -471,8 +632,22 @@ std::string SwiftppObjcOutput::converterForCXXType2ObjcType( const clang::QualTy
 	}
 	
 	// add a few default converters
-	if ( s == "std::string" )
+	if ( cxxtype == "std::string" )
 		return std::string("[NSString stringWithUTF8String:") + i_code + ".c_str()]";
 	
+	clang::QualType valueType;
+	if ( isCXXVectorType( i_cxxtype, &valueType ) )
+	{
+		return std::string("swift_converter::generated_from_vector_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
+	}
+	if ( isCXXMapType( i_cxxtype, &valueType ) )
+	{
+		return std::string("swift_converter::generated_from_map_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
+	}
+	if ( isCXXSetType( i_cxxtype, &valueType ) )
+	{
+		return std::string("swift_converter::generated_from_set_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
+	}
+
 	return i_code;
 }

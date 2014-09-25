@@ -1,10 +1,23 @@
 
 -swiftpp: handle static method, there is code for it but I don't think it works ?
 -swiftpp: add tests:
-	virtual, non-virtual, pure virtual, static method,
-	methods with default parameters, overloads, const/non-const
-	inheritance, multiple inheritance, virtual inheritance
-	
+	-constructor with params
+	-virtual override call from swift
+	-virtual override call from c++
+	-non virtual override call from swift
+	-non virtual override call from c++
+	-pure virtual override call from swift
+	-pure virtual override call from c++
+	-pure virtual not override call from c++
+	-pure virtual not override call from swift
+	-inheritance
+	-multiple inheritance
+	-virtual inheritance
+	-type conversion
+	-simple collection handling
+	-complex collection handling
+	-complex collection handling with user type
+
 -swiftpp: handle collections automatically, vector to NSArray, map to NSDict, things like map<string,vector<set<int>>> should have convertes automatically generated.
 -swiftpp: simplify usage/setup in Xcode ?
 -examples: improve simple example, it's very lame now

@@ -11,6 +11,7 @@
 
 #include "Path2D.h"
 #include <string>
+#include <vector>
 
 class swift ShapeDetector
 {
@@ -19,6 +20,9 @@ class swift ShapeDetector
 		virtual ~ShapeDetector();
 	
 		void detect( const Path2D &i_paths );
+
+//		virtual void detect2( const std::vector<Path2D> &i_paths );
+//		virtual void detect3( const std::vector<std::string> &i_paths );
 	
 	protected:
 		virtual void shapeDetected( const std::string &i_name, const Path2D &i_path );

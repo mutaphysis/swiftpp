@@ -84,7 +84,7 @@ void CXXMethod::addParam( const CXXParam &i_param )
 
 bool CXXMethod::operator<( const CXXMethod &i_other ) const
 {
-	return std::tie(_isConst,_name,_params) < std::tie(i_other._isConst,i_other._name,i_other._params);
+	return std::tie(/*_isConst,*/_name,_params) < std::tie(/*i_other._isConst,*/i_other._name,i_other._params);
 }
 
 #if 0
@@ -106,6 +106,23 @@ void CXXClass::addMethod( const CXXMethod &i_method )
 	// mark constructor
 	if ( res.first->name() == name() )
 		res.first->setIsConstructor();
+}
+
+void CXXClass::addMissingConstructor()
+{
+	for ( auto m : _methods )
+	{
+		if ( m.isConstructor() )
+			return;
+	}
+	
+	// no constructor, synthesize one
+	CXXMethod defaultConstructor( CXXMethod::type_t::kNormal, CXXMethod::access_t::kPublic,
+								 false,
+								 name(),
+								 clang::QualType() );
+	
+	addMethod( defaultConstructor );
 }
 
 #if 0
@@ -130,6 +147,12 @@ void SwiftppData::addConverter( const TypeConverter &i_converter )
 void SwiftppData::addCXXTypeIncludePath( const std::string &i_fn )
 {
 	_includesForCXXTypes.push_back( i_fn );
+}
+
+void SwiftppData::addMissingConstructors()
+{
+	for ( auto &c : _classes )
+		c.addMissingConstructor();
 }
 
 std::string SwiftppData::formatIncludeFileName( const std::string &i_filepath ) const

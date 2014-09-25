@@ -28,7 +28,7 @@ class SwiftppObjcOutput : public SwiftppOutput
 		std::string type2UndecoratedTypeString( const clang::QualType &i_type ) const;
 		
 		//! return the Objective-C type corresponding to the C++ type, according to the available converters
-		std::string cxxType2ObjcTypeString( const clang::QualType &i_type ) const;
+		std::string cxxType2ObjcTypeString( const clang::QualType &i_cxxtype ) const;
 		
 		/*!
 		 @brief Write a function call that convert i_code to a C++ type.
@@ -39,11 +39,11 @@ class SwiftppObjcOutput : public SwiftppOutput
 		 converterForObjcType2CXXType( {NSString}, "variable" )
 		 return: "std::string( [variable UTF8String] )"
 		 
-		 @param[in] i_type type of i_code
-		 @param[in] i_code expression of type i_type
+		 @param[in] i_cxxtype type of i_code
+		 @param[in] i_code expression of type i_cxxtype
 		 @return     a function call converting i_code
 		*/
-		std::string converterForObjcType2CXXType( const clang::QualType &i_type, const std::string &i_code ) const;
+		std::string converterForObjcType2CXXType( const clang::QualType &i_cxxtype, const std::string &i_code ) const;
 		
 		/*!
 		 @brief Write a function call that convert i_code to an Objective-C type.
@@ -54,12 +54,18 @@ class SwiftppObjcOutput : public SwiftppOutput
 		 converterForObjcType2CXXType( {std::string}, "variable" )
 		 return: "[NSString stringWithUTF8String:variable.c_str()]"
 		 
-		 @param[in] i_type type of i_code
-		 @param[in] i_code expression of type i_type
+		 @param[in] i_cxxtype type of i_code
+		 @param[in] i_code Objective-C expression that can be converted to type i_cxxtype
 		 @return     a function call converting i_code
 		*/
-		std::string converterForCXXType2ObjcType( const clang::QualType &i_type, const std::string &i_code ) const;
+		std::string converterForCXXType2ObjcType( const clang::QualType &i_cxxtype, const std::string &i_code ) const;
 
+
+		bool isCXXVectorType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
+		bool isCXXMapType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
+		bool isCXXSetType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
+		std::string typeNameForFunc( const clang::QualType &i_cxxtype ) const;
+	
 		/*!
 		 @brief Write an Objectvie-C method.
 		 

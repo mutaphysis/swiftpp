@@ -38,6 +38,8 @@ class TypeConverter
 		std::string _name; //!< function name
 		clang::QualType _to; //!< returned type
 		clang::QualType _from; //!< input type
+
+		std::string _body;
 };
 
 /*!
@@ -117,6 +119,7 @@ class CXXClass
 		CXXClass( const std::string &i_name );
 	
 		void addMethod( const CXXMethod &i_method );
+		void addMissingConstructor();
 	
 		inline const std::string &name() const { return _name; }
 		inline const std::set<CXXMethod> &methods() const { return _methods; }
@@ -150,6 +153,7 @@ class SwiftppData
 		void addClass( const CXXClass &i_class );
 		void addConverter( const TypeConverter &i_converter );
 		void addCXXTypeIncludePath( const std::string &i_fn );
+		void addMissingConstructors();
 	
 		inline const std::vector<CXXClass> &classes() const { return _classes; }
 		inline const std::vector<TypeConverter> &converters() const { return _converters; }
@@ -158,7 +162,6 @@ class SwiftppData
 		inline std::string outputFolder() const { return _options.output; }
 	
 		inline const SwiftppOptions &options() const { return _options; }
-		
 	
 		/*!
 		 @brief Format a file name for #include.
