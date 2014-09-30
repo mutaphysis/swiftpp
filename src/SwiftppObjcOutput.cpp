@@ -135,17 +135,18 @@ std::string SwiftppObjcOutput::write_objc_method_decl( const CXXMethod &i_method
 
 void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) const
 {
-	ostr << "// generated cxx-objc-protocols.h\n"
-	"//  pure Objective-C, cannot contain any C++\n"
-	"\n"
-	"#ifndef H_CXX_OBJC_PROTOCOLS\n"
-	"#define H_CXX_OBJC_PROTOCOLS\n"
-	"\n"
-	"#import <Foundation/Foundation.h>\n"
-	"#import <AppKit/AppKit.h>\n"
-	"\n"
-	"// Objective-C proxy protocols for each classes\n"
-	"\n";
+	ostr << R"(// generated cxx-objc-protocols.h
+//  pure Objective-C, cannot contain any C++\n"
+
+#ifndef H_CXX_OBJC_PROTOCOLS
+#define H_CXX_OBJC_PROTOCOLS
+
+#import <Foundation/Foundation.h>
+#import <AppKit/AppKit.h>
+
+// Objective-C proxy protocols for each classes
+
+)";
 	
 	for ( auto oneClass : _data->classes() )
 	{
@@ -156,23 +157,25 @@ void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) co
 			ostr << write_objc_method_decl( method );
 			ostr << ";\n";
 		}
+		ostr << "@end\n";
 	}
 	
-	ostr << "@end\n\n#endif\n";
+	ostr << "\n#endif\n";
 }
 
 void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) const
 {
-	ostr << "// generated cxx-objc-proxies.h\n"
-	"//  pure Objective-C, cannot contain any C++\n"
-	"\n"
-	"#ifndef H_CXX_OBJC_PROXIES\n"
-	"#define H_CXX_OBJC_PROXIES\n"
-	"\n"
-	"#import \"cxx-objc-protocols.h\"\n"
-	"\n"
-	"// Objective-C proxies for each classes\n"
-	"\n";
+	ostr << R"(// generated cxx-objc-proxies.h
+//  pure Objective-C, cannot contain any C++
+
+#ifndef H_CXX_OBJC_PROXIES
+#define H_CXX_OBJC_PROXIES
+
+#import "cxx-objc-protocols.h"
+
+// Objective-C proxies for each classes
+
+)";
 	
 	/*
 	 proxy classes are really simple:
@@ -195,14 +198,15 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) cons
 
 void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) const
 {
-	ostr << "// generated cxx-objc-proxies.mm\n"
-	"\n"
-	"#import \"cxx-objc-proxies.h\"\n"
-	"\n";
+	ostr << R"(// generated cxx-objc-proxies.mm
+
+#import "cxx-objc-proxies.h"
+#include <string>
+#include <vector>
+#include <map>
+
+)";
 	
-	ostr << "#include <string>\n";
-	ostr << "#include <vector>\n";
-	ostr << "#include <map>\n";
 	// type #includes, all c++ types used in converters
 	for ( auto fi : _data->includesForCXXTypes() )
 		ostr << "#include \"" << _data->formatIncludeFileName( fi ) << "\"\n";
@@ -296,20 +300,25 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) con
 
 void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
 {
-	ostr << "// generated cxx-subclasses.mm\n"
-	"\n"
-	"#import \"cxx-objc-protocols.h\"\n";
+	ostr << R"(// generated cxx-subclasses.mm
+
+#import "cxx-objc-protocols.h"
+)";
 	
 	ostr << "#include \"" << _data->formatIncludeFileName( _inputFile ) << "\"\n";
 	
-	ostr << "\ntemplate<typename T>\n"
-	"struct LinkSaver\n"
-	"{\n"
-	"  T saved, &link;\n"
-	"  LinkSaver( T &i_link ) : saved( i_link ), link( i_link ) { link = nil; }\n"
-	"  ~LinkSaver() { link = saved; }\n"
-	"};\n\n"
-	"// the wrapping sub-classes\n\n";
+	ostr << R"(
+template<typename T>
+struct LinkSaver
+{
+  T saved, &link;
+  LinkSaver( T &i_link ) : saved( i_link ), link( i_link ) { link = nil; }
+  ~LinkSaver() { link = saved; }
+};
+
+// the wrapping sub-classes
+
+)";
 	
 	for ( auto oneClass : _data->classes() )
 	{

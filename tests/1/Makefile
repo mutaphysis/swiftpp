@@ -13,8 +13,7 @@ all:
 	xcrun cc -x objective-c++ -c classes/cxx-subclasses.mm -I. $(CPPFLAGS)
 	xcrun cc -x c++ -c classes.cpp $(CPPFLAGS)
 	xcrun c++ -o app test.o classes.o cxx-objc-proxies.o cxx-subclasses.o $(LDFLAGS)
-	export DYLD_LIBRARY_PATH=$(LIBPATH)
-	./app
+	export DYLD_LIBRARY_PATH=$(LIBPATH) ; ./app
 
 clean:
 	rm -rf app *.o classes
