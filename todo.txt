@@ -1,5 +1,4 @@
 
--swiftpp: handle static method, there is code for it but I don't think it works ?
 -swiftpp: add tests:
 	-constructor with params
 	-virtual override call from swift
