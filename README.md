@@ -4,7 +4,7 @@ swiftpp
 An attempt at a C++ to swift bridge.
 
 
-Intoduction
+Introduction
 ===========
 
 swiftpp is a clang tool that automatically generate the Objective-C++ glue code to let a swift class inherit from a C++ class.  You can override C++ virtual methods from the swift derivative as well.
