@@ -28,11 +28,11 @@ class TypeConverter
 		TypeConverter( const std::string &i_name, const clang::QualType &i_to, const clang::QualType &i_from );
 	
 		//! function name
-		inline const std::string &name() const { return _name; }
+		const std::string &name() const;
 		//! returned type
-		inline const clang::QualType &to() const { return _to; }
+		const clang::QualType &to() const;
 		//! input type
-		inline const clang::QualType &from() const { return _from; }
+		const clang::QualType &from() const;
 	
 	private:
 		std::string _name; //!< function name
@@ -53,9 +53,9 @@ class CXXParam
 		CXXParam( const clang::QualType &i_type, const std::string &i_name );
 		
 		//! parameter name
-		inline const std::string &name() const { return _name; }
+		const std::string &name() const;
 		//! parameter type
-		inline const clang::QualType &type() const { return _type; }
+		const clang::QualType &type() const;
 	
 		//! attempt to get a clean name, without any notation prefix
 		std::string cleanName() const;
@@ -84,17 +84,17 @@ class CXXMethod
 	
 		void addParam( const CXXParam &i_param );
 	
-		inline const std::string &name() const { return _name; }
-		inline const clang::QualType &returnType() const { return _returnType; }
-		inline const std::vector<CXXParam> &params() const { return _params; }
+		const std::string &name() const;
+		const clang::QualType &returnType() const;
+		const std::vector<CXXParam> &params() const;
 	
-		inline bool isConstructor() const { return _isConstructor; }
-		inline void setIsConstructor() const { _isConstructor = true; }
+		bool isConstructor() const;
+		void setIsConstructor() const;
 	
-		inline bool isStatic() const { return _type == type_t::kStatic; }
-		inline bool isVirtual() const { return _type == type_t::kVirtual or _type == type_t::kPureVirtual ; }
-		inline bool isPureVirtual() const { return _type == type_t::kPureVirtual ; }
-		inline bool isConst() const { return _isConst; }
+		bool isStatic() const;
+		bool isVirtual() const;
+		bool isPureVirtual() const;
+		bool isConst() const;
 	
 		bool operator<( const CXXMethod &i_other ) const;
 	
@@ -121,8 +121,8 @@ class CXXClass
 		void addMethod( const CXXMethod &i_method );
 		void addMissingConstructor();
 	
-		inline const std::string &name() const { return _name; }
-		inline const std::set<CXXMethod> &methods() const { return _methods; }
+		const std::string &name() const;
+		const std::set<CXXMethod> &methods() const;
 	
 	private:
 		std::string _name;
@@ -155,13 +155,13 @@ class SwiftppData
 		void addCXXTypeIncludePath( const std::string &i_fn );
 		void addMissingConstructors();
 	
-		inline const std::vector<CXXClass> &classes() const { return _classes; }
-		inline const std::vector<TypeConverter> &converters() const { return _converters; }
-		inline const std::vector<std::string> &includesForCXXTypes() const { return _includesForCXXTypes; }
+		const std::vector<CXXClass> &classes() const;
+		const std::vector<TypeConverter> &converters() const;
+		const std::vector<std::string> &includesForCXXTypes() const;
 	
-		inline std::string outputFolder() const { return _options.output; }
+		std::string outputFolder() const;
 	
-		inline const SwiftppOptions &options() const { return _options; }
+		const SwiftppOptions &options() const;
 	
 		/*!
 		 @brief Format a file name for #include.
@@ -177,5 +177,35 @@ class SwiftppData
 		std::vector<CXXClass> _classes;
 		std::vector<std::string> _includesForCXXTypes; //!< include paths needed for some user's C++ type definition
 };
+
+inline const std::string &TypeConverter::name() const { return _name; }
+inline const clang::QualType &TypeConverter::to() const { return _to; }
+inline const clang::QualType &TypeConverter::from() const { return _from; }
+
+inline const std::string &CXXParam::name() const { return _name; }
+inline const clang::QualType &CXXParam::type() const { return _type; }
+
+inline const std::string &CXXMethod::name() const { return _name; }
+inline const clang::QualType &CXXMethod::returnType() const { return _returnType; }
+inline const std::vector<CXXParam> &CXXMethod::params() const { return _params; }
+
+inline bool CXXMethod::isConstructor() const { return _isConstructor; }
+inline void CXXMethod::setIsConstructor() const { _isConstructor = true; }
+
+inline bool CXXMethod::isStatic() const { return _type == type_t::kStatic; }
+inline bool CXXMethod::isVirtual() const { return _type == type_t::kVirtual or _type == type_t::kPureVirtual ; }
+inline bool CXXMethod::isPureVirtual() const { return _type == type_t::kPureVirtual ; }
+inline bool CXXMethod::isConst() const { return _isConst; }
+
+inline const std::string &CXXClass::name() const { return _name; }
+inline const std::set<CXXMethod> &CXXClass::methods() const { return _methods; }
+
+inline const std::vector<CXXClass> &SwiftppData::classes() const { return _classes; }
+inline const std::vector<TypeConverter> &SwiftppData::converters() const { return _converters; }
+inline const std::vector<std::string> &SwiftppData::includesForCXXTypes() const { return _includesForCXXTypes; }
+
+inline std::string SwiftppData::outputFolder() const { return _options.output; }
+
+inline const SwiftppOptions &SwiftppData::options() const { return _options; }
 
 #endif

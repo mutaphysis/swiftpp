@@ -19,6 +19,7 @@ class CompilerInstance;
 class SwiftppOutput
 {
 	public:
+		SwiftppOutput() = default;
 		virtual ~SwiftppOutput();
 	
 		void write( clang::CompilerInstance &i_ci, const std::string &i_inputFile, const SwiftppData &i_data );
@@ -26,7 +27,7 @@ class SwiftppOutput
 	protected:
 		clang::CompilerInstance *_ci = nullptr;
 		std::string _inputFile;
-		const SwiftppData *_data;
+		const SwiftppData *_data = nullptr;
 	
 		virtual void write_impl() = 0;
 };

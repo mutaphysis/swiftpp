@@ -10,6 +10,7 @@
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/AST/DeclCXX.h>
 #include <clang/AST/DeclTemplate.h>
+#include "CodeTemplate.h"
 
 #include <iostream>
 
@@ -135,7 +136,8 @@ std::string SwiftppObjcOutput::write_objc_method_decl( const CXXMethod &i_method
 
 void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) const
 {
-	ostr << R"(// generated cxx-objc-protocols.h
+	const char tmpl[] = R"(
+// generated cxx-objc-protocols.h
 //  pure Objective-C, cannot contain any C++\n"
 
 #ifndef H_CXX_OBJC_PROTOCOLS
@@ -145,27 +147,66 @@ void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) co
 #import <AppKit/AppKit.h>
 
 // Objective-C proxy protocols for each classes
-
+<{#classes}>
+@protocol <{class_name}>_protocol
+<{#methods}><{objc_method_decl}>;
+<{/methods}>@end
+<{/classes}>
+#endif
 )";
 	
-	for ( auto oneClass : _data->classes() )
+	CodeTemplateModel model;
+	auto data = _data;
+	model.resolveSection = [=]( const std::string &i_name, int i_index, CodeTemplateModel &o_model )
 	{
-		ostr << "@protocol " << oneClass.name() << "_protocol\n";
-		
-		for ( auto method : oneClass.methods() )
+		if ( i_name == "classes" and i_index < data->classes().size() )
 		{
-			ostr << write_objc_method_decl( method );
-			ostr << ";\n";
+			auto classPtr = &(data->classes()[i_index]);
+			o_model.resolveName = [=]( const std::string &i_name, std::string &o_replc )
+			{
+				if ( i_name == "class_name" )
+				{
+					o_replc = classPtr->name();
+					return true;
+				}
+				return false;
+			};
+			o_model.resolveSection = [=]( const std::string &i_name, int i_index, CodeTemplateModel &o_model )
+			{
+				if ( i_name == "methods" and i_index < classPtr->methods().size() )
+				{
+					auto methodPtr = classPtr->methods().begin();
+					std::advance( methodPtr, i_index );
+					o_model.resolveName = [=]( const std::string &i_name, std::string &o_replc )
+					{
+						if ( i_name == "objc_method_decl" )
+						{
+							o_replc = this->write_objc_method_decl( *methodPtr );
+							return true;
+						}
+						return false;
+					};
+					return true;
+				}
+				return false;
+			};
+			return true;
 		}
-		ostr << "@end\n";
-	}
+		return false;
+	};
 	
-	ostr << "\n#endif\n";
+	CodeTemplate renderer( substringref( std::begin(tmpl) + 1, std::end(tmpl) -1 ) );
+	renderer.render( model,
+		[&]( const char *i_ptr, size_t i_len )
+		{
+			ostr.write( i_ptr, i_len );
+		} );
 }
 
 void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) const
 {
-	ostr << R"(// generated cxx-objc-proxies.h
+	const char tmpl[] = R"(
+// generated cxx-objc-proxies.h
 //  pure Objective-C, cannot contain any C++
 
 #ifndef H_CXX_OBJC_PROXIES
@@ -174,26 +215,41 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) cons
 #import "cxx-objc-protocols.h"
 
 // Objective-C proxies for each classes
-
+<{#classes}>
+@interface <{class_name}> : NSObject<<{class_name}>_protocol>
+{ void *_ptr; }
+@end
+<{/classes}>
+#endif
 )";
 	
-	/*
-	 proxy classes are really simple:
-	 
-	 @interface ClassName : NSObject<Class_protocol>
-	 {
-	 	void *ptr; <-- a pointer to the C++ class
-	 }
-	 @end
-	*/
-	for ( auto oneClass : _data->classes() )
+	CodeTemplateModel model;
+	auto data = _data;
+	model.resolveSection = [=]( const std::string &i_name, int i_index, CodeTemplateModel &o_model )
 	{
-		ostr << "@interface " << oneClass.name() <<  " : NSObject<" << oneClass.name() << "_protocol>\n"
-		"{ void *_ptr; }\n"
-		"@end\n"
-		"\n";
-	}
-	ostr << "#endif\n";
+		if ( i_name == "classes" and i_index < data->classes().size() )
+		{
+			auto classPtr = &(data->classes()[i_index]);
+			o_model.resolveName = [=]( const std::string &i_name, std::string &o_replc )
+			{
+				if ( i_name == "class_name" )
+				{
+					o_replc = classPtr->name();
+					return true;
+				}
+				return false;
+			};
+			return true;
+		}
+		return false;
+	};
+
+	CodeTemplate renderer( substringref( std::begin(tmpl) + 1, std::end(tmpl) -1 ) );
+	renderer.render( model,
+					[&]( const char *i_ptr, size_t i_len )
+					{
+						ostr.write( i_ptr, i_len );
+					} );
 }
 
 void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) const

@@ -10,6 +10,8 @@
 		26B8842919ABF54300CCD8B3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26B8842819ABF54300CCD8B3 /* main.cpp */; };
 		26B8852A19ABFB6C00CCD8B3 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B8852919ABFB6C00CCD8B3 /* libz.dylib */; };
 		26B8852C19ABFB8C00CCD8B3 /* libcurses.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26B8852B19ABFB8C00CCD8B3 /* libcurses.dylib */; };
+		26C687C81A7AE0C6006635CE /* CodeTemplate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26C687C61A7AE0C6006635CE /* CodeTemplate.cpp */; };
+		26C687CB1A7AE11F006635CE /* substringref.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26C687C91A7AE11F006635CE /* substringref.cpp */; };
 		26DCA6BA19AE9FA800EDD4C7 /* SwiftppASTVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26DCA6B819AE9FA800EDD4C7 /* SwiftppASTVisitor.cpp */; };
 		26DCA6BD19AEB14D00EDD4C7 /* SwiftppData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26DCA6BB19AEB14D00EDD4C7 /* SwiftppData.cpp */; };
 		26EB002A19AD549E0084507D /* SwiftppASTConsumer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 26EB002819AD549E0084507D /* SwiftppASTConsumer.cpp */; };
@@ -34,6 +36,10 @@
 		26B8842819ABF54300CCD8B3 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		26B8852919ABFB6C00CCD8B3 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		26B8852B19ABFB8C00CCD8B3 /* libcurses.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurses.dylib; path = usr/lib/libcurses.dylib; sourceTree = SDKROOT; };
+		26C687C61A7AE0C6006635CE /* CodeTemplate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CodeTemplate.cpp; sourceTree = "<group>"; };
+		26C687C71A7AE0C6006635CE /* CodeTemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodeTemplate.h; sourceTree = "<group>"; };
+		26C687C91A7AE11F006635CE /* substringref.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = substringref.cpp; sourceTree = "<group>"; };
+		26C687CA1A7AE11F006635CE /* substringref.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = substringref.h; sourceTree = "<group>"; };
 		26D7915A19B9370200238401 /* Version.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Version.h; sourceTree = "<group>"; };
 		26DCA6B819AE9FA800EDD4C7 /* SwiftppASTVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SwiftppASTVisitor.cpp; sourceTree = "<group>"; };
 		26DCA6B919AE9FA800EDD4C7 /* SwiftppASTVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwiftppASTVisitor.h; sourceTree = "<group>"; };
@@ -92,6 +98,10 @@
 				26EE502519BFCD590072F1C4 /* SwiftppObjcOutput.cpp */,
 				26EE502619BFCD590072F1C4 /* SwiftppObjcOutput.h */,
 				26D7915A19B9370200238401 /* Version.h */,
+				26C687C61A7AE0C6006635CE /* CodeTemplate.cpp */,
+				26C687C71A7AE0C6006635CE /* CodeTemplate.h */,
+				26C687C91A7AE11F006635CE /* substringref.cpp */,
+				26C687CA1A7AE11F006635CE /* substringref.h */,
 			);
 			path = src;
 			sourceTree = "<group>";
@@ -180,6 +190,8 @@
 			files = (
 				26EB002A19AD549E0084507D /* SwiftppASTConsumer.cpp in Sources */,
 				26B8842919ABF54300CCD8B3 /* main.cpp in Sources */,
+				26C687CB1A7AE11F006635CE /* substringref.cpp in Sources */,
+				26C687C81A7AE0C6006635CE /* CodeTemplate.cpp in Sources */,
 				26EE502A19BFD1050072F1C4 /* SwiftppOutput.cpp in Sources */,
 				26DCA6BA19AE9FA800EDD4C7 /* SwiftppASTVisitor.cpp in Sources */,
 				26DCA6BD19AEB14D00EDD4C7 /* SwiftppData.cpp in Sources */,
