@@ -155,7 +155,7 @@ void SwiftppData::addMissingConstructors()
 		c.addMissingConstructor();
 }
 
-std::string SwiftppData::formatIncludeFileName( const std::string &i_filepath ) const
+std::string SwiftppData::formatIncludeName( const std::string &i_filepath ) const
 {
 	if ( not _options.usedFullPathForUserIncludes )
 	{

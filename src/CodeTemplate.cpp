@@ -29,38 +29,43 @@ void CodeTemplate::render( const substringref &i_tmpl, const std::function<void 
 	auto last = i_tmpl.begin();
 	auto ptr = last;
 	char lastChar = 0;
-	const char *startTag = nullptr;
-	const char *startSectionTag = nullptr;
-	const char *endSectionTag = nullptr;
+	const char *startTag = nullptr; // start of the tag currently being parsed
+	const char *startOpenSectionTag = nullptr; // start of the open tag of the current section
+	const char *endOpenSectionTag = nullptr; // end of the open tag of the current section
 	while ( ptr != i_tmpl.end() )
 	{
 		if ( startTag != nullptr and *ptr == '>' and lastChar == '}' ) // }>
 		{
 			auto endTag = ptr + 1;
-			if ( endSectionTag != nullptr )
+			if ( endOpenSectionTag != nullptr )
 			{
 				// looking for the end of a section
-				if ( startTag[2] == '/' and substringref( startSectionTag + 3, endSectionTag - 2 ) == substringref( startTag + 3, endTag - 2 ) )
+				if ( startTag[2] == '/' and substringref( startOpenSectionTag + 3, endOpenSectionTag - 2 ) == substringref( startTag + 3, endTag - 2 ) )
 				{
 					int i = 0;
-					std::string sectionName( startSectionTag + 3, endSectionTag - 2 );
+					std::string sectionName( startOpenSectionTag + 3, endOpenSectionTag - 2 );
+
+					// this allow nicer formatting for the template
+					if ( *endOpenSectionTag == '\n' )
+						++endOpenSectionTag;
+
 					CodeTemplateModel m;
 					while ( resolveSection( sectionName, i, m ) )
 					{
 						_context.push_front( m );
-						render( substringref( endSectionTag, startTag ), i_writer );
+						render( substringref( endOpenSectionTag, startTag ), i_writer );
 						_context.pop_front();
 						++i;
 					}
-					startSectionTag = endSectionTag = nullptr;
+					startOpenSectionTag = endOpenSectionTag = nullptr;
 					last = endTag;
 				}
 			}
 			else if ( startTag[2] == '#' )
 			{
 				// begin section
-				startSectionTag = startTag;
-				endSectionTag = endTag;
+				startOpenSectionTag = startTag;
+				endOpenSectionTag = endTag;
 			}
 			else
 			{
@@ -74,7 +79,7 @@ void CodeTemplate::render( const substringref &i_tmpl, const std::function<void 
 		else if ( *ptr == '{' and lastChar == '<' and startTag == nullptr ) // <{
 		{
 			startTag = ptr - 1;
-			if ( endSectionTag == nullptr )
+			if ( endOpenSectionTag == nullptr )
 				i_writer( last, startTag - last );
 		}
 
@@ -83,27 +88,28 @@ void CodeTemplate::render( const substringref &i_tmpl, const std::function<void 
 	}
 	
 	// write the remaining, if we're not in a tag
-	if ( startTag == nullptr and endSectionTag == nullptr )
+	if ( startTag == nullptr and endOpenSectionTag == nullptr )
 		i_writer( last, ptr - last );
 }
 
 std::string CodeTemplate::resolveName( const std::string &i_name )
 {
-	std::string result;
 	for ( auto m : _context )
 	{
-		if ( m.resolveName and m.resolveName( i_name, result ) )
-			break;
+		auto it = m.names.find( i_name );
+		if ( it != m.names.end() )
+			return it->second();
 	}
-	return result;
+	return std::string();
 }
 
 bool CodeTemplate::resolveSection( const std::string &i_name, int i_index, CodeTemplateModel &o_model )
 {
 	for ( auto m : _context )
 	{
-		if ( m.resolveSection and m.resolveSection( i_name, i_index, o_model ) )
-			return true;;
+		auto it = m.sections.find( i_name );
+		if ( it != m.sections.end() )
+			return it->second( i_index, o_model );
 	}
 	return false;
 }

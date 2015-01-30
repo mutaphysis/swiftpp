@@ -147,45 +147,32 @@ void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) co
 #import <AppKit/AppKit.h>
 
 // Objective-C proxy protocols for each classes
+
 <{#classes}>
 @protocol <{class_name}>_protocol
-<{#methods}><{objc_method_decl}>;
-<{/methods}>@end
+<{#methods}>
+<{objc_method_decl}>;
+<{/methods}>
+@end
 <{/classes}>
 #endif
 )";
 	
 	CodeTemplateModel model;
 	auto data = _data;
-	model.resolveSection = [=]( const std::string &i_name, int i_index, CodeTemplateModel &o_model )
+	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
 	{
-		if ( i_name == "classes" and i_index < data->classes().size() )
+		if ( i_index < data->classes().size() )
 		{
 			auto classPtr = &(data->classes()[i_index]);
-			o_model.resolveName = [=]( const std::string &i_name, std::string &o_replc )
+			o_model.names["class_name"] = [=](){ return classPtr->name(); };
+			o_model.sections["methods"] = [=]( int i_index, CodeTemplateModel &o_model )
 			{
-				if ( i_name == "class_name" )
-				{
-					o_replc = classPtr->name();
-					return true;
-				}
-				return false;
-			};
-			o_model.resolveSection = [=]( const std::string &i_name, int i_index, CodeTemplateModel &o_model )
-			{
-				if ( i_name == "methods" and i_index < classPtr->methods().size() )
+				if ( i_index < classPtr->methods().size() )
 				{
 					auto methodPtr = classPtr->methods().begin();
 					std::advance( methodPtr, i_index );
-					o_model.resolveName = [=]( const std::string &i_name, std::string &o_replc )
-					{
-						if ( i_name == "objc_method_decl" )
-						{
-							o_replc = this->write_objc_method_decl( *methodPtr );
-							return true;
-						}
-						return false;
-					};
+					o_model.names["objc_method_decl"] = [=](){ return this->write_objc_method_decl( *methodPtr ); };
 					return true;
 				}
 				return false;
@@ -215,6 +202,7 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) cons
 #import "cxx-objc-protocols.h"
 
 // Objective-C proxies for each classes
+
 <{#classes}>
 @interface <{class_name}> : NSObject<<{class_name}>_protocol>
 { void *_ptr; }
@@ -225,20 +213,12 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) cons
 	
 	CodeTemplateModel model;
 	auto data = _data;
-	model.resolveSection = [=]( const std::string &i_name, int i_index, CodeTemplateModel &o_model )
+	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
 	{
-		if ( i_name == "classes" and i_index < data->classes().size() )
+		if ( i_index < data->classes().size() )
 		{
 			auto classPtr = &(data->classes()[i_index]);
-			o_model.resolveName = [=]( const std::string &i_name, std::string &o_replc )
-			{
-				if ( i_name == "class_name" )
-				{
-					o_replc = classPtr->name();
-					return true;
-				}
-				return false;
-			};
+			o_model.names["class_name"] = [=](){ return classPtr->name(); };
 			return true;
 		}
 		return false;
@@ -254,116 +234,174 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) cons
 
 void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) const
 {
-	ostr << R"(// generated cxx-objc-proxies.mm
+	const char tmpl[] = R"(
+// generated cxx-objc-proxies.mm
 
 #import "cxx-objc-proxies.h"
 #include <string>
 #include <vector>
 #include <map>
 
+<{#includes_for_cxx_types}>
+#include "<{include_name}>"
+<{/includes_for_cxx_types}>
+namespace swift_converter
+{
+<{#converters}><{converter_decl}>;
+<{/converters}>}
+
+<{#classes}>
+//********************************
+// <{class_name}>
+//********************************
+
+// C-style
+
+class <{class_name}>_subclass;
+void <{class_name}>_subclass_delete( <{class_name}>_subclass *i_this );
+<{#methods}>
+<{c_proxy_method_decl}>;
+<{/methods}>
+// Objective-C proxy
+
+#define _this ((<{class_name}>_subclass *)_ptr)
+
+@implementation <{class_name}>
+
+- (void)dealloc
+{
+  <{class_name}>_subclass_delete( _this );
+#if !__has_feature(objc_arc)
+  [super dealloc];
+#endif
+}
+<{#methods}>
+<{objc_method_impl}>
+
+<{/methods}>
+@end
+
+#undef _this
+<{/classes}>
 )";
 	
-	// type #includes, all c++ types used in converters
-	for ( auto fi : _data->includesForCXXTypes() )
-		ostr << "#include \"" << _data->formatIncludeFileName( fi ) << "\"\n";
-	
-	// wtite the converters prototype
-	ostr << "\nnamespace swift_converter\n"
-	"{\n";
-	
-	for ( auto conv : _data->converters() )
+	CodeTemplateModel model;
+	auto data = _data;
+	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
 	{
-		ostr << type2String(conv.to()) << " " << conv.name() << "( " << type2String(conv.from()) << " );\n";
-	}
-	ostr << "}\n\n";
-	
-	for ( auto oneClass : _data->classes() )
+		if ( i_index < data->classes().size() )
+		{
+			auto classPtr = &(data->classes()[i_index]);
+			o_model.names["class_name"] = [=](){ return classPtr->name(); };
+			o_model.sections["methods"] = [=]( int i_index, CodeTemplateModel &o_model )
+			{
+				if ( i_index < classPtr->methods().size() )
+				{
+					auto methodPtr = classPtr->methods().begin();
+					std::advance( methodPtr, i_index );
+					o_model.names["c_proxy_method_decl"] = [=](){ return this->write_c_proxy_method_decl( classPtr->name(), *methodPtr ); };
+					o_model.names["objc_method_impl"] = [=](){ return this->write_objc_method_impl( classPtr->name(), *methodPtr ); };
+					return true;
+				}
+				return false;
+			};
+			return true;
+			return true;
+		}
+		return false;
+	};
+	model.sections["includes_for_cxx_types"] = [=]( int i_index, CodeTemplateModel &o_model )
 	{
-		ostr << "//********************************\n"
-		"// " << oneClass.name() << "\n"
-		"//********************************\n"
-		"\n"
-		"// C-style\n"
-		"\n";
-		
-		ostr << "class " << oneClass.name() << "_subclass;\n";
-		ostr << "void " << oneClass.name() << "_subclass_delete( " << oneClass.name() << "_subclass *i_this );\n";
-		
-		for ( auto method : oneClass.methods() )
+		if ( i_index < data->includesForCXXTypes().size() )
 		{
-			if ( method.isConstructor() )
-				ostr << oneClass.name() << "_subclass *" << oneClass.name() << "_subclass_new( id<" << oneClass.name() << "_protocol> i_link";
-			else
-			{
-				ostr << type2String( method.returnType() ) << " " << oneClass.name() << "_subclass_" << method.name() << "( ";
-				if ( not method.isStatic() )
-					ostr << oneClass.name() << "_subclass *i_this";
-			}
-			ostr << write_cxx_params_decl( method, not method.isStatic(), [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
-			ostr << " );\n";
+			auto includeName = data->formatIncludeName( data->includesForCXXTypes()[i_index] );
+			o_model.names["include_name"] = [=](){ return includeName; };
+			return true;
 		}
-		ostr << "\n"
-		"// Objective-C proxy\n"
-		"\n";
-		
-		ostr << "#define _this ((" << oneClass.name() << "_subclass *)_ptr)\n\n";
-		
-		ostr << "@implementation " << oneClass.name() << "\n\n";
-		
-		ostr << "- (void)dealloc\n{\n";
-		ostr << "  " << oneClass.name() << "_subclass_delete( _this );\n";
-		ostr << "#if !__has_feature(objc_arc)\n"
-		"  [super dealloc];\n"
-		"#endif\n}\n";
-		
-		for ( auto method : oneClass.methods() )
+		return false;
+	};
+	model.sections["converters"] = [=]( int i_index, CodeTemplateModel &o_model )
+	{
+		if ( i_index < data->converters().size() )
 		{
-			ostr << write_objc_method_decl( method );
-			if ( method.isConstructor() )
+			auto convPtr = &(data->converters()[i_index]);
+			o_model.names["converter_decl"] = [=]()
 			{
-				ostr << "\n{\n  self = [super init];\n  if ( self )\n";
-				ostr << "    _ptr = " << oneClass.name() << "_subclass_new( self";
-				ostr << write_cxx_params_decl( method, true, [&]( const CXXParam &p ){ return this->converterForObjcType2CXXType( p.type(), p.name() ); } );
-				ostr << " );\n  return self;\n}\n\n";
-			}
-			else
-			{
-				ostr << "\n{\n";
-				std::string s;
-				s.append( oneClass.name() );
-				s.append( "_subclass_" );
-				s.append( method.name() );
-				s.append( "( " );
-				if ( not method.isStatic() )
-					s.append( "_this" );
-				s.append( write_cxx_params_decl( method, not method.isStatic(), [&]( const CXXParam &p ){ return this->converterForObjcType2CXXType( p.type(), p.name() ); } ) );
-				s.append( " )" );
-				if ( not method.returnType()->isVoidType() )
-				{
-					ostr << "  return " << converterForCXXType2ObjcType( method.returnType(), s ) << ";\n";
-				}
-				else
-				{
-					ostr << "  " << s << ";\n";
-				}
-				ostr << "}\n\n";
-			}
+				return this->type2String(convPtr->to()) + " " + convPtr->name() + "( " + this->type2String(convPtr->from()) + " )";
+			};
+			return true;
 		}
-		
-		ostr << "@end\n\n#undef _this\n\n";
+		return false;
+	};
+
+	CodeTemplate renderer( substringref( std::begin(tmpl) + 1, std::end(tmpl) -1 ) );
+	renderer.render( model,
+					[&]( const char *i_ptr, size_t i_len )
+					{
+						ostr.write( i_ptr, i_len );
+					} );
+}
+
+std::string SwiftppObjcOutput::write_c_proxy_method_decl( const std::string &i_className, const CXXMethod &i_method ) const
+{
+	std::string res;
+	if ( i_method.isConstructor() )
+		res += i_className + "_subclass *" + i_className + "_subclass_new( id<" + i_className + "_protocol> i_link";
+	else
+	{
+		res += type2String( i_method.returnType() ) + " " + i_className + "_subclass_" + i_method.name() + "( ";
+		if ( not i_method.isStatic() )
+			res += i_className + "_subclass *i_this";
 	}
+	res += write_cxx_params_decl( i_method, not i_method.isStatic(), [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+	res += " )";
+	return res;
+}
+
+std::string SwiftppObjcOutput::write_objc_method_impl( const std::string &i_className, const CXXMethod &i_method ) const
+{
+	std::string res;
+	res += write_objc_method_decl( i_method );
+	if ( i_method.isConstructor() )
+	{
+		res += "\n{\n  self = [super init];\n  if ( self )\n";
+		res += "    _ptr = " + i_className + "_subclass_new( self";
+		res += write_cxx_params_decl( i_method, true, [&]( const CXXParam &p ){ return this->converterForObjcType2CXXType( p.type(), p.name() ); } );
+		res += " );\n  return self;\n}";
+	}
+	else
+	{
+		res += "\n{\n";
+		std::string s;
+		s.append( i_className );
+		s.append( "_subclass_" );
+		s.append( i_method.name() );
+		s.append( "( " );
+		if ( not i_method.isStatic() )
+			s.append( "_this" );
+		s.append( write_cxx_params_decl( i_method, not i_method.isStatic(), [&]( const CXXParam &p ){ return this->converterForObjcType2CXXType( p.type(), p.name() ); } ) );
+		s.append( " )" );
+		if ( not i_method.returnType()->isVoidType() )
+		{
+			res += "  return " + converterForCXXType2ObjcType( i_method.returnType(), s ) + ";\n";
+		}
+		else
+		{
+			res += "  " + s + ";\n";
+		}
+		res += "}";
+	}
+	return res;
 }
 
 void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
 {
-	ostr << R"(// generated cxx-subclasses.mm
+	const char tmpl[] = R"(
+// generated cxx-subclasses.mm
 
 #import "cxx-objc-protocols.h"
-)";
-	
-	ostr << "#include \"" << _data->formatIncludeFileName( _inputFile ) << "\"\n";
-	
-	ostr << R"(
+#include "<{bridge_include}>"
+
 template<typename T>
 struct LinkSaver
 {
@@ -374,125 +412,169 @@ struct LinkSaver
 
 // the wrapping sub-classes
 
+<{#classes}>
+class <{class_name}>_subclass : public <{class_name}>
+{
+  public:
+    id<<{class_name}>_protocol> _link;
+
+<{#methods}>
+<{cpp_method_impl}>
+<{/methods}>
+};
+
+<{/classes}>
+// the c implementations
+
+<{#classes}>
+void <{class_name}>_subclass_delete( <{class_name}>_subclass *i_this )
+{
+  delete i_this;
+}
+
+<{#methods}>
+<{c_proxy_method_impl}>
+
+<{/methods}>
+<{/classes}>
 )";
 	
-	for ( auto oneClass : _data->classes() )
+	CodeTemplateModel model;
+	auto data = _data;
+	auto inputFile = _inputFile;
+	model.names["bridge_include"] = [=](){ return data->formatIncludeName( _inputFile ); };
+	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
 	{
-		ostr << "class " << oneClass.name() << "_subclass : public " << oneClass.name() << "\n";
-		ostr << "{\n"
-		"  public:\n";
-		ostr << "    id<" << oneClass.name() << "_protocol> _link;\n";
-		
-		for ( auto method : oneClass.methods() )
+		if ( i_index < data->classes().size() )
 		{
-			if ( method.isConstructor() )
+			auto classPtr = &(data->classes()[i_index]);
+			o_model.names["class_name"] = [=](){ return classPtr->name(); };
+			o_model.sections["methods"] = [=]( int i_index, CodeTemplateModel &o_model )
 			{
-				ostr << "    " << method.name() << "_subclass( id<" << oneClass.name() << "_protocol> i_link";
-				ostr << write_cxx_params_decl( method, true, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
-				ostr << " )\n      : " << oneClass.name() << "(";
-				ostr << write_cxx_params_decl( method, false, [&]( const CXXParam &p ){ return p.name(); } );
-				ostr << " ),\n      _link( i_link ){}\n";
-			}
-			else if ( method.isVirtual() )
-			{
-				ostr << "    virtual ";
-				ostr << type2String( method.returnType() ) << " " << method.name() << "(";
-				ostr << write_cxx_params_decl( method, false, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
-				ostr << " )";
-				if ( method.isConst() )
-					ostr << " const";
-				ostr << "\n    {\n";
-				ostr << "      if ( _link == nil )\n";
-				if ( method.isPureVirtual() )
+				if ( i_index < classPtr->methods().size() )
 				{
-					ostr << "        abort(); // pure-virtual call!\n";
+					auto methodPtr = classPtr->methods().begin();
+					std::advance( methodPtr, i_index );
+					o_model.names["cpp_method_impl"] = [=](){ return this->write_cpp_method_impl( classPtr->name(), *methodPtr ); };
+					o_model.names["c_proxy_method_impl"] = [=](){ return this->write_c_proxy_method_impl( classPtr->name(), *methodPtr ); };
+					return true;
 				}
-				else
-				{
-					ostr << "        ";
-					if ( not method.returnType()->isVoidType() )
-						ostr << "return ";
-					ostr << oneClass.name() << "::" << method.name() << "(";
-					ostr << write_cxx_params_decl( method, false, [&]( const CXXParam &p ){ return p.name(); } );
-					ostr << " );\n";
-					ostr << "      else\n  ";
-				}
-				std::string s;
-				s.append( "[_link " );
-				s.append( method.name() );
-				bool firstParam = true;
-				for ( auto p : method.params() )
-				{
-					if ( firstParam )
-						firstParam = false;
-					else
+				return false;
+			};
+			return true;
+			return true;
+		}
+		return false;
+	};
+
+	CodeTemplate renderer( substringref( std::begin(tmpl) + 1, std::end(tmpl) -1 ) );
+	renderer.render( model,
+					[&]( const char *i_ptr, size_t i_len )
 					{
-						s.append( 1, ' ' );
-						if ( _data->options().usedNamedParams )
-							s.append( p.cleanName() );
-					}
-					s.append( 1, ':' );
-					s.append( converterForCXXType2ObjcType( p.type(), p.name() ) );
-				}
-				s.append( 1, ']' );
-				
-				ostr << "      ";
-				if ( not method.returnType()->isVoidType() )
-					ostr << "return " << converterForObjcType2CXXType( method.returnType(), s );
-				else
-					ostr << s;
-				ostr << ";\n    }\n";
-			}
-		}
-		ostr << "};\n";
-	}
-	
-	ostr << "\n"
-	"// the c implementations\n"
-	"\n";
-	
-	for ( auto oneClass : _data->classes() )
+						ostr.write( i_ptr, i_len );
+					} );
+}
+
+std::string SwiftppObjcOutput::write_cpp_method_impl( const std::string &i_className, const CXXMethod &i_method ) const
+{
+	std::string res;
+	if ( i_method.isConstructor() )
 	{
-		ostr << "void " << oneClass.name() << "_subclass_delete( " << oneClass.name() << "_subclass *i_this )\n{\n";
-		ostr << "  delete i_this;\n}\n\n";
-		
-		for ( auto method : oneClass.methods() )
-		{
-			if ( method.isConstructor() )
-				ostr << oneClass.name() << "_subclass *" << oneClass.name() << "_subclass_new( id<" << oneClass.name() << "_protocol> i_link";
-			else
-			{
-				ostr << type2String( method.returnType() ) << " " << oneClass.name() << "_subclass_" << method.name() << "( ";
-				if ( not method.isStatic() )
-					ostr << oneClass.name() << "_subclass *i_this";
-			}
-			ostr << write_cxx_params_decl( method, not method.isStatic(), [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
-			ostr << " )\n{\n";
-			if ( method.isConstructor() )
-			{
-				ostr << "  return new " << oneClass.name() << "_subclass( i_link";
-				ostr << write_cxx_params_decl( method, true, [&]( const CXXParam &p ){ return p.name(); } );
-				ostr << " );\n";
-			}
-			else
-			{
-				if ( method.isVirtual() )
-					ostr << "  LinkSaver<id<" << oneClass.name() << "_protocol>> s( i_this->_link );\n";
-				ostr << "  ";
-				if ( not method.returnType()->isVoidType() )
-					ostr << "return ";
-				if ( method.isStatic() )
-					ostr << oneClass.name() << "::";
-				else
-					ostr << "i_this->";
-				ostr << method.name() << "(";
-				ostr << write_cxx_params_decl( method, false, [&]( const CXXParam &p ){ return p.name(); } );
-				ostr << " );\n";
-			}
-			ostr << "}\n\n";
-		}
-		ostr << "\n";
+		res += "    " + i_method.name() + "_subclass( id<" + i_className + "_protocol> i_link";
+		res += write_cxx_params_decl( i_method, true, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+		res += " )\n      : " + i_className + "(";
+		res += write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return p.name(); } );
+		res += " ),\n      _link( i_link ){}";
 	}
+	else if ( i_method.isVirtual() )
+	{
+		res += "    virtual ";
+		res += type2String( i_method.returnType() ) + " " + i_method.name() + "(";
+		res += write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+		res += " )";
+		if ( i_method.isConst() )
+			res += " const";
+		res += "\n    {\n";
+		res += "      if ( _link == nil )\n";
+		if ( i_method.isPureVirtual() )
+		{
+			res += "        abort(); // pure-virtual call!\n";
+		}
+		else
+		{
+			res += "        ";
+			if ( not i_method.returnType()->isVoidType() )
+				res += "return ";
+			res += i_className + "::" + i_method.name() + "(";
+			res += write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return p.name(); } );
+			res += " );\n";
+			res += "      else\n  ";
+		}
+		std::string s;
+		s.append( "[_link " );
+		s.append( i_method.name() );
+		bool firstParam = true;
+		for ( auto p : i_method.params() )
+		{
+			if ( firstParam )
+				firstParam = false;
+			else
+			{
+				s.append( 1, ' ' );
+				if ( _data->options().usedNamedParams )
+					s.append( p.cleanName() );
+			}
+			s.append( 1, ':' );
+			s.append( converterForCXXType2ObjcType( p.type(), p.name() ) );
+		}
+		s.append( 1, ']' );
+		
+		res += "      ";
+		if ( not i_method.returnType()->isVoidType() )
+			res += "return " + converterForObjcType2CXXType( i_method.returnType(), s );
+		else
+			res += s;
+		res += ";\n    }";
+	}
+	return res;
+}
+
+std::string SwiftppObjcOutput::write_c_proxy_method_impl( const std::string &i_className, const CXXMethod &i_method ) const
+{
+	std::string res;
+	if ( i_method.isConstructor() )
+		res += i_className + "_subclass *" + i_className + "_subclass_new( id<" + i_className + "_protocol> i_link";
+	else
+	{
+		res += type2String( i_method.returnType() ) + " " + i_className + "_subclass_" + i_method.name() + "( ";
+		if ( not i_method.isStatic() )
+			res += i_className + "_subclass *i_this";
+	}
+	res += write_cxx_params_decl( i_method, not i_method.isStatic(), [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+	res += " )\n{\n";
+	if ( i_method.isConstructor() )
+	{
+		res += "  return new " + i_className + "_subclass( i_link";
+		res += write_cxx_params_decl( i_method, true, [&]( const CXXParam &p ){ return p.name(); } );
+		res += " );\n";
+	}
+	else
+	{
+		if ( i_method.isVirtual() )
+			res += "  LinkSaver<id<" + i_className + "_protocol>> s( i_this->_link );\n";
+		res += "  ";
+		if ( not i_method.returnType()->isVoidType() )
+			res += "return ";
+		if ( i_method.isStatic() )
+			res += i_className + "::";
+		else
+			res += "i_this->";
+		res += i_method.name() + "(";
+		res += write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return p.name(); } );
+		res += " );\n";
+	}
+	res += "}";
+	return res;
 }
 
 std::string SwiftppObjcOutput::type2String( const clang::QualType &i_type ) const

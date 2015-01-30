@@ -12,11 +12,12 @@
 #include "substringref.h"
 #include <functional>
 #include <deque>
+#include <map>
 
 struct CodeTemplateModel
 {
-	std::function<bool ( const std::string &, std::string & )> resolveName;
-	std::function<bool ( const std::string &, int, CodeTemplateModel & )> resolveSection;
+	std::map<std::string,std::function<std::string ()>> names;
+	std::map<std::string,std::function<bool ( int, CodeTemplateModel & )>> sections;
 };
 
 class CodeTemplate

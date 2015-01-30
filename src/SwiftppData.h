@@ -169,7 +169,7 @@ class SwiftppData
 		 @param[in] i_filepath file path
 		 @return     suitable for #include
 		*/
-		std::string formatIncludeFileName( const std::string &i_filepath ) const;
+		std::string formatIncludeName( const std::string &i_filepath ) const;
 
 	private:
 		SwiftppOptions _options;

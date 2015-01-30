@@ -72,6 +72,12 @@ class SwiftppObjcOutput : public SwiftppOutput
 		 @param[in] i_method the methos
 		*/
 		std::string write_objc_method_decl( const CXXMethod &i_method ) const;
+		std::string write_objc_method_impl( const std::string &i_className, const CXXMethod &i_method ) const;
+	
+		std::string write_c_proxy_method_decl( const std::string &i_className, const CXXMethod &i_method ) const;
+		std::string write_c_proxy_method_impl( const std::string &i_className, const CXXMethod &i_method ) const;
+
+		std::string write_cpp_method_impl( const std::string &i_className, const CXXMethod &i_method ) const;
 };
 
 #endif
