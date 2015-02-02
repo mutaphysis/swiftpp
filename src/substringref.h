@@ -21,6 +21,8 @@ class substringref
 	
 		bool operator==( const substringref &i_other ) const;
 	
+		void trim();
+	
 	private:
 		const char *_begin = nullptr;
 		const char *_end = nullptr;

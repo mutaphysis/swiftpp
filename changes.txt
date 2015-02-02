@@ -1,0 +1,8 @@
+
+Version 0.2
+	-simple template engine for code generation
+	-add tests
+	-add enum support
+
+Version 0.1
+	-initial version

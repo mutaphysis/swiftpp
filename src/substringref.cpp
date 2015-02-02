@@ -22,3 +22,11 @@ bool substringref::operator==( const substringref &i_other ) const
 	}
 	return true;
 }
+
+void substringref::trim()
+{
+	while ( _begin != _end and *_begin == '\n' )
+		++_begin;
+	while ( _end > _begin and *(_end-1) == 0 )
+		--_end;
+}

@@ -20,18 +20,18 @@ namespace
 	/*!
 	 @brief Iterate over the parameters of a C++ method.
 	 
-	 Iterate over the parameters of a method, calling the f() for each
+	 Iterate over the parameters of a method, calling the i_formatFunc() for each
 	 and building a comma separated string with all results.
 	 @param i_method      the method
 	 @param i_commaPrefix should it start with a comma
-	 @param f             function to apply
+	 @param i_formatFunc  function to apply
 	 */
-	std::string write_cxx_params_decl( const CXXMethod &i_method, bool i_commaPrefix, const std::function<std::string (const CXXParam &)> f )
+	std::string write_cxx_params_decl( const CXXMethod &i_method, bool i_commaPrefix, const std::function<std::string (const CXXParam &)> i_formatFunc )
 	{
 		std::string result;
 		result.reserve( i_method.params().size() * 6 );
 		bool firstParam = true;
-		for ( auto p : i_method.params() )
+		for ( auto param : i_method.params() )
 		{
 			if ( firstParam )
 			{
@@ -43,7 +43,7 @@ namespace
 			}
 			else
 				result.append( ", ", 2 );
-			result.append( f( p ) );
+			result.append( i_formatFunc( param ) );
 		}
 		return result;
 	}
@@ -85,24 +85,19 @@ void SwiftppObjcOutput::write_impl()
 }
 
 // write an Objective-C method declaration
-std::string SwiftppObjcOutput::write_objc_method_decl( const CXXMethod &i_method ) const
+void SwiftppObjcOutput::write_objc_method_decl( llvm::raw_ostream &ostr, const CXXMethod &i_method ) const
 {
-	std::string result;
-	result.reserve( i_method.params().size() * 6 ); // make some room
 	if ( i_method.isStatic() )
-		result.append( "+ ", 2 );
+		ostr << "+ ";
 	else
-		result.append( "- ", 2 );
+		ostr << "- ";
 	
 	if ( i_method.isConstructor() )
-		result.append( "(instancetype)init" );
+		ostr << "(instancetype)init";
 	else
 	{
 		// (return type)methodName
-		result.append( 1, '(' );
-		result.append( cxxType2ObjcTypeString( i_method.returnType() ) );
-		result.append( 1, ')' );
-		result.append( i_method.name() );
+		ostr << "(" << cxxType2ObjcTypeString( i_method.returnType() ) << ")" << i_method.name();
 	}
 	
 	bool firstParam = true;
@@ -111,23 +106,19 @@ std::string SwiftppObjcOutput::write_objc_method_decl( const CXXMethod &i_method
 		if ( firstParam )
 		{
 			if ( i_method.isConstructor() ) // constructor with a param will by name initWith:
-				result.append( "With" );
+				ostr << "With";
 			firstParam = false;
 		}
 		else
 		{
-			result.append( 1, ' ' );
+			ostr << " ";
 			// if usedNamedParams, put a name for the param, like in [method:p1 nameOf2:p2 nameOf3:p3]
 			if ( _data->options().usedNamedParams )
-				result.append( p.cleanName() );
+				ostr << p.cleanName();
 		}
 		// :(type)name
-		result.append( ":(", 2 );
-		result.append( cxxType2ObjcTypeString( p.type() ) );
-		result.append( 1, ')' );
-		result.append( p.name() );
+		ostr << ":(" << cxxType2ObjcTypeString( p.type() ) << ")" << p.name();
 	}
-	return result;
 }
 
 #if 0
@@ -165,14 +156,14 @@ void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) co
 		if ( i_index < data->classes().size() )
 		{
 			auto classPtr = &(data->classes()[i_index]);
-			o_model.names["class_name"] = [=](){ return classPtr->name(); };
+			o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
 			o_model.sections["methods"] = [=]( int i_index, CodeTemplateModel &o_model )
 			{
 				if ( i_index < classPtr->methods().size() )
 				{
 					auto methodPtr = classPtr->methods().begin();
 					std::advance( methodPtr, i_index );
-					o_model.names["objc_method_decl"] = [=](){ return this->write_objc_method_decl( *methodPtr ); };
+					o_model.names["objc_method_decl"] = [=]( llvm::raw_ostream &ostr ){ this->write_objc_method_decl( ostr, *methodPtr ); };
 					return true;
 				}
 				return false;
@@ -182,12 +173,8 @@ void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) co
 		return false;
 	};
 	
-	CodeTemplate renderer( substringref( std::begin(tmpl) + 1, std::end(tmpl) -1 ) );
-	renderer.render( model,
-		[&]( const char *i_ptr, size_t i_len )
-		{
-			ostr.write( i_ptr, i_len );
-		} );
+	CodeTemplate renderer( std::begin(tmpl), std::end(tmpl) );
+	renderer.render( model, ostr );
 }
 
 void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) const
@@ -218,18 +205,14 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) cons
 		if ( i_index < data->classes().size() )
 		{
 			auto classPtr = &(data->classes()[i_index]);
-			o_model.names["class_name"] = [=](){ return classPtr->name(); };
+			o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
 			return true;
 		}
 		return false;
 	};
 
-	CodeTemplate renderer( substringref( std::begin(tmpl) + 1, std::end(tmpl) -1 ) );
-	renderer.render( model,
-					[&]( const char *i_ptr, size_t i_len )
-					{
-						ostr.write( i_ptr, i_len );
-					} );
+	CodeTemplate renderer( std::begin(tmpl), std::end(tmpl) );
+	renderer.render( model, ostr );
 }
 
 void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) const
@@ -292,15 +275,15 @@ void <{class_name}>_subclass_delete( <{class_name}>_subclass *i_this );
 		if ( i_index < data->classes().size() )
 		{
 			auto classPtr = &(data->classes()[i_index]);
-			o_model.names["class_name"] = [=](){ return classPtr->name(); };
+			o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
 			o_model.sections["methods"] = [=]( int i_index, CodeTemplateModel &o_model )
 			{
 				if ( i_index < classPtr->methods().size() )
 				{
 					auto methodPtr = classPtr->methods().begin();
 					std::advance( methodPtr, i_index );
-					o_model.names["c_proxy_method_decl"] = [=](){ return this->write_c_proxy_method_decl( classPtr->name(), *methodPtr ); };
-					o_model.names["objc_method_impl"] = [=](){ return this->write_objc_method_impl( classPtr->name(), *methodPtr ); };
+					o_model.names["c_proxy_method_decl"] = [=]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_decl( ostr, classPtr->name(), *methodPtr ); };
+					o_model.names["objc_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_objc_method_impl( ostr, classPtr->name(), *methodPtr ); };
 					return true;
 				}
 				return false;
@@ -315,7 +298,7 @@ void <{class_name}>_subclass_delete( <{class_name}>_subclass *i_this );
 		if ( i_index < data->includesForCXXTypes().size() )
 		{
 			auto includeName = data->formatIncludeName( data->includesForCXXTypes()[i_index] );
-			o_model.names["include_name"] = [=](){ return includeName; };
+			o_model.names["include_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << includeName; };
 			return true;
 		}
 		return false;
@@ -325,53 +308,55 @@ void <{class_name}>_subclass_delete( <{class_name}>_subclass *i_this );
 		if ( i_index < data->converters().size() )
 		{
 			auto convPtr = &(data->converters()[i_index]);
-			o_model.names["converter_decl"] = [=]()
+			o_model.names["converter_decl"] = [=]( llvm::raw_ostream &ostr )
 			{
-				return this->type2String(convPtr->to()) + " " + convPtr->name() + "( " + this->type2String(convPtr->from()) + " )";
+				ostr << this->type2String(convPtr->to()) + " " + convPtr->name() + "( " + this->type2String(convPtr->from()) + " )";
 			};
 			return true;
 		}
 		return false;
 	};
 
-	CodeTemplate renderer( substringref( std::begin(tmpl) + 1, std::end(tmpl) -1 ) );
-	renderer.render( model,
-					[&]( const char *i_ptr, size_t i_len )
-					{
-						ostr.write( i_ptr, i_len );
-					} );
+	CodeTemplate renderer( std::begin(tmpl), std::end(tmpl) );
+	renderer.render( model, ostr );
 }
 
-std::string SwiftppObjcOutput::write_c_proxy_method_decl( const std::string &i_className, const CXXMethod &i_method ) const
+void SwiftppObjcOutput::write_c_proxy_method_decl( llvm::raw_ostream &ostr, const std::string &i_className, const CXXMethod &i_method ) const
 {
-	std::string res;
 	if ( i_method.isConstructor() )
-		res += i_className + "_subclass *" + i_className + "_subclass_new( id<" + i_className + "_protocol> i_link";
+	{
+		// a c proxy constructor has the form:
+		//	className_subclass *className_subclass_new( id<className_protocol> i_link, args... );
+		ostr << i_className << "_subclass *" << i_className << "_subclass_new( id<" << i_className << "_protocol> i_link";
+	}
 	else
 	{
-		res += type2String( i_method.returnType() ) + " " + i_className + "_subclass_" + i_method.name() + "( ";
+		// a c proxy method has the form:
+		// class method (static):
+		//	return_type className_subclass_method( args... );
+		// memder method (normal)
+		//	return_type className_subclass_method( className_subclass *i_this, args... );
+		ostr << type2String( i_method.returnType() ) << " " << i_className << "_subclass_" << i_method.name() << "( ";
 		if ( not i_method.isStatic() )
-			res += i_className + "_subclass *i_this";
+			ostr << i_className << "_subclass *i_this";
 	}
-	res += write_cxx_params_decl( i_method, not i_method.isStatic(), [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
-	res += " )";
-	return res;
+	ostr << write_cxx_params_decl( i_method, not i_method.isStatic(), [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+	ostr << " )";
 }
 
-std::string SwiftppObjcOutput::write_objc_method_impl( const std::string &i_className, const CXXMethod &i_method ) const
+void SwiftppObjcOutput::write_objc_method_impl( llvm::raw_ostream &ostr, const std::string &i_className, const CXXMethod &i_method ) const
 {
-	std::string res;
-	res += write_objc_method_decl( i_method );
+	write_objc_method_decl( ostr, i_method );
 	if ( i_method.isConstructor() )
 	{
-		res += "\n{\n  self = [super init];\n  if ( self )\n";
-		res += "    _ptr = " + i_className + "_subclass_new( self";
-		res += write_cxx_params_decl( i_method, true, [&]( const CXXParam &p ){ return this->converterForObjcType2CXXType( p.type(), p.name() ); } );
-		res += " );\n  return self;\n}";
+		ostr << "\n{\n  self = [super init];\n  if ( self )\n";
+		ostr << "    _ptr = " << i_className << "_subclass_new( self";
+		ostr << write_cxx_params_decl( i_method, true, [&]( const CXXParam &p ){ return this->converterForObjcType2CXXType( p.type(), p.name() ); } );
+		ostr << " );\n  return self;\n}";
 	}
 	else
 	{
-		res += "\n{\n";
+		ostr << "\n{\n";
 		std::string s;
 		s.append( i_className );
 		s.append( "_subclass_" );
@@ -383,15 +368,14 @@ std::string SwiftppObjcOutput::write_objc_method_impl( const std::string &i_clas
 		s.append( " )" );
 		if ( not i_method.returnType()->isVoidType() )
 		{
-			res += "  return " + converterForCXXType2ObjcType( i_method.returnType(), s ) + ";\n";
+			ostr << "  return " << converterForCXXType2ObjcType( i_method.returnType(), s ) << ";\n";
 		}
 		else
 		{
-			res += "  " + s + ";\n";
+			ostr << "  " << s << ";\n";
 		}
-		res += "}";
+		ostr << "}";
 	}
-	return res;
 }
 
 void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
@@ -442,21 +426,21 @@ void <{class_name}>_subclass_delete( <{class_name}>_subclass *i_this )
 	CodeTemplateModel model;
 	auto data = _data;
 	auto inputFile = _inputFile;
-	model.names["bridge_include"] = [=](){ return data->formatIncludeName( _inputFile ); };
+	model.names["bridge_include"] = [=]( llvm::raw_ostream &ostr ){ ostr << data->formatIncludeName( _inputFile ); };
 	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
 	{
 		if ( i_index < data->classes().size() )
 		{
 			auto classPtr = &(data->classes()[i_index]);
-			o_model.names["class_name"] = [=](){ return classPtr->name(); };
+			o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
 			o_model.sections["methods"] = [=]( int i_index, CodeTemplateModel &o_model )
 			{
 				if ( i_index < classPtr->methods().size() )
 				{
 					auto methodPtr = classPtr->methods().begin();
 					std::advance( methodPtr, i_index );
-					o_model.names["cpp_method_impl"] = [=](){ return this->write_cpp_method_impl( classPtr->name(), *methodPtr ); };
-					o_model.names["c_proxy_method_impl"] = [=](){ return this->write_c_proxy_method_impl( classPtr->name(), *methodPtr ); };
+					o_model.names["cpp_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_cpp_method_impl( ostr, classPtr->name(), *methodPtr ); };
+					o_model.names["c_proxy_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_impl( ostr, classPtr->name(), *methodPtr ); };
 					return true;
 				}
 				return false;
@@ -467,48 +451,43 @@ void <{class_name}>_subclass_delete( <{class_name}>_subclass *i_this )
 		return false;
 	};
 
-	CodeTemplate renderer( substringref( std::begin(tmpl) + 1, std::end(tmpl) -1 ) );
-	renderer.render( model,
-					[&]( const char *i_ptr, size_t i_len )
-					{
-						ostr.write( i_ptr, i_len );
-					} );
+	CodeTemplate renderer( std::begin(tmpl), std::end(tmpl) );
+	renderer.render( model, ostr );
 }
 
-std::string SwiftppObjcOutput::write_cpp_method_impl( const std::string &i_className, const CXXMethod &i_method ) const
+void SwiftppObjcOutput::write_cpp_method_impl( llvm::raw_ostream &ostr, const std::string &i_className, const CXXMethod &i_method ) const
 {
-	std::string res;
 	if ( i_method.isConstructor() )
 	{
-		res += "    " + i_method.name() + "_subclass( id<" + i_className + "_protocol> i_link";
-		res += write_cxx_params_decl( i_method, true, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
-		res += " )\n      : " + i_className + "(";
-		res += write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return p.name(); } );
-		res += " ),\n      _link( i_link ){}";
+		ostr << "    " << i_method.name() << "_subclass( id<" << i_className << "_protocol> i_link";
+		ostr << write_cxx_params_decl( i_method, true, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+		ostr << " )\n      : " << i_className << "(";
+		ostr << write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return p.name(); } );
+		ostr << " ),\n      _link( i_link ){}";
 	}
 	else if ( i_method.isVirtual() )
 	{
-		res += "    virtual ";
-		res += type2String( i_method.returnType() ) + " " + i_method.name() + "(";
-		res += write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
-		res += " )";
+		ostr << "    virtual ";
+		ostr << type2String( i_method.returnType() ) << " " << i_method.name() << "(";
+		ostr << write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+		ostr << " )";
 		if ( i_method.isConst() )
-			res += " const";
-		res += "\n    {\n";
-		res += "      if ( _link == nil )\n";
+			ostr << " const";
+		ostr << "\n    {\n";
+		ostr << "      if ( _link == nil )\n";
 		if ( i_method.isPureVirtual() )
 		{
-			res += "        abort(); // pure-virtual call!\n";
+			ostr << "        abort(); // pure-virtual call!\n";
 		}
 		else
 		{
-			res += "        ";
+			ostr << "        ";
 			if ( not i_method.returnType()->isVoidType() )
-				res += "return ";
-			res += i_className + "::" + i_method.name() + "(";
-			res += write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return p.name(); } );
-			res += " );\n";
-			res += "      else\n  ";
+				ostr << "return ";
+			ostr << i_className << "::" << i_method.name() << "(";
+			ostr << write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return p.name(); } );
+			ostr << " );\n";
+			ostr << "      else\n  ";
 		}
 		std::string s;
 		s.append( "[_link " );
@@ -529,52 +508,49 @@ std::string SwiftppObjcOutput::write_cpp_method_impl( const std::string &i_class
 		}
 		s.append( 1, ']' );
 		
-		res += "      ";
+		ostr << "      ";
 		if ( not i_method.returnType()->isVoidType() )
-			res += "return " + converterForObjcType2CXXType( i_method.returnType(), s );
+			ostr << "return " << converterForObjcType2CXXType( i_method.returnType(), s );
 		else
-			res += s;
-		res += ";\n    }";
+			ostr << s;
+		ostr << ";\n    }";
 	}
-	return res;
 }
 
-std::string SwiftppObjcOutput::write_c_proxy_method_impl( const std::string &i_className, const CXXMethod &i_method ) const
+void SwiftppObjcOutput::write_c_proxy_method_impl( llvm::raw_ostream &ostr, const std::string &i_className, const CXXMethod &i_method ) const
 {
-	std::string res;
 	if ( i_method.isConstructor() )
-		res += i_className + "_subclass *" + i_className + "_subclass_new( id<" + i_className + "_protocol> i_link";
+		ostr << i_className << "_subclass *" << i_className << "_subclass_new( id<" << i_className << "_protocol> i_link";
 	else
 	{
-		res += type2String( i_method.returnType() ) + " " + i_className + "_subclass_" + i_method.name() + "( ";
+		ostr << type2String( i_method.returnType() ) << " " << i_className << "_subclass_" << i_method.name() << "( ";
 		if ( not i_method.isStatic() )
-			res += i_className + "_subclass *i_this";
+			ostr << i_className << "_subclass *i_this";
 	}
-	res += write_cxx_params_decl( i_method, not i_method.isStatic(), [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
-	res += " )\n{\n";
+	ostr << write_cxx_params_decl( i_method, not i_method.isStatic(), [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+	ostr << " )\n{\n";
 	if ( i_method.isConstructor() )
 	{
-		res += "  return new " + i_className + "_subclass( i_link";
-		res += write_cxx_params_decl( i_method, true, [&]( const CXXParam &p ){ return p.name(); } );
-		res += " );\n";
+		ostr << "  return new " << i_className << "_subclass( i_link";
+		ostr << write_cxx_params_decl( i_method, true, [&]( const CXXParam &p ){ return p.name(); } );
+		ostr << " );\n";
 	}
 	else
 	{
 		if ( i_method.isVirtual() )
-			res += "  LinkSaver<id<" + i_className + "_protocol>> s( i_this->_link );\n";
-		res += "  ";
+			ostr << "  LinkSaver<id<" << i_className << "_protocol>> s( i_this->_link );\n";
+		ostr << "  ";
 		if ( not i_method.returnType()->isVoidType() )
-			res += "return ";
+			ostr << "return ";
 		if ( i_method.isStatic() )
-			res += i_className + "::";
+			ostr << i_className << "::";
 		else
-			res += "i_this->";
-		res += i_method.name() + "(";
-		res += write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return p.name(); } );
-		res += " );\n";
+			ostr << "i_this->";
+		ostr << i_method.name() << "(";
+		ostr << write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return p.name(); } );
+		ostr << " );\n";
 	}
-	res += "}";
-	return res;
+	ostr << "}";
 }
 
 std::string SwiftppObjcOutput::type2String( const clang::QualType &i_type ) const

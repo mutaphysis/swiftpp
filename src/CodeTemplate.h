@@ -10,30 +10,31 @@
 #define H_CodeTemplate
 
 #include "substringref.h"
+#include <llvm/Support/raw_ostream.h>
 #include <functional>
 #include <deque>
 #include <map>
 
 struct CodeTemplateModel
 {
-	std::map<std::string,std::function<std::string ()>> names;
+	std::map<std::string,std::function<void ( llvm::raw_ostream & )>> names;
 	std::map<std::string,std::function<bool ( int, CodeTemplateModel & )>> sections;
 };
 
 class CodeTemplate
 {
 	public:
-		CodeTemplate( const substringref &i_tmpl );
+		CodeTemplate( const char *i_begin, const char *i_end );
 	
-		void render( const CodeTemplateModel &i_model, const std::function<void (const char *,size_t)> &i_writer );
+		void render( const CodeTemplateModel &i_model, llvm::raw_ostream &ostr );
 	
 	private:
 		substringref _tmpl;
 		std::deque<CodeTemplateModel> _context;
 
-		void render( const substringref &i_tmpl, const std::function<void (const char *,size_t)> &i_writer );
+		void render( const substringref &i_tmpl, llvm::raw_ostream &ostr );
 
-		std::string resolveName( const std::string &i_name );
+		void resolveName( const std::string &i_name, llvm::raw_ostream &ostr );
 		bool resolveSection( const std::string &i_name, int i_index, CodeTemplateModel &o_model );
 };
 
