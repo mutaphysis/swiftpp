@@ -1,5 +1,5 @@
 /*
-	test: non-virtual
+	test: non-virtual, virtual not overriden and static
 */
 
 #ifndef H_CLASSES
@@ -15,6 +15,8 @@ class swift Simple
 		void method1();
 		virtual void method2();
 		void method3();
+		
+		static void method4();
 	
 	private:
 		std::string _test;

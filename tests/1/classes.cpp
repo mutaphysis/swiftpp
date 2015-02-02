@@ -12,6 +12,11 @@ void Simple::method2()
 
 void Simple::method3()
 {
-	_test += "correct";
-	printf( "%s\n", _test.c_str() );
+	_test += "cor";
+	printf( "%s", _test.c_str() );
+}
+
+void Simple::method4()
+{
+	printf( "%s\n", "rect" );
 }

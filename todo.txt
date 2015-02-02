@@ -1,7 +1,5 @@
 
 -swiftpp: add tests:
-	-constructor with params
-	-virtual override call from c++
 	-non virtual override call from swift
 	-non virtual override call from c++
 	-pure virtual override call from swift

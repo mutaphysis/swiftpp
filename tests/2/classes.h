@@ -1,5 +1,5 @@
 /*
-	test: virtual & static
+	test: overriden virtual
 */
 
 #ifndef H_CLASSES

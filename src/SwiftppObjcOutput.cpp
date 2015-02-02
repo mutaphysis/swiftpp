@@ -357,6 +357,8 @@ void SwiftppObjcOutput::write_objc_method_impl( llvm::raw_ostream &ostr, const s
 	else
 	{
 		ostr << "\n{\n";
+		if ( not i_method.isStatic() )
+			ostr << "  assert( _this != nullptr );\n";
 		std::string s;
 		s.append( i_className );
 		s.append( "_subclass_" );
@@ -555,7 +557,10 @@ void SwiftppObjcOutput::write_c_proxy_method_impl( llvm::raw_ostream &ostr, cons
 
 std::string SwiftppObjcOutput::type2String( const clang::QualType &i_type ) const
 {
-	return clang::QualType::getAsString(i_type.split());
+	auto v = clang::QualType::getAsString(i_type.split());
+	if ( v == "_Bool" )
+		return "bool";
+	return v;
 }
 
 std::string SwiftppObjcOutput::type2UndecoratedTypeString( const clang::QualType &i_type ) const
@@ -592,6 +597,8 @@ std::string SwiftppObjcOutput::cxxType2ObjcTypeString( const clang::QualType &i_
 	// add a few default converters
 	if ( cxxtype == "std::string" )
 		return "NSString *";
+	if ( cxxtype == "bool" )
+		return "BOOL";
 	
 	if ( isCXXVectorType( i_cxxtype ) )
 		return "NSArray *";
