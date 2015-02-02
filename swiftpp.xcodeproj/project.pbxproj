@@ -32,6 +32,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		26354FDE1A8036FA00D23B06 /* SwiftppObjcTemplates.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwiftppObjcTemplates.h; sourceTree = "<group>"; };
 		26B8842519ABF54300CCD8B3 /* swiftpp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = swiftpp; sourceTree = BUILT_PRODUCTS_DIR; };
 		26B8842819ABF54300CCD8B3 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		26B8852919ABFB6C00CCD8B3 /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
@@ -97,6 +98,7 @@
 				26EE502919BFD1050072F1C4 /* SwiftppOutput.h */,
 				26EE502519BFCD590072F1C4 /* SwiftppObjcOutput.cpp */,
 				26EE502619BFCD590072F1C4 /* SwiftppObjcOutput.h */,
+				26354FDE1A8036FA00D23B06 /* SwiftppObjcTemplates.h */,
 				26D7915A19B9370200238401 /* Version.h */,
 				26C687C61A7AE0C6006635CE /* CodeTemplate.cpp */,
 				26C687C71A7AE0C6006635CE /* CodeTemplate.h */,

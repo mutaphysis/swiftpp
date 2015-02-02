@@ -11,6 +11,7 @@
 #include <clang/AST/DeclCXX.h>
 #include <clang/AST/DeclTemplate.h>
 #include "CodeTemplate.h"
+#include "SwiftppObjcTemplates.h"
 
 #include <iostream>
 
@@ -127,28 +128,6 @@ void SwiftppObjcOutput::write_objc_method_decl( llvm::raw_ostream &ostr, const C
 
 void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) const
 {
-	const char tmpl[] = R"(
-// generated cxx-objc-protocols.h
-//  pure Objective-C, cannot contain any C++\n"
-
-#ifndef H_CXX_OBJC_PROTOCOLS
-#define H_CXX_OBJC_PROTOCOLS
-
-#import <Foundation/Foundation.h>
-#import <AppKit/AppKit.h>
-
-// Objective-C proxy protocols for each classes
-
-<{#classes}>
-@protocol <{class_name}>_protocol
-<{#methods}>
-<{objc_method_decl}>;
-<{/methods}>
-@end
-<{/classes}>
-#endif
-)";
-	
 	CodeTemplateModel model;
 	auto data = _data;
 	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
@@ -173,31 +152,12 @@ void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) co
 		return false;
 	};
 	
-	CodeTemplate renderer( std::begin(tmpl), std::end(tmpl) );
+	CodeTemplate renderer( std::begin(kCXX_OBJC_PROTOCOLS_H_TEMPLATE), std::end(kCXX_OBJC_PROTOCOLS_H_TEMPLATE) );
 	renderer.render( model, ostr );
 }
 
 void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) const
 {
-	const char tmpl[] = R"(
-// generated cxx-objc-proxies.h
-//  pure Objective-C, cannot contain any C++
-
-#ifndef H_CXX_OBJC_PROXIES
-#define H_CXX_OBJC_PROXIES
-
-#import "cxx-objc-protocols.h"
-
-// Objective-C proxies for each classes
-
-<{#classes}>
-@interface <{class_name}> : NSObject<<{class_name}>_protocol>
-{ void *_ptr; }
-@end
-<{/classes}>
-#endif
-)";
-	
 	CodeTemplateModel model;
 	auto data = _data;
 	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
@@ -211,63 +171,12 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) cons
 		return false;
 	};
 
-	CodeTemplate renderer( std::begin(tmpl), std::end(tmpl) );
+	CodeTemplate renderer( std::begin(kCXX_OBJC_PROXIES_H_TEMPLATE), std::end(kCXX_OBJC_PROXIES_H_TEMPLATE) );
 	renderer.render( model, ostr );
 }
 
 void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) const
 {
-	const char tmpl[] = R"(
-// generated cxx-objc-proxies.mm
-
-#import "cxx-objc-proxies.h"
-#include <string>
-#include <vector>
-#include <map>
-
-<{#includes_for_cxx_types}>
-#include "<{include_name}>"
-<{/includes_for_cxx_types}>
-namespace swift_converter
-{
-<{#converters}><{converter_decl}>;
-<{/converters}>}
-
-<{#classes}>
-//********************************
-// <{class_name}>
-//********************************
-
-// C-style
-
-class <{class_name}>_subclass;
-void <{class_name}>_subclass_delete( <{class_name}>_subclass *i_this );
-<{#methods}>
-<{c_proxy_method_decl}>;
-<{/methods}>
-// Objective-C proxy
-
-#define _this ((<{class_name}>_subclass *)_ptr)
-
-@implementation <{class_name}>
-
-- (void)dealloc
-{
-  <{class_name}>_subclass_delete( _this );
-#if !__has_feature(objc_arc)
-  [super dealloc];
-#endif
-}
-<{#methods}>
-<{objc_method_impl}>
-
-<{/methods}>
-@end
-
-#undef _this
-<{/classes}>
-)";
-	
 	CodeTemplateModel model;
 	auto data = _data;
 	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
@@ -317,7 +226,41 @@ void <{class_name}>_subclass_delete( <{class_name}>_subclass *i_this );
 		return false;
 	};
 
-	CodeTemplate renderer( std::begin(tmpl), std::end(tmpl) );
+	CodeTemplate renderer( std::begin(kCXX_OBJC_PROXIES_MM_TEMPLATE), std::end(kCXX_OBJC_PROXIES_MM_TEMPLATE) );
+	renderer.render( model, ostr );
+}
+
+void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
+{
+	CodeTemplateModel model;
+	auto data = _data;
+	auto inputFile = _inputFile;
+	model.names["bridge_include"] = [=]( llvm::raw_ostream &ostr ){ ostr << data->formatIncludeName( _inputFile ); };
+	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
+	{
+		if ( i_index < data->classes().size() )
+		{
+			auto classPtr = &(data->classes()[i_index]);
+			o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
+			o_model.sections["methods"] = [=]( int i_index, CodeTemplateModel &o_model )
+			{
+				if ( i_index < classPtr->methods().size() )
+				{
+					auto methodPtr = classPtr->methods().begin();
+					std::advance( methodPtr, i_index );
+					o_model.names["cpp_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_cpp_method_impl( ostr, classPtr->name(), *methodPtr ); };
+					o_model.names["c_proxy_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_impl( ostr, classPtr->name(), *methodPtr ); };
+					return true;
+				}
+				return false;
+			};
+			return true;
+			return true;
+		}
+		return false;
+	};
+	
+	CodeTemplate renderer( std::begin(kCXX_SUBCLASSES_MM_TEMPLATE), std::end(kCXX_SUBCLASSES_MM_TEMPLATE) );
 	renderer.render( model, ostr );
 }
 
@@ -378,83 +321,6 @@ void SwiftppObjcOutput::write_objc_method_impl( llvm::raw_ostream &ostr, const s
 		}
 		ostr << "}";
 	}
-}
-
-void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
-{
-	const char tmpl[] = R"(
-// generated cxx-subclasses.mm
-
-#import "cxx-objc-protocols.h"
-#include "<{bridge_include}>"
-
-template<typename T>
-struct LinkSaver
-{
-  T saved, &link;
-  LinkSaver( T &i_link ) : saved( i_link ), link( i_link ) { link = nil; }
-  ~LinkSaver() { link = saved; }
-};
-
-// the wrapping sub-classes
-
-<{#classes}>
-class <{class_name}>_subclass : public <{class_name}>
-{
-  public:
-    id<<{class_name}>_protocol> _link;
-
-<{#methods}>
-<{cpp_method_impl}>
-<{/methods}>
-};
-
-<{/classes}>
-// the c implementations
-
-<{#classes}>
-void <{class_name}>_subclass_delete( <{class_name}>_subclass *i_this )
-{
-  delete i_this;
-}
-
-<{#methods}>
-<{c_proxy_method_impl}>
-
-<{/methods}>
-<{/classes}>
-)";
-	
-	CodeTemplateModel model;
-	auto data = _data;
-	auto inputFile = _inputFile;
-	model.names["bridge_include"] = [=]( llvm::raw_ostream &ostr ){ ostr << data->formatIncludeName( _inputFile ); };
-	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
-	{
-		if ( i_index < data->classes().size() )
-		{
-			auto classPtr = &(data->classes()[i_index]);
-			o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
-			o_model.sections["methods"] = [=]( int i_index, CodeTemplateModel &o_model )
-			{
-				if ( i_index < classPtr->methods().size() )
-				{
-					auto methodPtr = classPtr->methods().begin();
-					std::advance( methodPtr, i_index );
-					o_model.names["cpp_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_cpp_method_impl( ostr, classPtr->name(), *methodPtr ); };
-					o_model.names["c_proxy_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_impl( ostr, classPtr->name(), *methodPtr ); };
-					return true;
-				}
-				return false;
-			};
-			return true;
-			return true;
-		}
-		return false;
-	};
-
-	CodeTemplate renderer( std::begin(tmpl), std::end(tmpl) );
-	renderer.render( model, ostr );
 }
 
 void SwiftppObjcOutput::write_cpp_method_impl( llvm::raw_ostream &ostr, const std::string &i_className, const CXXMethod &i_method ) const
