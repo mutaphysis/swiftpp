@@ -13,12 +13,15 @@
 #include <llvm/Support/raw_ostream.h>
 #include <functional>
 #include <deque>
-#include <map>
+#include <unordered_map>
 
 struct CodeTemplateModel
 {
-	std::map<std::string,std::function<void ( llvm::raw_ostream & )>> names;
-	std::map<std::string,std::function<bool ( int, CodeTemplateModel & )>> sections;
+	// for a name, just a callback that write to the stream
+	std::unordered_map<std::string,std::function<void ( llvm::raw_ostream & )>> names;
+	
+	struct Section { size_t nb; std::function<void ( size_t, CodeTemplateModel & )> callback; };
+	std::unordered_map<std::string,Section> sections;
 };
 
 class CodeTemplate
@@ -35,7 +38,7 @@ class CodeTemplate
 		void render( const substringref &i_tmpl, llvm::raw_ostream &ostr );
 
 		void resolveName( const std::string &i_name, llvm::raw_ostream &ostr );
-		bool resolveSection( const std::string &i_name, int i_index, CodeTemplateModel &o_model );
+		bool resolveSection( const std::string &i_name, size_t i_index, CodeTemplateModel &o_model );
 };
 
 #endif

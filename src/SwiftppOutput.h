@@ -30,6 +30,22 @@ class SwiftppOutput
 		const SwiftppData *_data = nullptr;
 	
 		virtual void write_impl() = 0;
+
+		// utils
+
+		//! transform a QualType to a string
+		std::string type2String( const clang::QualType &i_type ) const;
+		
+		//! transform a QualType to a string, removing constness and referenced
+		std::string type2UndecoratedTypeString( const clang::QualType &i_type ) const;
+
+		std::string typeNameForFunc( const clang::QualType &i_cxxtype ) const;
+		
+		bool isCXXVectorType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
+		bool isCXXListType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
+		bool isCXXMapType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
+		bool isCXXUnorderedMapType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
+		bool isCXXSetType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
 };
 
 #endif

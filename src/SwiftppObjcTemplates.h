@@ -19,6 +19,16 @@ const char kCXX_OBJC_PROTOCOLS_H_TEMPLATE[] = R"(
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
 
+<{#has_enums}>// enums definition
+<{#enums}>
+typedef NS_ENUM(<{enum_name}>_,<{enum_type}>)
+{
+<{#enum_values}>
+<{enum_name}>_<{enum_value_name}>,
+<{/enum_values}>
+};
+<{/enums}><{/has_enums}>
+
 // Objective-C proxy protocols for each classes
 
 <{#classes}>

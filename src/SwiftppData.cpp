@@ -8,6 +8,7 @@
 
 #include "SwiftppData.h"
 #include <iostream>
+#include <clang/AST/Decl.h>
 
 TypeConverter::TypeConverter( const std::string &i_name, const clang::QualType &i_to, const clang::QualType &i_from )
 	: _name( i_name ),
@@ -129,6 +130,21 @@ void CXXClass::addMissingConstructor()
 #pragma mark-
 #endif
 
+CXXEnum::CXXEnum( const std::string &i_name, bool i_isSigned )
+	: _name( i_name ),
+		_isSigned( i_isSigned )
+{
+}
+
+void CXXEnum::addValue( const std::string &i_name, int64_t i_value )
+{
+	_values.emplace_back( i_name, i_value );
+}
+
+#if 0
+#pragma mark-
+#endif
+
 SwiftppData::SwiftppData( const SwiftppOptions &i_options )
 	: _options( i_options )
 {
@@ -153,6 +169,11 @@ void SwiftppData::addMissingConstructors()
 {
 	for ( auto &c : _classes )
 		c.addMissingConstructor();
+}
+
+void SwiftppData::addEnum( const CXXEnum &i_enum )
+{
+	_enums.push_back( i_enum );
 }
 
 std::string SwiftppData::formatIncludeName( const std::string &i_filepath ) const

@@ -19,6 +19,7 @@
 -examples: improve simple example, it's very lame now
 -examples: write a more complexe example
 -detect std::shared_ptr<T> and make them work with ARC on the Objective-C/swift side. right now, swift only sees copies of C++ objects.
+-retain comments in generated code
 
 -since the goal is to parse portable C++ code to generate bridge to platform specific code, could we also generate a JNI bridge for use on Android ?!
 

@@ -129,6 +129,23 @@ class CXXClass
 		std::set<CXXMethod> _methods;
 };
 
+class CXXEnum
+{
+	public:
+		CXXEnum( const std::string &i_name, bool i_isSigned );
+	
+		void addValue( const std::string &i_name, int64_t i_value );
+
+		const std::string &name() const;
+		bool isSigned() const;
+		const std::vector<std::pair<std::string,int64_t>> &values() const;
+	
+	private:
+		std::string _name;
+		bool _isSigned = false;
+		std::vector<std::pair<std::string,int64_t>> _values;
+};
+
 /*!
    @brief options for a customised output.
 */
@@ -154,8 +171,10 @@ class SwiftppData
 		void addConverter( const TypeConverter &i_converter );
 		void addCXXTypeIncludePath( const std::string &i_fn );
 		void addMissingConstructors();
+		void addEnum( const CXXEnum &i_enum );
 	
 		const std::vector<CXXClass> &classes() const;
+		const std::vector<CXXEnum> &enums() const;
 		const std::vector<TypeConverter> &converters() const;
 		const std::vector<std::string> &includesForCXXTypes() const;
 	
@@ -175,6 +194,7 @@ class SwiftppData
 		SwiftppOptions _options;
 		std::vector<TypeConverter> _converters;
 		std::vector<CXXClass> _classes;
+		std::vector<CXXEnum> _enums;
 		std::vector<std::string> _includesForCXXTypes; //!< include paths needed for some user's C++ type definition
 };
 
@@ -200,7 +220,12 @@ inline bool CXXMethod::isConst() const { return _isConst; }
 inline const std::string &CXXClass::name() const { return _name; }
 inline const std::set<CXXMethod> &CXXClass::methods() const { return _methods; }
 
+inline const std::string &CXXEnum::name() const { return _name; }
+inline bool CXXEnum::isSigned() const { return _isSigned; }
+inline const std::vector<std::pair<std::string,int64_t>> &CXXEnum::values() const { return _values; }
+
 inline const std::vector<CXXClass> &SwiftppData::classes() const { return _classes; }
+inline const std::vector<CXXEnum> &SwiftppData::enums() const { return _enums; }
 inline const std::vector<TypeConverter> &SwiftppData::converters() const { return _converters; }
 inline const std::vector<std::string> &SwiftppData::includesForCXXTypes() const { return _includesForCXXTypes; }
 

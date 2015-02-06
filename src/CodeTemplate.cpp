@@ -64,7 +64,7 @@ void CodeTemplate::render( const substringref &i_tmpl, llvm::raw_ostream &ostr )
 						++endOpenSectionTag;
 
 					CodeTemplateModel m;
-					int i = 0;
+					size_t i = 0;
 					while ( resolveSection( sectionName, i, m ) )
 					{
 						_context.push_front( m );
@@ -117,13 +117,18 @@ void CodeTemplate::resolveName( const std::string &i_name, llvm::raw_ostream &os
 	}
 }
 
-bool CodeTemplate::resolveSection( const std::string &i_name, int i_index, CodeTemplateModel &o_model )
+bool CodeTemplate::resolveSection( const std::string &i_name, size_t i_index, CodeTemplateModel &o_model )
 {
 	for ( auto m : _context )
 	{
 		auto it = m.sections.find( i_name );
 		if ( it != m.sections.end() )
-			return it->second( i_index, o_model );
+		{
+			if ( i_index >= it->second.nb )
+				return false;
+			it->second.callback( i_index, o_model );
+			return true;
+		}
 	}
 	return false;
 }

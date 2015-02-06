@@ -56,6 +56,34 @@ void SwiftppASTConsumer::HandleTranslationUnit( clang::ASTContext &i_ctx )
 	
 	_data.addMissingConstructors();
 	
+	// find all enums used
+	std::set<const clang::EnumDecl *> enumTypes;
+	for ( const auto &c : _data.classes() )
+	{
+		for ( const auto &m : c.methods() )
+		{
+			auto e = clang::cast_or_null<clang::EnumDecl>(m.returnType()->getAsTagDecl());
+			if ( e != nullptr )
+				enumTypes.insert( e->getDefinition() );
+			for ( const auto &p : m.params() )
+			{
+				auto e = clang::cast_or_null<clang::EnumDecl>(p.type()->getAsTagDecl());
+				if ( e != nullptr )
+					enumTypes.insert( e->getDefinition() );
+			}
+		}
+	}
+	for ( const auto &t : enumTypes )
+	{
+		auto s = t->getIntegerType()->isSignedIntegerType();
+		CXXEnum cxxEnum( t->getNameAsString(), s );
+		for ( auto v = t->enumerator_begin(); v != t->enumerator_end(); ++v )
+		{
+			cxxEnum.addValue( v->getNameAsString(), v->getInitVal().getExtValue() );
+		}
+		_data.addEnum( cxxEnum );
+	}
+	
 	// synthesize missing converters
 //	for ( const auto &c : _data.classes() )
 //	{

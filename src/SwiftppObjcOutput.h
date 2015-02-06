@@ -21,20 +21,14 @@ class SwiftppObjcOutput : public SwiftppOutput
 		void write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) const;
 		void write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const;
 
-		//! transform a QualType to a string
-		std::string type2String( const clang::QualType &i_type ) const;
-		
-		//! transform a QualType to a string, removing constness and referenced
-		std::string type2UndecoratedTypeString( const clang::QualType &i_type ) const;
-		
 		//! return the Objective-C type corresponding to the C++ type, according to the available converters
 		std::string cxxType2ObjcTypeString( const clang::QualType &i_cxxtype ) const;
 		
 		/*!
 		 @brief Write a function call that convert i_code to a C++ type.
 		 
-		 i_code is an expression of type i_type. This will return a string
-		 that is a function call converting i_code to a C++ type.
+		 i_code is an expression of an ObjC type convertible to i_cxxtype. This will return a string
+		 that is a function call converting i_code to the C++ type.
 		 example:
 		 converterForObjcType2CXXType( {NSString}, "variable" )
 		 return: "std::string( [variable UTF8String] )"
@@ -48,7 +42,7 @@ class SwiftppObjcOutput : public SwiftppOutput
 		/*!
 		 @brief Write a function call that convert i_code to an Objective-C type.
 		 
-		 i_code is an expression of type i_type. This will return a string
+		 i_code is an expression of type i_cxxtype. This will return a string
 		 that is a function call converting i_code to an Objective-C type.
 		 example:
 		 converterForObjcType2CXXType( {std::string}, "variable" )
@@ -60,18 +54,21 @@ class SwiftppObjcOutput : public SwiftppOutput
 		*/
 		std::string converterForCXXType2ObjcType( const clang::QualType &i_cxxtype, const std::string &i_code ) const;
 
-
-		bool isCXXVectorType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
-		bool isCXXMapType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
-		bool isCXXSetType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
-		std::string typeNameForFunc( const clang::QualType &i_cxxtype ) const;
-	
 		/*!
-		 @brief Write an Objectvie-C method.
+		 @brief Write an Objectvie-C method declaration.
 		 
-		 @param[in] i_method the methos
+		 @param     ostr     stream to write to
+		 @param[in] i_method the method
 		*/
 		void write_objc_method_decl( llvm::raw_ostream &ostr, const CXXMethod &i_method ) const;
+	
+		/*!
+		   @brief Write an Objectvie-C method implementation.
+
+		   @param     ostr        stream to write to
+		   @param[in] i_className the class name
+		   @param[in] i_method    the method
+		*/
 		void write_objc_method_impl( llvm::raw_ostream &ostr, const std::string &i_className, const CXXMethod &i_method ) const;
 	
 		void write_c_proxy_method_decl( llvm::raw_ostream &ostr, const std::string &i_className, const CXXMethod &i_method ) const;

@@ -9,6 +9,6 @@
 #ifndef H_SWIFTPP_Version
 #define H_SWIFTPP_Version
 
-#define SWIFTPP_VERSION "0.1"
+#define SWIFTPP_VERSION "0.2"
 
 #endif

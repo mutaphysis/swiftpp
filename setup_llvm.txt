@@ -21,6 +21,12 @@ svn co http://llvm.org/svn/llvm-project/compiler-rt/trunk compiler-rt
 cd "$BUILD_DIR"
 svn co http://llvm.org/svn/llvm-project/libcxx/trunk libcxx
 
+# or update
+cd "$BUILD_DIR/llvm"
+svn up tools/clang ; svn up tools/clang/tools/extra ; svn up projects/compiler-rt
+cd "$BUILD_DIR/libcxx"
+svn up
+
 # build/install llvm
 cd "$BUILD_DIR/llvm"
 ./configure --prefix="$INSTALL_DIR" # add --enable-optimized for release build

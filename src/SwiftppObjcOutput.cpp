@@ -21,8 +21,9 @@ namespace
 	/*!
 	 @brief Iterate over the parameters of a C++ method.
 	 
-	 Iterate over the parameters of a method, calling the i_formatFunc() for each
-	 and building a comma separated string with all results.
+	 	Iterate over the parameters of a method, calling the i_formatFunc() for each
+	 	and building a comma separated string with all results.
+		
 	 @param i_method      the method
 	 @param i_commaPrefix should it start with a comma
 	 @param i_formatFunc  function to apply
@@ -85,7 +86,7 @@ void SwiftppObjcOutput::write_impl()
 		write_cxx_subclasses_mm( *ostr );
 }
 
-// write an Objective-C method declaration
+//! write an Objective-C method declaration
 void SwiftppObjcOutput::write_objc_method_decl( llvm::raw_ostream &ostr, const CXXMethod &i_method ) const
 {
 	if ( i_method.isStatic() )
@@ -130,27 +131,36 @@ void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) co
 {
 	CodeTemplateModel model;
 	auto data = _data;
-	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
-	{
-		if ( i_index < data->classes().size() )
-		{
-			auto classPtr = &(data->classes()[i_index]);
-			o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
-			o_model.sections["methods"] = [=]( int i_index, CodeTemplateModel &o_model )
-			{
-				if ( i_index < classPtr->methods().size() )
-				{
-					auto methodPtr = classPtr->methods().begin();
-					std::advance( methodPtr, i_index );
-					o_model.names["objc_method_decl"] = [=]( llvm::raw_ostream &ostr ){ this->write_objc_method_decl( ostr, *methodPtr ); };
-					return true;
-				}
-				return false;
-			};
-			return true;
-		}
-		return false;
-	};
+	model.sections["classes"] = CodeTemplateModel::Section{ data->classes().size(),
+						[=]( size_t i_index, CodeTemplateModel &o_model )
+						{
+							auto classPtr = &(data->classes()[i_index]);
+							o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
+							o_model.sections["methods"] = CodeTemplateModel::Section{ classPtr->methods().size(),
+								[=]( size_t i_index, CodeTemplateModel &o_model )
+								{
+									auto methodPtr = classPtr->methods().begin();
+									std::advance( methodPtr, i_index );
+									o_model.names["objc_method_decl"] = [=]( llvm::raw_ostream &ostr ){ this->write_objc_method_decl( ostr, *methodPtr ); };
+								} };
+						} };
+	model.sections["has_enums"] = CodeTemplateModel::Section{ (data->enums().empty() ? size_t(0) : size_t(1)),
+						[=]( size_t /*i_index*/, CodeTemplateModel &o_model )
+						{
+							o_model.sections["enums"] = CodeTemplateModel::Section{ data->enums().size(),
+									[=]( size_t i_index, CodeTemplateModel &o_model )
+									{
+										auto enumPtr = &(data->enums()[i_index]);
+										o_model.names["enum_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << enumPtr->name(); };
+										o_model.names["enum_type"] = [=]( llvm::raw_ostream &ostr ){ ostr << (enumPtr->isSigned() ? "NSInteger" : "NSUInteger"); };
+										o_model.sections["enum_values"] = CodeTemplateModel::Section{ enumPtr->values().size(),
+											[=]( size_t i_index, CodeTemplateModel &o_model )
+											{
+												auto valPtr = &(enumPtr->values()[i_index]);
+												o_model.names["enum_value_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << valPtr->first << " = " << valPtr->second; };
+											} };
+									} };
+						} };
 	
 	CodeTemplate renderer( std::begin(kCXX_OBJC_PROTOCOLS_H_TEMPLATE), std::end(kCXX_OBJC_PROTOCOLS_H_TEMPLATE) );
 	renderer.render( model, ostr );
@@ -160,16 +170,12 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) cons
 {
 	CodeTemplateModel model;
 	auto data = _data;
-	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
-	{
-		if ( i_index < data->classes().size() )
-		{
-			auto classPtr = &(data->classes()[i_index]);
-			o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
-			return true;
-		}
-		return false;
-	};
+	model.sections["classes"] = CodeTemplateModel::Section{ data->classes().size(),
+					[=]( size_t i_index, CodeTemplateModel &o_model )
+					{
+						auto classPtr = &(data->classes()[i_index]);
+						o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
+					} };
 
 	CodeTemplate renderer( std::begin(kCXX_OBJC_PROXIES_H_TEMPLATE), std::end(kCXX_OBJC_PROXIES_H_TEMPLATE) );
 	renderer.render( model, ostr );
@@ -179,52 +185,35 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) con
 {
 	CodeTemplateModel model;
 	auto data = _data;
-	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
-	{
-		if ( i_index < data->classes().size() )
-		{
-			auto classPtr = &(data->classes()[i_index]);
-			o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
-			o_model.sections["methods"] = [=]( int i_index, CodeTemplateModel &o_model )
-			{
-				if ( i_index < classPtr->methods().size() )
-				{
-					auto methodPtr = classPtr->methods().begin();
-					std::advance( methodPtr, i_index );
-					o_model.names["c_proxy_method_decl"] = [=]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_decl( ostr, classPtr->name(), *methodPtr ); };
-					o_model.names["objc_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_objc_method_impl( ostr, classPtr->name(), *methodPtr ); };
-					return true;
-				}
-				return false;
-			};
-			return true;
-			return true;
-		}
-		return false;
-	};
-	model.sections["includes_for_cxx_types"] = [=]( int i_index, CodeTemplateModel &o_model )
-	{
-		if ( i_index < data->includesForCXXTypes().size() )
-		{
-			auto includeName = data->formatIncludeName( data->includesForCXXTypes()[i_index] );
-			o_model.names["include_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << includeName; };
-			return true;
-		}
-		return false;
-	};
-	model.sections["converters"] = [=]( int i_index, CodeTemplateModel &o_model )
-	{
-		if ( i_index < data->converters().size() )
-		{
-			auto convPtr = &(data->converters()[i_index]);
-			o_model.names["converter_decl"] = [=]( llvm::raw_ostream &ostr )
-			{
-				ostr << this->type2String(convPtr->to()) + " " + convPtr->name() + "( " + this->type2String(convPtr->from()) + " )";
-			};
-			return true;
-		}
-		return false;
-	};
+	model.sections["classes"] = CodeTemplateModel::Section{ data->classes().size(),
+					[=]( size_t i_index, CodeTemplateModel &o_model )
+					{
+						auto classPtr = &(data->classes()[i_index]);
+						o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
+						o_model.sections["methods"] = CodeTemplateModel::Section{ classPtr->methods().size(),
+								[=]( size_t i_index, CodeTemplateModel &o_model )
+								{
+									auto methodPtr = classPtr->methods().begin();
+									std::advance( methodPtr, i_index );
+									o_model.names["c_proxy_method_decl"] = [=]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_decl( ostr, classPtr->name(), *methodPtr ); };
+									o_model.names["objc_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_objc_method_impl( ostr, classPtr->name(), *methodPtr ); };
+								} };
+					} };
+	model.sections["includes_for_cxx_types"] = CodeTemplateModel::Section{ data->includesForCXXTypes().size(),
+					[=]( size_t i_index, CodeTemplateModel &o_model )
+					{
+						auto includeName = data->formatIncludeName( data->includesForCXXTypes()[i_index] );
+						o_model.names["include_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << includeName; };
+					} };
+	model.sections["converters"] = CodeTemplateModel::Section{ data->converters().size(),
+					[=]( size_t i_index, CodeTemplateModel &o_model )
+					{
+						auto convPtr = &(data->converters()[i_index]);
+						o_model.names["converter_decl"] = [=]( llvm::raw_ostream &ostr )
+						{
+							ostr << this->type2String(convPtr->to()) + " " + convPtr->name() + "( " + this->type2String(convPtr->from()) + " )";
+						};
+					} };
 
 	CodeTemplate renderer( std::begin(kCXX_OBJC_PROXIES_MM_TEMPLATE), std::end(kCXX_OBJC_PROXIES_MM_TEMPLATE) );
 	renderer.render( model, ostr );
@@ -236,29 +225,20 @@ void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
 	auto data = _data;
 	auto inputFile = _inputFile;
 	model.names["bridge_include"] = [=]( llvm::raw_ostream &ostr ){ ostr << data->formatIncludeName( _inputFile ); };
-	model.sections["classes"] = [=]( int i_index, CodeTemplateModel &o_model )
-	{
-		if ( i_index < data->classes().size() )
-		{
-			auto classPtr = &(data->classes()[i_index]);
-			o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
-			o_model.sections["methods"] = [=]( int i_index, CodeTemplateModel &o_model )
-			{
-				if ( i_index < classPtr->methods().size() )
-				{
-					auto methodPtr = classPtr->methods().begin();
-					std::advance( methodPtr, i_index );
-					o_model.names["cpp_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_cpp_method_impl( ostr, classPtr->name(), *methodPtr ); };
-					o_model.names["c_proxy_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_impl( ostr, classPtr->name(), *methodPtr ); };
-					return true;
-				}
-				return false;
-			};
-			return true;
-			return true;
-		}
-		return false;
-	};
+	model.sections["classes"] = CodeTemplateModel::Section{ data->classes().size(),
+					[=]( size_t i_index, CodeTemplateModel &o_model )
+					{
+						auto classPtr = &(data->classes()[i_index]);
+						o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
+						o_model.sections["methods"] = CodeTemplateModel::Section{ classPtr->methods().size(),
+								[=]( size_t i_index, CodeTemplateModel &o_model )
+								{
+									auto methodPtr = classPtr->methods().begin();
+									std::advance( methodPtr, i_index );
+									o_model.names["cpp_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_cpp_method_impl( ostr, classPtr->name(), *methodPtr ); };
+									o_model.names["c_proxy_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_impl( ostr, classPtr->name(), *methodPtr ); };
+								} };
+					} };
 	
 	CodeTemplate renderer( std::begin(kCXX_SUBCLASSES_MM_TEMPLATE), std::end(kCXX_SUBCLASSES_MM_TEMPLATE) );
 	renderer.render( model, ostr );
@@ -421,31 +401,6 @@ void SwiftppObjcOutput::write_c_proxy_method_impl( llvm::raw_ostream &ostr, cons
 	ostr << "}";
 }
 
-std::string SwiftppObjcOutput::type2String( const clang::QualType &i_type ) const
-{
-	auto v = clang::QualType::getAsString(i_type.split());
-	if ( v == "_Bool" )
-		return "bool";
-	return v;
-}
-
-std::string SwiftppObjcOutput::type2UndecoratedTypeString( const clang::QualType &i_type ) const
-{
-	clang::QualType type( i_type.getNonReferenceType() );
-	type.removeLocalConst();
-	return type2String( type );
-}
-
-std::string SwiftppObjcOutput::typeNameForFunc( const clang::QualType &i_cxxtype ) const
-{
-	std::string result( type2UndecoratedTypeString( i_cxxtype ) );
-	std::replace( std::begin(result), std::end(result), ' ', '_' );
-	std::replace( std::begin(result), std::end(result), ':', '_' );
-	std::replace( std::begin(result), std::end(result), '<', '_' );
-	std::replace( std::begin(result), std::end(result), '>', '_' );
-	return result;
-}
-
 std::string SwiftppObjcOutput::cxxType2ObjcTypeString( const clang::QualType &i_cxxtype ) const
 {
 	std::string cxxtype( type2UndecoratedTypeString( i_cxxtype ) );
@@ -466,9 +421,9 @@ std::string SwiftppObjcOutput::cxxType2ObjcTypeString( const clang::QualType &i_
 	if ( cxxtype == "bool" )
 		return "BOOL";
 	
-	if ( isCXXVectorType( i_cxxtype ) )
+	if ( isCXXVectorType( i_cxxtype ) or isCXXListType( i_cxxtype ) )
 		return "NSArray *";
-	if ( isCXXMapType( i_cxxtype ) )
+	if ( isCXXMapType( i_cxxtype ) or isCXXUnorderedMapType( i_cxxtype ) )
 		return "NSDictionary *";
 	if ( isCXXSetType( i_cxxtype ) )
 		return "NSSet *";
@@ -501,150 +456,24 @@ std::string SwiftppObjcOutput::converterForObjcType2CXXType( const clang::QualTy
 	{
 		return std::string("swift_converter::generated_to_vector_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
 	}
-	if ( isCXXMapType( i_cxxtype, &valueType ) )
+	else if ( isCXXListType( i_cxxtype, &valueType ) )
+	{
+		return std::string("swift_converter::generated_to_list_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
+	}
+	else if ( isCXXMapType( i_cxxtype, &valueType ) )
 	{
 		return std::string("swift_converter::generated_to_map_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
 	}
-	if ( isCXXSetType( i_cxxtype, &valueType ) )
+	else if ( isCXXUnorderedMapType( i_cxxtype, &valueType ) )
+	{
+		return std::string("swift_converter::generated_to_map_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
+	}
+	else if ( isCXXSetType( i_cxxtype, &valueType ) )
 	{
 		return std::string("swift_converter::generated_to_set_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
 	}
 	
 	return i_code;
-}
-
-/*!
- @brief find if a type is std::vector<T>.
- 
- @param[in]  i_cxxtype   the type to check
- @param[out] o_valueType the type of T
- @return     true if i_cxxtype is std::vector<T>
- */
-bool SwiftppObjcOutput::isCXXVectorType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType ) const
-{
-	auto type = i_cxxtype.getCanonicalType().getNonReferenceType().getTypePtrOrNull();
-	if ( type == nullptr )
-		return false;
-	
-	// is it a C++ class in 'std' namespace?
-	auto cxxdecl = type->getAsCXXRecordDecl();
-	if ( cxxdecl == nullptr or not cxxdecl->getDeclContext()->isStdNamespace() )
-		return false;
-	
-	// is it a template specialisation?
-	auto templdecl = clang::dyn_cast<clang::ClassTemplateSpecializationDecl>( cxxdecl );
-	if ( templdecl == nullptr )
-		return false;
-	
-	// named 'vector' ?
-	if ( templdecl->getNameAsString() != "vector" )
-		return false;
-	
-	// with at least one template argument...
-	const auto &targs = templdecl->getTemplateArgs();
-	if ( targs.size() < 1 )
-		return false;
-	
-	// ... that is a type
-	const auto &arg = targs[0];
-	if ( arg.getKind() != clang::TemplateArgument::Type )
-		return false;
-	
-	if ( o_valueType )
-		*o_valueType = arg.getAsType();
-	
-	return true;
-}
-
-/*!
- @brief find if a type is std::map<std::string,T>.
- 
- @param[in]  i_cxxtype   the type to check
- @param[out] o_valueType the type of T
- @return     true if i_cxxtype is std::map<std::string,T>
- */
-bool SwiftppObjcOutput::isCXXMapType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType ) const
-{
-	auto type = i_cxxtype.getCanonicalType().getNonReferenceType().getTypePtrOrNull();
-	if ( type == nullptr )
-		return false;
-	
-	// is it a C++ class in 'std' namespace?
-	auto cxxdecl = type->getAsCXXRecordDecl();
-	if ( cxxdecl == nullptr or not cxxdecl->getDeclContext()->isStdNamespace() )
-		return false;
-	
-	// is it a template specialisation?
-	auto templdecl = clang::dyn_cast<clang::ClassTemplateSpecializationDecl>( cxxdecl );
-	if ( templdecl == nullptr )
-		return false;
-	
-	// named 'map' ?
-	if ( templdecl->getNameAsString() != "map" )
-		return false;
-	
-	// with at least 2 template arguments...
-	const auto &targs = templdecl->getTemplateArgs();
-	if ( targs.size() < 2 )
-		return false;
-	
-	// ... that are types
-	const auto &arg1 = targs[0];
-	const auto &arg2 = targs[1];
-	if ( arg1.getKind() != clang::TemplateArgument::Type or arg2.getKind() != clang::TemplateArgument::Type )
-		return false;
-	
-	// the first one should be 'std::string'
-	if ( type2UndecoratedTypeString( arg1.getAsType() ) != "std::string" )
-		return false;
-	
-	if ( o_valueType )
-		*o_valueType = arg2.getAsType();
-
-	return true;
-}
-
-/*!
-   @brief find if a type is std::set<T>.
-
-   @param[in]  i_cxxtype   the type to check
-   @param[out] o_valueType the type of T
-   @return     true if i_cxxtype is std::set<T>
-*/
-bool SwiftppObjcOutput::isCXXSetType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType ) const
-{
-	auto type = i_cxxtype.getCanonicalType().getNonReferenceType().getTypePtrOrNull();
-	if ( type == nullptr )
-		return false;
-	
-	// is it a C++ class in 'std' namespace?
-	auto cxxdecl = type->getAsCXXRecordDecl();
-	if ( cxxdecl == nullptr or not cxxdecl->getDeclContext()->isStdNamespace() )
-		return false;
-	
-	// is it a template specialisation?
-	auto templdecl = clang::dyn_cast<clang::ClassTemplateSpecializationDecl>( cxxdecl );
-	if ( templdecl == nullptr )
-		return false;
-	
-	// named 'set' ?
-	if ( templdecl->getNameAsString() != "set" )
-		return false;
-	
-	// with at least one template argument...
-	const auto &targs = templdecl->getTemplateArgs();
-	if ( targs.size() < 1 )
-		return false;
-	
-	// ... that is a type
-	const auto &arg = targs[0];
-	if ( arg.getKind() != clang::TemplateArgument::Type )
-		return false;
-	
-	if ( o_valueType )
-		*o_valueType = arg.getAsType();
-
-	return true;
 }
 
 std::string SwiftppObjcOutput::converterForCXXType2ObjcType( const clang::QualType &i_cxxtype, const std::string &i_code ) const
@@ -668,15 +497,23 @@ std::string SwiftppObjcOutput::converterForCXXType2ObjcType( const clang::QualTy
 	clang::QualType valueType;
 	if ( isCXXVectorType( i_cxxtype, &valueType ) )
 	{
-		return std::string("swift_converter::generated_from_vector_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
+		return std::string("swift_converter::generated_from_vector( ") + i_code + " )";
 	}
-	if ( isCXXMapType( i_cxxtype, &valueType ) )
+	else if ( isCXXListType( i_cxxtype, &valueType ) )
 	{
-		return std::string("swift_converter::generated_from_map_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
+		return std::string("swift_converter::generated_from_list( ") + i_code + " )";
 	}
-	if ( isCXXSetType( i_cxxtype, &valueType ) )
+	else if ( isCXXMapType( i_cxxtype, &valueType ) )
 	{
-		return std::string("swift_converter::generated_from_set_") + typeNameForFunc( valueType ) + "( " + i_code + " )";
+		return std::string("swift_converter::generated_from_map_( ") + i_code + " )";
+	}
+	else if ( isCXXUnorderedMapType( i_cxxtype, &valueType ) )
+	{
+		return std::string("swift_converter::generated_from_map_( ") + i_code + " )";
+	}
+	else if ( isCXXSetType( i_cxxtype, &valueType ) )
+	{
+		return std::string("swift_converter::generated_from_set_( ") + i_code + " )";
 	}
 
 	return i_code;
