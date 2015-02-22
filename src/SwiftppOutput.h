@@ -43,9 +43,12 @@ class SwiftppOutput
 		
 		bool isCXXVectorType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
 		bool isCXXListType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
+		bool isCXXSetType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
+		bool isCXXContainerType( const clang::QualType &i_cxxtype, const std::string &i_typeName, clang::QualType *o_valueType = nullptr ) const;
+
 		bool isCXXMapType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
 		bool isCXXUnorderedMapType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
-		bool isCXXSetType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType = nullptr ) const;
+		bool isCXXAssociativeContainerType( const clang::QualType &i_cxxtype, const std::string &i_typeName, clang::QualType *o_valueType = nullptr ) const;
 };
 
 #endif

@@ -21,6 +21,10 @@ struct CodeTemplateModel
 	std::unordered_map<std::string,std::function<void ( llvm::raw_ostream & )>> names;
 	
 	struct Section { size_t nb; std::function<void ( size_t, CodeTemplateModel & )> callback; };
+	inline static Section BoolSection( bool on, std::function<void ( CodeTemplateModel & )> callback )
+	{
+		return Section{ size_t(on?1:0), [=]( size_t, CodeTemplateModel &m ){ callback( m ); } };
+	}
 	std::unordered_map<std::string,Section> sections;
 };
 

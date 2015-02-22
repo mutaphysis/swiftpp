@@ -59,14 +59,7 @@ std::string SwiftppOutput::typeNameForFunc( const clang::QualType &i_cxxtype ) c
 	return result;
 }
 
-/*!
- @brief find if a type is std::vector<T>.
- 
- @param[in]  i_cxxtype   the type to check
- @param[out] o_valueType the type of T
- @return     true if i_cxxtype is std::vector<T>
- */
-bool SwiftppOutput::isCXXVectorType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType ) const
+bool SwiftppOutput::isCXXContainerType( const clang::QualType &i_cxxtype, const std::string &i_typeName, clang::QualType *o_valueType ) const
 {
 	auto type = i_cxxtype.getCanonicalType().getNonReferenceType().getTypePtrOrNull();
 	if ( type == nullptr )
@@ -82,8 +75,8 @@ bool SwiftppOutput::isCXXVectorType( const clang::QualType &i_cxxtype, clang::Qu
 	if ( templdecl == nullptr )
 		return false;
 	
-	// named 'vector' ?
-	if ( templdecl->getNameAsString() != "vector" )
+	// named i_typeName ?
+	if ( templdecl->getNameAsString() != i_typeName )
 		return false;
 	
 	// with at least one template argument...
@@ -103,6 +96,18 @@ bool SwiftppOutput::isCXXVectorType( const clang::QualType &i_cxxtype, clang::Qu
 }
 
 /*!
+ @brief find if a type is std::vector<T>.
+ 
+ @param[in]  i_cxxtype   the type to check
+ @param[out] o_valueType the type of T
+ @return     true if i_cxxtype is std::vector<T>
+ */
+bool SwiftppOutput::isCXXVectorType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType ) const
+{
+	return isCXXContainerType( i_cxxtype, "vector", o_valueType );
+}
+
+/*!
  @brief find if a type is std::list<T>.
  
  @param[in]  i_cxxtype   the type to check
@@ -110,6 +115,11 @@ bool SwiftppOutput::isCXXVectorType( const clang::QualType &i_cxxtype, clang::Qu
  @return     true if i_cxxtype is std::list<T>
  */
 bool SwiftppOutput::isCXXListType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType ) const
+{
+	return isCXXContainerType( i_cxxtype, "list", o_valueType );
+}
+
+bool SwiftppOutput::isCXXAssociativeContainerType( const clang::QualType &i_cxxtype, const std::string &i_typeName, clang::QualType *o_valueType ) const
 {
 	auto type = i_cxxtype.getCanonicalType().getNonReferenceType().getTypePtrOrNull();
 	if ( type == nullptr )
@@ -125,22 +135,27 @@ bool SwiftppOutput::isCXXListType( const clang::QualType &i_cxxtype, clang::Qual
 	if ( templdecl == nullptr )
 		return false;
 	
-	// named 'list' ?
-	if ( templdecl->getNameAsString() != "list" )
+	// named i_typeName ?
+	if ( templdecl->getNameAsString() != i_typeName )
 		return false;
 	
-	// with at least one template argument...
+	// with at least 2 template arguments...
 	const auto &targs = templdecl->getTemplateArgs();
-	if ( targs.size() < 1 )
+	if ( targs.size() < 2 )
 		return false;
 	
-	// ... that is a type
-	const auto &arg = targs[0];
-	if ( arg.getKind() != clang::TemplateArgument::Type )
+	// ... that are types
+	const auto &arg1 = targs[0];
+	const auto &arg2 = targs[1];
+	if ( arg1.getKind() != clang::TemplateArgument::Type or arg2.getKind() != clang::TemplateArgument::Type )
+		return false;
+	
+	// the first one should be 'std::string'
+	if ( type2UndecoratedTypeString( arg1.getAsType() ) != "std::string" )
 		return false;
 	
 	if ( o_valueType )
-		*o_valueType = arg.getAsType();
+		*o_valueType = arg2.getAsType();
 	
 	return true;
 }
@@ -154,43 +169,7 @@ bool SwiftppOutput::isCXXListType( const clang::QualType &i_cxxtype, clang::Qual
  */
 bool SwiftppOutput::isCXXMapType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType ) const
 {
-	auto type = i_cxxtype.getCanonicalType().getNonReferenceType().getTypePtrOrNull();
-	if ( type == nullptr )
-		return false;
-	
-	// is it a C++ class in 'std' namespace?
-	auto cxxdecl = type->getAsCXXRecordDecl();
-	if ( cxxdecl == nullptr or not cxxdecl->getDeclContext()->isStdNamespace() )
-		return false;
-	
-	// is it a template specialisation?
-	auto templdecl = clang::dyn_cast<clang::ClassTemplateSpecializationDecl>( cxxdecl );
-	if ( templdecl == nullptr )
-		return false;
-	
-	// named 'map' ?
-	if ( templdecl->getNameAsString() != "map" )
-		return false;
-	
-	// with at least 2 template arguments...
-	const auto &targs = templdecl->getTemplateArgs();
-	if ( targs.size() < 2 )
-		return false;
-	
-	// ... that are types
-	const auto &arg1 = targs[0];
-	const auto &arg2 = targs[1];
-	if ( arg1.getKind() != clang::TemplateArgument::Type or arg2.getKind() != clang::TemplateArgument::Type )
-		return false;
-	
-	// the first one should be 'std::string'
-	if ( type2UndecoratedTypeString( arg1.getAsType() ) != "std::string" )
-		return false;
-	
-	if ( o_valueType )
-		*o_valueType = arg2.getAsType();
-	
-	return true;
+	return isCXXAssociativeContainerType( i_cxxtype, "map", o_valueType );
 }
 
 /*!
@@ -202,43 +181,7 @@ bool SwiftppOutput::isCXXMapType( const clang::QualType &i_cxxtype, clang::QualT
  */
 bool SwiftppOutput::isCXXUnorderedMapType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType ) const
 {
-	auto type = i_cxxtype.getCanonicalType().getNonReferenceType().getTypePtrOrNull();
-	if ( type == nullptr )
-		return false;
-	
-	// is it a C++ class in 'std' namespace?
-	auto cxxdecl = type->getAsCXXRecordDecl();
-	if ( cxxdecl == nullptr or not cxxdecl->getDeclContext()->isStdNamespace() )
-		return false;
-	
-	// is it a template specialisation?
-	auto templdecl = clang::dyn_cast<clang::ClassTemplateSpecializationDecl>( cxxdecl );
-	if ( templdecl == nullptr )
-		return false;
-	
-	// named 'unordered_map' ?
-	if ( templdecl->getNameAsString() != "unordered_map" )
-		return false;
-	
-	// with at least 2 template arguments...
-	const auto &targs = templdecl->getTemplateArgs();
-	if ( targs.size() < 2 )
-		return false;
-	
-	// ... that are types
-	const auto &arg1 = targs[0];
-	const auto &arg2 = targs[1];
-	if ( arg1.getKind() != clang::TemplateArgument::Type or arg2.getKind() != clang::TemplateArgument::Type )
-		return false;
-	
-	// the first one should be 'std::string'
-	if ( type2UndecoratedTypeString( arg1.getAsType() ) != "std::string" )
-		return false;
-	
-	if ( o_valueType )
-		*o_valueType = arg2.getAsType();
-	
-	return true;
+	return isCXXAssociativeContainerType( i_cxxtype, "unordered_map", o_valueType );
 }
 
 /*!
@@ -250,37 +193,6 @@ bool SwiftppOutput::isCXXUnorderedMapType( const clang::QualType &i_cxxtype, cla
  */
 bool SwiftppOutput::isCXXSetType( const clang::QualType &i_cxxtype, clang::QualType *o_valueType ) const
 {
-	auto type = i_cxxtype.getCanonicalType().getNonReferenceType().getTypePtrOrNull();
-	if ( type == nullptr )
-		return false;
-	
-	// is it a C++ class in 'std' namespace?
-	auto cxxdecl = type->getAsCXXRecordDecl();
-	if ( cxxdecl == nullptr or not cxxdecl->getDeclContext()->isStdNamespace() )
-		return false;
-	
-	// is it a template specialisation?
-	auto templdecl = clang::dyn_cast<clang::ClassTemplateSpecializationDecl>( cxxdecl );
-	if ( templdecl == nullptr )
-		return false;
-	
-	// named 'set' ?
-	if ( templdecl->getNameAsString() != "set" )
-		return false;
-	
-	// with at least one template argument...
-	const auto &targs = templdecl->getTemplateArgs();
-	if ( targs.size() < 1 )
-		return false;
-	
-	// ... that is a type
-	const auto &arg = targs[0];
-	if ( arg.getKind() != clang::TemplateArgument::Type )
-		return false;
-	
-	if ( o_valueType )
-		*o_valueType = arg.getAsType();
-	
-	return true;
+	return isCXXContainerType( i_cxxtype, "set", o_valueType );
 }
 

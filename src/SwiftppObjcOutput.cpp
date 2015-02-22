@@ -144,8 +144,8 @@ void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) co
 									o_model.names["objc_method_decl"] = [=]( llvm::raw_ostream &ostr ){ this->write_objc_method_decl( ostr, *methodPtr ); };
 								} };
 						} };
-	model.sections["has_enums"] = CodeTemplateModel::Section{ (data->enums().empty() ? size_t(0) : size_t(1)),
-						[=]( size_t /*i_index*/, CodeTemplateModel &o_model )
+	model.sections["has_enums"] = CodeTemplateModel::BoolSection( not data->enums().empty(),
+						[=]( CodeTemplateModel &o_model )
 						{
 							o_model.sections["enums"] = CodeTemplateModel::Section{ data->enums().size(),
 									[=]( size_t i_index, CodeTemplateModel &o_model )
@@ -160,7 +160,7 @@ void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) co
 												o_model.names["enum_value_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << valPtr->first << " = " << valPtr->second; };
 											} };
 									} };
-						} };
+						} );
 	
 	CodeTemplate renderer( std::begin(kCXX_OBJC_PROTOCOLS_H_TEMPLATE), std::end(kCXX_OBJC_PROTOCOLS_H_TEMPLATE) );
 	renderer.render( model, ostr );
