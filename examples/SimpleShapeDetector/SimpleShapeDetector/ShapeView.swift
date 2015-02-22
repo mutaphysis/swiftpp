@@ -18,7 +18,7 @@ class ShapeView : NSView
 	@IBOutlet var _textView: NSTextView!
 	
 
-	required init(coder: NSCoder)
+	required init?(coder: NSCoder)
 	{
 		super.init(coder: coder)
 	}
@@ -31,6 +31,8 @@ class ShapeView : NSView
     override func drawRect(dirtyRect: NSRect)
 	{
         super.drawRect(dirtyRect)
+		
+		NSAttributedString( string: "Draw some\nsimple shapes" ).drawAtPoint( CGPoint( x: 5, y: 5 ) );
 
 		NSColor.blackColor().set()
 		for p in _coolPathList
@@ -45,7 +47,7 @@ class ShapeView : NSView
 		}
     }
 	
-	override func mouseDown(theEvent: NSEvent!)
+	override func mouseDown(theEvent: NSEvent)
 	{
 		if let t = _timer
 		{
@@ -66,7 +68,7 @@ class ShapeView : NSView
 		self.needsDisplay = true
 	}
 	
-	override func mouseDragged(theEvent: NSEvent!)
+	override func mouseDragged(theEvent: NSEvent)
 	{
 		var	pt = self.convertPoint( theEvent.locationInWindow, fromView: nil )
 		
@@ -74,7 +76,7 @@ class ShapeView : NSView
 		self.needsDisplay = true
 	}
 
-	override func mouseUp(theEvent: NSEvent!)
+	override func mouseUp(theEvent: NSEvent)
 	{
 		var	pt = self.convertPoint( theEvent.locationInWindow, fromView: nil )
 
@@ -104,7 +106,7 @@ class ShapeView : NSView
 	func report( name: String )
 	{
 		println( name )
-		_textView.textStorage.appendAttributedString( NSAttributedString( string: name + "\n" ) )
+		_textView.textStorage?.appendAttributedString( NSAttributedString( string: name + "\n" ) )
 	}
 	
 	func onTimer()
