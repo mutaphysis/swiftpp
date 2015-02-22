@@ -12,10 +12,10 @@
 #include <CoreGraphics/CoreGraphics.h>
 #include <vector>
 
+// simple C++ Path class
 class Path2D
 {
 	public:
-	
 		void move_to( const CGPoint &pt );
 		void line_to( const CGPoint &pt );
 		void curve_to( const CGPoint &pt1, const CGPoint &pt2, const CGPoint &pt );

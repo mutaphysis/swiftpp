@@ -14,7 +14,9 @@
 #include <deque>
 #include <vector>
 
-void DetectCorners( const std::deque<CGPoint> &i_path, bool i_closedPath, std::vector<size_t> &o_corners, int W );
+// simple C++ code that detect sharp corners in a polyline
+
+void detectCorners( const std::deque<CGPoint> &i_path, bool i_closedPath, std::vector<size_t> &o_corners, int W );
 
 std::deque<CGPoint> uniformResample( const std::vector<CGPoint> &v );
 

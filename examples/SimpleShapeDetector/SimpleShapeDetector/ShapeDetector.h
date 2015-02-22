@@ -13,6 +13,19 @@
 #include <string>
 #include <vector>
 
+/*!
+   @brief detect shapes from polylines.
+	
+       This class just runs a bunch of heuristics, trying to guess what the polyline
+	   represent (triangle, rectangle, circle, etc).
+	   It is not particularly good at what it is supposed to do :-(
+	   
+	   Usage:
+	   	1- subclass and implement override shapeDetected()
+		2- instantiate
+		3- call detect with a path
+		4- shapeDetected() override will be called with each shape detected
+*/
 class swift ShapeDetector
 {
 	public:
@@ -21,9 +34,6 @@ class swift ShapeDetector
 	
 		void detect( const Path2D &i_paths );
 
-//		virtual void detect2( const std::vector<Path2D> &i_paths );
-//		virtual void detect3( const std::vector<std::string> &i_paths );
-	
 	protected:
 		virtual void shapeDetected( const std::string &i_name, const Path2D &i_path );
 	

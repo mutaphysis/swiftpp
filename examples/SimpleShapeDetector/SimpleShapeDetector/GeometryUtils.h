@@ -12,6 +12,8 @@
 #include <CoreGraphics/CoreGraphics.h>
 #include <cmath>
 
+// various geometry utilities
+
 inline CGPoint operator-( const CGPoint &a, const CGPoint &b )
 {
 	return CGPoint{ a.x - b.x, a.y - b.y };

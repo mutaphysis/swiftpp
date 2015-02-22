@@ -8,9 +8,14 @@
 
 #import "cxx-converter.h"
 
+// the 'swift_converter' namespace is automatically consulted
+// when swiftpp needs a converter from a C++ type to a swift type
+// or vice-versa. The name of the converter does not matter
+// it is found by type matching.
 namespace swift_converter
 {
 
+// convert a C++ Path2D to an ObjC/swift NSBezierPath
 NSBezierPath *to( const Path2D &s )
 {
 	NSBezierPath *b = [NSBezierPath bezierPath];
@@ -47,6 +52,7 @@ NSBezierPath *to( const Path2D &s )
 	}
 	return b;
 }
+// convert an ObjC/swift NSBezierPath to a C++ Path2D
 Path2D from( NSBezierPath *s )
 {
 	Path2D p;

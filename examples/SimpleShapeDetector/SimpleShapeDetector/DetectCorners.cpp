@@ -63,7 +63,7 @@ CGFloat Straws::median() const
 	return vec[vec.size()/2];
 }
 
-void DetectCorners( const std::deque<CGPoint> &i_path, bool i_closedPath, std::vector<size_t> &o_corners, int W )
+void detectCorners( const std::deque<CGPoint> &i_path, bool i_closedPath, std::vector<size_t> &o_corners, int W )
 {
 	// give us some space, if the path is too small compared to the window, just return
 	if ( i_path.size() < (W * 4) )

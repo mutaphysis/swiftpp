@@ -270,8 +270,7 @@ void ShapeDetector::detect( const Path2D &i_paths )
 		else
 		{
 			std::deque<CGPoint> resampled = uniformResample( polyline );
-			
-			DetectCorners( resampled, it.second, corners, 16 );
+			detectCorners( resampled, it.second, corners, 16 );
 			
 			if ( corners.size() == 0 and not it.second and polyline.size() == 2 )
 			{
