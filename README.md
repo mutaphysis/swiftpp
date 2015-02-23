@@ -11,7 +11,7 @@ swiftpp is a clang tool that automatically generate the Objective-C++ glue code 
 
 Things like this become possible:
 
-```
+```C++
 // source.cpp
 #define swift __attribute__((annotate("swift")))
 
@@ -23,7 +23,9 @@ class swift MyCXXClass
 	
 		virtual void doSomething( const std::string &i_text );
 };
+```
 
+```
 // source.swift
 class MySwiftClass : MyCXXClass
 {
@@ -33,9 +35,7 @@ class MySwiftClass : MyCXXClass
 		super.doSomething( text )
 	}
 }
-
 ```
-
 
 Building
 ========
@@ -47,6 +47,8 @@ As of this writing I have llvm revision #230189 and Xcode 6.3 beta.
 If clang/llvm is installed at the same path as in setup_llvm.txt (/opt/llvm), you can then open and compile swiftpp.xcodeproj. You will have to edit the project's paths otherwise.
 
 That's it, you should now have a tool named swiftpp at the repository root level.
+
+Note that if do an non-optimised (debug) build of clang/llvm, the swiftpp pre-compiler might run very slow.
 
 
 Usage
@@ -68,7 +70,7 @@ swiftpp will also use every unary function defined in the namespace swift_conver
 
 example:
 
-```
+```C++
 namespace swift_converter
 {
 NSBezierPath *to( const Path2D &s ); // Path2D is a C++ class that represent a Bezier path
@@ -104,6 +106,12 @@ OK, pretty cool! But at this point I have to ask myself what exactly have I crea
 
 In that perspective it is more similar to swig, the C/C++ interface generator, so why not use swig? Well, the 2 major advantages of swiftpp are 1) it does not require a special "interface file", the C++ class interface itself is the definition, thanks to clang parsing and 2) swig does NOT (officially) support Objective-C, making it unsuitable for the task.
 
-See the todo.txt
+Another tool that was released while I was working on this is djinni (see https://github.com/dropbox/djinni). It uses a custom idl (Interface Definition Language) to automatically generate bridges and support C++, Java and Objective-C, I haven't tried using it with swift yet.
+
+License
+=======
+
+Provided under the MIT license.
+
 
 Comments are welcome.
