@@ -40,7 +40,9 @@ class MySwiftClass : MyCXXClass
 Building
 ========
 
-You will need a clang/llvm install to be able to compile swiftpp itself.  Look in setup_llvm.txt for  instructions. I worked with trunk revision #217018, should compile with clang/llvm release 3.5. I use Xcode 6.1.
+You will need a clang/llvm install to be able to compile swiftpp itself.  Look in setup_llvm.txt for instructions.
+I worked with llvm trunk and try to use the latest Xcode to track the latest swift version. When things get more stable, I'll try to settle on an llvm version.
+As of this writing I have llvm revision #230189 and Xcode 6.3 beta.
 
 If clang/llvm is installed at the same path as in setup_llvm.txt (/opt/llvm), you can then open and compile swiftpp.xcodeproj. You will have to edit the project's paths otherwise.
 
