@@ -1,48 +1,105 @@
+#!/bin/sh
 ##
 # All the step to get a working clang C++ compiler with standard libraries.
 ##
 
+export BUILD_DIR=/opt/llvm_build
+export INSTALL_DIR=/opt/llvm
 
-BUILD_DIR=/opt/llvm_build
-INSTALL_DIR=/opt/llvm
+if [ ! -e "$BUILD_DIR" ] || [ ! -e "$INSTALL_DIR" ]
+then
+	echo "The script will create folders $BUILD_DIR and $INSTALL_DIR for building and installing clang/llvm."
+	echo "Your password might be required."
+	
+	sudo mkdir -p "$BUILD_DIR"
+	sudo mkdir -p "$INSTALL_DIR"
+fi
 
-mkdir -p "$BUILD_DIR"
-mkdir -p "$INSTALL_DIR"
+if [ ! -w "$BUILD_DIR" ] || [ ! -w "$INSTALL_DIR" ] || [ ! -x "$BUILD_DIR" ] || [ ! -x "$INSTALL_DIR" ]
+then
+	echo "The folders $BUILD_DIR and $INSTALL_DIR need to be writable by your user."
+	echo "Your password might be required to change permissions."
+	
+	USER=`whoami`
+	sudo chown -R $USER:staff "$BUILD_DIR"
+	sudo chown -R $USER:staff "$INSTALL_DIR"
+fi
 
-# get the sources
-cd "$BUILD_DIR"
-svn co http://llvm.org/svn/llvm-project/llvm/trunk llvm
-cd "$BUILD_DIR/llvm/tools"
-svn co http://llvm.org/svn/llvm-project/cfe/trunk clang
-cd "$BUILD_DIR/llvm/tools/clang/tools"
-svn co http://llvm.org/svn/llvm-project/clang-tools-extra/trunk extra
-cd "$BUILD_DIR/llvm/projects"
-svn co http://llvm.org/svn/llvm-project/compiler-rt/trunk compiler-rt
-cd "$BUILD_DIR"
-svn co http://llvm.org/svn/llvm-project/libcxx/trunk libcxx
+echo "---> cleaning up previous install"
+rm -rf "$INSTALL_DIR"/*
 
-# or update
-cd "$BUILD_DIR/llvm"
-svn up tools/clang ; svn up tools/clang/tools/extra ; svn up projects/compiler-rt
-cd "$BUILD_DIR/libcxx"
-svn up
+# get or update the sources
+echo "---> getting latest llvm"
+if [ -e "$BUILD_DIR/llvm/.svn" ]
+then
+	cd "$BUILD_DIR/llvm" || exit -1
+	svn up
+else
+	cd "$BUILD_DIR" || exit -1
+	svn co http://llvm.org/svn/llvm-project/llvm/tags/RELEASE_360/final llvm || exit -1
+fi
 
-# build/install llvm
-cd "$BUILD_DIR/llvm"
+echo "---> getting latest clang"
+if [ -e "$BUILD_DIR/llvm/tools/clang/.svn" ]
+then
+	cd "$BUILD_DIR/llvm/tools/clang" || exit -1
+	svn up
+else
+	cd "$BUILD_DIR/llvm/tools" || exit -1
+	svn co http://llvm.org/svn/llvm-project/cfe/tags/RELEASE_360/final clang || exit -1
+fi
+
+echo "---> getting latest clang/tools/extra"
+if [ -e "$BUILD_DIR/llvm/tools/clang/tools/extra/.svn" ]
+then
+	cd "$BUILD_DIR/llvm/tools/clang/tools/extra" || exit -1
+	svn up
+else
+	cd "$BUILD_DIR/llvm/tools/clang/tools" || exit -1
+	svn co http://llvm.org/svn/llvm-project/clang-tools-extra/tags/RELEASE_360/final extra || exit -1
+fi
+
+echo "---> getting latest compiler-rt"
+if [ -e "$BUILD_DIR/llvm/projects/compiler-rt/.svn" ]
+then
+	cd "$BUILD_DIR/llvm/projects/compiler-rt" || exit -1
+	svn up
+else
+	cd "$BUILD_DIR/llvm/projects" || exit -1
+	svn co http://llvm.org/svn/llvm-project/compiler-rt/tags/RELEASE_360/final compiler-rt || exit -1
+fi
+
+echo "---> getting latest libc++"
+if [ -e "$BUILD_DIR/libcxx/.svn" ]
+then
+	cd "$BUILD_DIR/libcxx" || exit -1
+	svn up
+else
+	cd "$BUILD_DIR" || exit -1
+	svn co http://llvm.org/svn/llvm-project/libcxx/tags/RELEASE_360/final libcxx || exit -1
+fi
+
+echo "---> building clang/llvm"
+cd "$BUILD_DIR/llvm" || exit -1
 ./configure --prefix="$INSTALL_DIR" # add --enable-optimized for release build
 make
+echo "---> installing clang/llvm"
 make install
 
-# build/install libc++
-cd "$BUILD_DIR/libcxx/lib"
+echo "---> building libc++"
+cd "$BUILD_DIR/libcxx/lib" || exit -1
 export TRIPLE=-apple-
 export CXX="$INSTALL_DIR/bin/clang++"
 export CC="$INSTALL_DIR/bin/clang"
 ./buildit
-cd ../include
+
+echo "---> installing libc++"
+cd ../include || exit -1
 mkdir -p "$INSTALL_DIR/include/c++/v1/ext"
 tar cf - --exclude=support . |  (cd "$INSTALL_DIR/include/c++/v1" && tar xf -)
 cd ..
 ditto lib/libc++.1.dylib "$INSTALL_DIR/lib/libc++.1.dylib"
 cd "$INSTALL_DIR/lib"
 ln -s libc++.1.dylib libc++.dylib
+
+echo "---> Done!"
