@@ -3,7 +3,7 @@
 //  swiftpp
 //
 //  Created by Sandy Martel on 3/02/2015.
-//  Copyright (c) 2015 dootaini. All rights reserved.
+//  Copyright (c) 2015 Sandy Martel. All rights reserved.
 //
 
 #ifndef H_SwiftppObjcTemplates

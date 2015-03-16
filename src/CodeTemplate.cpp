@@ -3,7 +3,7 @@
 //  swiftpp
 //
 //  Created by Sandy Martel on 2014/09/30.
-//  Copyright (c) 2014年 dootaini. All rights reserved.
+//  Copyright (c) 2014年 Sandy Martel. All rights reserved.
 //
 
 #include "CodeTemplate.h"
@@ -25,10 +25,16 @@ namespace
 	inline void skipCloseTag( const char *&ptr ) { ptr += 2; } // }>
 }
 
-CodeTemplate::CodeTemplate( const char *i_begin, const char *i_end )
-	: _tmpl( i_begin, i_end )
+CodeTemplate::CodeTemplate( const substringref &i_tmpl )
+	: _tmpl( i_tmpl )
 {
-	_tmpl.trim();
+	// trim new line at the start
+	while ( not _tmpl.empty() and *_tmpl.begin() == '\n' )
+		_tmpl.pop_front();
+	
+	// trim 0 at end
+	while ( not _tmpl.empty() and _tmpl.back() == 0 )
+		_tmpl.pop_back();
 }
 
 void CodeTemplate::render( const CodeTemplateModel &i_model, llvm::raw_ostream &ostr )
@@ -57,7 +63,7 @@ void CodeTemplate::render( const substringref &i_tmpl, llvm::raw_ostream &ostr )
 				// looking for the end of a section
 				if ( startTag[2] == '/' and substringref( startOpenSectionTag + 3, endOpenSectionTag - 2 ) == substringref( startTag + 3, endTag - 2 ) )
 				{
-					std::string sectionName( startOpenSectionTag + 3, endOpenSectionTag - 2 );
+					substringref sectionName( startOpenSectionTag + 3, endOpenSectionTag - 2 );
 
 					// this allow nicer formatting in the template
 					if ( *endOpenSectionTag == '\n' )
@@ -85,7 +91,7 @@ void CodeTemplate::render( const substringref &i_tmpl, llvm::raw_ostream &ostr )
 			else
 			{
 				// name
-				resolveName( std::string( startTag + 2, endTag - 2 ), ostr );
+				resolveName( substringref( startTag + 2, endTag - 2 ), ostr );
 				last = ptr + 2;
 			}
 			startTag = nullptr;
@@ -107,21 +113,23 @@ void CodeTemplate::render( const substringref &i_tmpl, llvm::raw_ostream &ostr )
 		ostr.write( last, ptr - last );
 }
 
-void CodeTemplate::resolveName( const std::string &i_name, llvm::raw_ostream &ostr )
+void CodeTemplate::resolveName( const substringref &i_name, llvm::raw_ostream &ostr )
 {
+	std::string name( i_name.begin(), i_name.end() );
 	for ( auto m : _context )
 	{
-		auto it = m.names.find( i_name );
+		auto it = m.names.find( name );
 		if ( it != m.names.end() )
 			it->second( ostr );
 	}
 }
 
-bool CodeTemplate::resolveSection( const std::string &i_name, size_t i_index, CodeTemplateModel &o_model )
+bool CodeTemplate::resolveSection( const substringref &i_name, size_t i_index, CodeTemplateModel &o_model )
 {
+	std::string name( i_name.begin(), i_name.end() );
 	for ( auto m : _context )
 	{
-		auto it = m.sections.find( i_name );
+		auto it = m.sections.find( name );
 		if ( it != m.sections.end() )
 		{
 			if ( i_index >= it->second.nb )

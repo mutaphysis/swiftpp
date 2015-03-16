@@ -81,10 +81,13 @@ fi
 
 echo "---> building clang/llvm"
 cd "$BUILD_DIR/llvm" || exit -1
-./configure --prefix="$INSTALL_DIR" # add --enable-optimized for release build
+./configure --prefix="$INSTALL_DIR" --enable-optimized
 make
 echo "---> installing clang/llvm"
 make install
+cd "$INSTALL_DIR"/bin
+ln -s clang++ c++
+ln -s clang cc
 
 echo "---> building libc++"
 cd "$BUILD_DIR/libcxx/lib" || exit -1

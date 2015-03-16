@@ -91,7 +91,7 @@ void SwiftppASTConsumer::HandleTranslationUnit( clang::ASTContext &i_ctx )
 		CXXEnum cxxEnum( t->getNameAsString(), s );
 		for ( auto v = t->enumerator_begin(); v != t->enumerator_end(); ++v )
 		{
-			cxxEnum.addValue( v->getNameAsString(), v->getInitVal().getExtValue() );
+			cxxEnum.addValue( v->getNameAsString(), v->getInitVal().getSExtValue() );
 		}
 		_data.addEnum( cxxEnum );
 	}

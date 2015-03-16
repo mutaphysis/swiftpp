@@ -3,7 +3,7 @@
 //  swiftpp
 //
 //  Created by Sandy Martel on 2014/09/10.
-//  Copyright (c) 2014年 dootaini. All rights reserved.
+//  Copyright (c) 2014年 Sandy Martel. All rights reserved.
 //
 
 #include "SwiftppObjcOutput.h"
@@ -162,7 +162,7 @@ void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) co
 									} };
 						} );
 	
-	CodeTemplate renderer( std::begin(kCXX_OBJC_PROTOCOLS_H_TEMPLATE), std::end(kCXX_OBJC_PROTOCOLS_H_TEMPLATE) );
+	CodeTemplate renderer( kCXX_OBJC_PROTOCOLS_H_TEMPLATE );
 	renderer.render( model, ostr );
 }
 
@@ -177,7 +177,7 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) cons
 						o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
 					} };
 
-	CodeTemplate renderer( std::begin(kCXX_OBJC_PROXIES_H_TEMPLATE), std::end(kCXX_OBJC_PROXIES_H_TEMPLATE) );
+	CodeTemplate renderer( kCXX_OBJC_PROXIES_H_TEMPLATE );
 	renderer.render( model, ostr );
 }
 
@@ -215,7 +215,7 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) con
 						};
 					} };
 
-	CodeTemplate renderer( std::begin(kCXX_OBJC_PROXIES_MM_TEMPLATE), std::end(kCXX_OBJC_PROXIES_MM_TEMPLATE) );
+	CodeTemplate renderer( kCXX_OBJC_PROXIES_MM_TEMPLATE );
 	renderer.render( model, ostr );
 }
 
@@ -240,7 +240,7 @@ void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
 								} };
 					} };
 	
-	CodeTemplate renderer( std::begin(kCXX_SUBCLASSES_MM_TEMPLATE), std::end(kCXX_SUBCLASSES_MM_TEMPLATE) );
+	CodeTemplate renderer( kCXX_SUBCLASSES_MM_TEMPLATE );
 	renderer.render( model, ostr );
 }
 
