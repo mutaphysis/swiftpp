@@ -32,7 +32,8 @@ void SwiftppASTConsumer::HandleTranslationUnit( clang::ASTContext &i_ctx )
 		return;
 
 	// find all C++ #include needed for the converted C++ types
-	auto collectInclude = [&]( clang::ASTContext &i_ctx, const clang::QualType &i_type )
+	auto data = &_data;
+	auto collectInclude = [data]( clang::ASTContext &i_ctx, const clang::QualType &i_type )
 		{
 			auto decl = i_type->getAsCXXRecordDecl();
 			if ( decl != nullptr )
@@ -41,7 +42,7 @@ void SwiftppASTConsumer::HandleTranslationUnit( clang::ASTContext &i_ctx )
 			    clang::PresumedLoc ploc = i_ctx.getSourceManager().getPresumedLoc( loc );
 			    if ( not ploc.isInvalid() )
 				{
-					this->_data.addCXXTypeIncludePath( ploc.getFilename() );
+					data->addCXXTypeIncludePath( ploc.getFilename() );
 				}
 			}
 		};

@@ -81,8 +81,10 @@ fi
 
 echo "---> building clang/llvm"
 cd "$BUILD_DIR/llvm" || exit -1
-./configure --prefix="$INSTALL_DIR" --enable-optimized
-make
+./configure --prefix="$INSTALL_DIR" #--enable-optimized
+JOBS=`sysctl -n hw.logicalcpu`
+JOBS=`echo "if ($JOBS > 1) $JOBS - 1 else $JOBS" | bc`
+make -j$JOBS
 echo "---> installing clang/llvm"
 make install
 cd "$INSTALL_DIR"/bin

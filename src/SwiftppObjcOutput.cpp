@@ -131,36 +131,63 @@ void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) co
 {
 	CodeTemplateModel model;
 	auto data = _data;
-	model.sections["classes"] = CodeTemplateModel::Section{ data->classes().size(),
-						[=]( size_t i_index, CodeTemplateModel &o_model )
+	model.sections["classes"] = CodeTemplateModel::ListSection{ data->classes().size(),
+						[this,data]( size_t i, CodeTemplateModel &o_model )
 						{
-							auto classPtr = &(data->classes()[i_index]);
-							o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
-							o_model.sections["methods"] = CodeTemplateModel::Section{ classPtr->methods().size(),
-								[=]( size_t i_index, CodeTemplateModel &o_model )
+							auto classPtr = &(data->classes()[i]);
+							o_model.names["class_name"] = [classPtr]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
+							o_model.sections["methods"] = CodeTemplateModel::ListSection{ classPtr->methods().size(),
+								[this,classPtr]( size_t i, CodeTemplateModel &o_model )
 								{
 									auto methodPtr = classPtr->methods().begin();
-									std::advance( methodPtr, i_index );
-									o_model.names["objc_method_decl"] = [=]( llvm::raw_ostream &ostr ){ this->write_objc_method_decl( ostr, *methodPtr ); };
+									std::advance( methodPtr, i );
+									o_model.names["objc_method_decl"] = [this,methodPtr]( llvm::raw_ostream &ostr ){ this->write_objc_method_decl( ostr, *methodPtr ); };
 								} };
 						} };
 	model.sections["has_enums"] = CodeTemplateModel::BoolSection( not data->enums().empty(),
-						[=]( CodeTemplateModel &o_model )
+						[data]( CodeTemplateModel &o_model )
 						{
-							o_model.sections["enums"] = CodeTemplateModel::Section{ data->enums().size(),
-									[=]( size_t i_index, CodeTemplateModel &o_model )
+							o_model.sections["enums"] = CodeTemplateModel::ListSection{ data->enums().size(),
+									[data]( size_t i, CodeTemplateModel &o_model )
 									{
-										auto enumPtr = &(data->enums()[i_index]);
-										o_model.names["enum_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << enumPtr->name(); };
-										o_model.names["enum_type"] = [=]( llvm::raw_ostream &ostr ){ ostr << (enumPtr->isSigned() ? "NSInteger" : "NSUInteger"); };
-										o_model.sections["enum_values"] = CodeTemplateModel::Section{ enumPtr->values().size(),
-											[=]( size_t i_index, CodeTemplateModel &o_model )
+										auto enumPtr = &(data->enums()[i]);
+										o_model.names["enum_name"] = [enumPtr]( llvm::raw_ostream &ostr ){ ostr << enumPtr->name(); };
+										o_model.names["enum_type"] = [enumPtr]( llvm::raw_ostream &ostr ){ ostr << (enumPtr->isSigned() ? "NSInteger" : "NSUInteger"); };
+										o_model.sections["enum_values"] = CodeTemplateModel::ListSection{ enumPtr->values().size(),
+											[enumPtr]( size_t i, CodeTemplateModel &o_model )
 											{
-												auto valPtr = &(enumPtr->values()[i_index]);
-												o_model.names["enum_value_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << valPtr->first << " = " << valPtr->second; };
+												auto valPtr = &(enumPtr->values()[i]);
+												o_model.names["enum_value_name"] = [valPtr]( llvm::raw_ostream &ostr ){ ostr << valPtr->first << " = " << valPtr->second; };
 											} };
 									} };
 						} );
+	
+	std::vector<std::string> objcClassNames;
+	for ( auto it : _data->converters() )
+	{
+		clang::QualType t[2];
+		t[0] = it.to().getCanonicalType();
+		t[1] = it.from().getCanonicalType();
+		for ( int i = 0; i < 2; ++i )
+		{
+			auto s = t[i].split();
+			auto itype = clang::dyn_cast<clang::ObjCObjectPointerType>( s.Ty );
+			if ( itype != nullptr )
+			{
+				auto v = itype->getPointeeType().getAsString();
+				std::cout << v << std::endl;
+				if ( std::find( objcClassNames.begin(), objcClassNames.end(), v ) == objcClassNames.end() )
+					objcClassNames.push_back( v );
+			}
+			//! @todo: protocols ?
+		}
+	}
+	model.sections["objc_class_proto"] = CodeTemplateModel::ListSection{ objcClassNames.size(),
+							[&objcClassNames]( size_t i, CodeTemplateModel &o_model )
+							{
+								auto class_proto_name = objcClassNames[i];
+								o_model.names["objc_class_proto_name"] = [class_proto_name]( llvm::raw_ostream &ostr ){ ostr << class_proto_name; };
+							} };
 	
 	CodeTemplate renderer( kCXX_OBJC_PROTOCOLS_H_TEMPLATE );
 	renderer.render( model, ostr );
@@ -170,11 +197,11 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_h( llvm::raw_ostream &ostr ) cons
 {
 	CodeTemplateModel model;
 	auto data = _data;
-	model.sections["classes"] = CodeTemplateModel::Section{ data->classes().size(),
-					[=]( size_t i_index, CodeTemplateModel &o_model )
+	model.sections["classes"] = CodeTemplateModel::ListSection{ data->classes().size(),
+					[data]( size_t i, CodeTemplateModel &o_model )
 					{
-						auto classPtr = &(data->classes()[i_index]);
-						o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
+						auto classPtr = &(data->classes()[i]);
+						o_model.names["class_name"] = [classPtr]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
 					} };
 
 	CodeTemplate renderer( kCXX_OBJC_PROXIES_H_TEMPLATE );
@@ -185,31 +212,31 @@ void SwiftppObjcOutput::write_cxx_objc_proxies_mm( llvm::raw_ostream &ostr ) con
 {
 	CodeTemplateModel model;
 	auto data = _data;
-	model.sections["classes"] = CodeTemplateModel::Section{ data->classes().size(),
-					[=]( size_t i_index, CodeTemplateModel &o_model )
+	model.sections["classes"] = CodeTemplateModel::ListSection{ data->classes().size(),
+					[this,data]( size_t i, CodeTemplateModel &o_model )
 					{
-						auto classPtr = &(data->classes()[i_index]);
-						o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
-						o_model.sections["methods"] = CodeTemplateModel::Section{ classPtr->methods().size(),
-								[=]( size_t i_index, CodeTemplateModel &o_model )
+						auto classPtr = &(data->classes()[i]);
+						o_model.names["class_name"] = [classPtr]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
+						o_model.sections["methods"] = CodeTemplateModel::ListSection{ classPtr->methods().size(),
+								[this,classPtr]( size_t i, CodeTemplateModel &o_model )
 								{
 									auto methodPtr = classPtr->methods().begin();
-									std::advance( methodPtr, i_index );
-									o_model.names["c_proxy_method_decl"] = [=]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_decl( ostr, classPtr->name(), *methodPtr ); };
-									o_model.names["objc_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_objc_method_impl( ostr, classPtr->name(), *methodPtr ); };
+									std::advance( methodPtr, i );
+									o_model.names["c_proxy_method_decl"] = [this,classPtr,methodPtr]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_decl( ostr, classPtr->name(), *methodPtr ); };
+									o_model.names["objc_method_impl"] = [this,classPtr,methodPtr]( llvm::raw_ostream &ostr ){ this->write_objc_method_impl( ostr, classPtr->name(), *methodPtr ); };
 								} };
 					} };
-	model.sections["includes_for_cxx_types"] = CodeTemplateModel::Section{ data->includesForCXXTypes().size(),
-					[=]( size_t i_index, CodeTemplateModel &o_model )
+	model.sections["includes_for_cxx_types"] = CodeTemplateModel::ListSection{ data->includesForCXXTypes().size(),
+					[data]( size_t i, CodeTemplateModel &o_model )
 					{
-						auto includeName = data->formatIncludeName( data->includesForCXXTypes()[i_index] );
-						o_model.names["include_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << includeName; };
+						auto includeName = data->formatIncludeName( data->includesForCXXTypes()[i] );
+						o_model.names["include_name"] = [includeName]( llvm::raw_ostream &ostr ){ ostr << includeName; };
 					} };
-	model.sections["converters"] = CodeTemplateModel::Section{ data->converters().size(),
-					[=]( size_t i_index, CodeTemplateModel &o_model )
+	model.sections["converters"] = CodeTemplateModel::ListSection{ data->converters().size(),
+					[this,data]( size_t i, CodeTemplateModel &o_model )
 					{
-						auto convPtr = &(data->converters()[i_index]);
-						o_model.names["converter_decl"] = [=]( llvm::raw_ostream &ostr )
+						auto convPtr = &(data->converters()[i]);
+						o_model.names["converter_decl"] = [this,convPtr]( llvm::raw_ostream &ostr )
 						{
 							ostr << this->type2String(convPtr->to()) + " " + convPtr->name() + "( " + this->type2String(convPtr->from()) + " )";
 						};
@@ -224,19 +251,19 @@ void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
 	CodeTemplateModel model;
 	auto data = _data;
 	auto inputFile = _inputFile;
-	model.names["bridge_include"] = [=]( llvm::raw_ostream &ostr ){ ostr << data->formatIncludeName( _inputFile ); };
-	model.sections["classes"] = CodeTemplateModel::Section{ data->classes().size(),
-					[=]( size_t i_index, CodeTemplateModel &o_model )
+	model.names["bridge_include"] = [data,&inputFile]( llvm::raw_ostream &ostr ){ ostr << data->formatIncludeName( inputFile ); };
+	model.sections["classes"] = CodeTemplateModel::ListSection{ data->classes().size(),
+					[this,data]( size_t i, CodeTemplateModel &o_model )
 					{
-						auto classPtr = &(data->classes()[i_index]);
-						o_model.names["class_name"] = [=]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
-						o_model.sections["methods"] = CodeTemplateModel::Section{ classPtr->methods().size(),
-								[=]( size_t i_index, CodeTemplateModel &o_model )
+						auto classPtr = &(data->classes()[i]);
+						o_model.names["class_name"] = [classPtr]( llvm::raw_ostream &ostr ){ ostr << classPtr->name(); };
+						o_model.sections["methods"] = CodeTemplateModel::ListSection{ classPtr->methods().size(),
+								[this,classPtr]( size_t i, CodeTemplateModel &o_model )
 								{
 									auto methodPtr = classPtr->methods().begin();
-									std::advance( methodPtr, i_index );
-									o_model.names["cpp_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_cpp_method_impl( ostr, classPtr->name(), *methodPtr ); };
-									o_model.names["c_proxy_method_impl"] = [=]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_impl( ostr, classPtr->name(), *methodPtr ); };
+									std::advance( methodPtr, i );
+									o_model.names["cpp_method_impl"] = [this,classPtr,methodPtr]( llvm::raw_ostream &ostr ){ this->write_cpp_method_impl( ostr, classPtr->name(), *methodPtr ); };
+									o_model.names["c_proxy_method_impl"] = [this,classPtr,methodPtr]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_impl( ostr, classPtr->name(), *methodPtr ); };
 								} };
 					} };
 	
@@ -263,7 +290,7 @@ void SwiftppObjcOutput::write_c_proxy_method_decl( llvm::raw_ostream &ostr, cons
 		if ( not i_method.isStatic() )
 			ostr << i_className << "_subclass *i_this";
 	}
-	ostr << write_cxx_params_decl( i_method, not i_method.isStatic(), [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+	ostr << write_cxx_params_decl( i_method, not i_method.isStatic(), [this]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
 	ostr << " )";
 }
 
@@ -274,7 +301,7 @@ void SwiftppObjcOutput::write_objc_method_impl( llvm::raw_ostream &ostr, const s
 	{
 		ostr << "\n{\n  self = [super init];\n  if ( self )\n";
 		ostr << "    _ptr = " << i_className << "_subclass_new( self";
-		ostr << write_cxx_params_decl( i_method, true, [&]( const CXXParam &p ){ return this->converterForObjcType2CXXType( p.type(), p.name() ); } );
+		ostr << write_cxx_params_decl( i_method, true, [this]( const CXXParam &p ){ return this->converterForObjcType2CXXType( p.type(), p.name() ); } );
 		ostr << " );\n  return self;\n}";
 	}
 	else
@@ -289,7 +316,7 @@ void SwiftppObjcOutput::write_objc_method_impl( llvm::raw_ostream &ostr, const s
 		s.append( "( " );
 		if ( not i_method.isStatic() )
 			s.append( "_this" );
-		s.append( write_cxx_params_decl( i_method, not i_method.isStatic(), [&]( const CXXParam &p ){ return this->converterForObjcType2CXXType( p.type(), p.name() ); } ) );
+		s.append( write_cxx_params_decl( i_method, not i_method.isStatic(), [this]( const CXXParam &p ){ return this->converterForObjcType2CXXType( p.type(), p.name() ); } ) );
 		s.append( " )" );
 		if ( not i_method.returnType()->isVoidType() )
 		{
@@ -307,35 +334,35 @@ void SwiftppObjcOutput::write_cpp_method_impl( llvm::raw_ostream &ostr, const st
 {
 	if ( i_method.isConstructor() )
 	{
-		ostr << "    " << i_method.name() << "_subclass( id<" << i_className << "_protocol> i_link";
-		ostr << write_cxx_params_decl( i_method, true, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
-		ostr << " )\n      : " << i_className << "(";
-		ostr << write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return p.name(); } );
-		ostr << " ),\n      _link( i_link ){}";
+		ostr << "  " << i_method.name() << "_subclass( id<" << i_className << "_protocol> i_link";
+		ostr << write_cxx_params_decl( i_method, true, [this]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+		ostr << " )\n   : " << i_className << "(";
+		ostr << write_cxx_params_decl( i_method, false, []( const CXXParam &p ){ return p.name(); } );
+		ostr << " ),\n    _link( i_link ){}";
 	}
 	else if ( i_method.isVirtual() )
 	{
-		ostr << "    virtual ";
+		ostr << "  virtual ";
 		ostr << type2String( i_method.returnType() ) << " " << i_method.name() << "(";
-		ostr << write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+		ostr << write_cxx_params_decl( i_method, false, [this]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
 		ostr << " )";
 		if ( i_method.isConst() )
 			ostr << " const";
-		ostr << "\n    {\n";
-		ostr << "      if ( _link == nil )\n";
+		ostr << "\n  {\n";
+		ostr << "    if ( _link == nil )\n";
 		if ( i_method.isPureVirtual() )
 		{
-			ostr << "        abort(); // pure-virtual call!\n";
+			ostr << "    abort(); // pure-virtual call!\n";
 		}
 		else
 		{
-			ostr << "        ";
+			ostr << "      ";
 			if ( not i_method.returnType()->isVoidType() )
 				ostr << "return ";
 			ostr << i_className << "::" << i_method.name() << "(";
-			ostr << write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return p.name(); } );
+			ostr << write_cxx_params_decl( i_method, false, []( const CXXParam &p ){ return p.name(); } );
 			ostr << " );\n";
-			ostr << "      else\n  ";
+			ostr << "    else\n  ";
 		}
 		std::string s;
 		s.append( "[_link " );
@@ -356,12 +383,12 @@ void SwiftppObjcOutput::write_cpp_method_impl( llvm::raw_ostream &ostr, const st
 		}
 		s.append( 1, ']' );
 		
-		ostr << "      ";
+		ostr << "    ";
 		if ( not i_method.returnType()->isVoidType() )
 			ostr << "return " << converterForObjcType2CXXType( i_method.returnType(), s );
 		else
 			ostr << s;
-		ostr << ";\n    }";
+		ostr << ";\n  }";
 	}
 }
 
@@ -375,12 +402,12 @@ void SwiftppObjcOutput::write_c_proxy_method_impl( llvm::raw_ostream &ostr, cons
 		if ( not i_method.isStatic() )
 			ostr << i_className << "_subclass *i_this";
 	}
-	ostr << write_cxx_params_decl( i_method, not i_method.isStatic(), [&]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+	ostr << write_cxx_params_decl( i_method, not i_method.isStatic(), [this]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
 	ostr << " )\n{\n";
 	if ( i_method.isConstructor() )
 	{
 		ostr << "  return new " << i_className << "_subclass( i_link";
-		ostr << write_cxx_params_decl( i_method, true, [&]( const CXXParam &p ){ return p.name(); } );
+		ostr << write_cxx_params_decl( i_method, true, []( const CXXParam &p ){ return p.name(); } );
 		ostr << " );\n";
 	}
 	else
@@ -395,7 +422,7 @@ void SwiftppObjcOutput::write_c_proxy_method_impl( llvm::raw_ostream &ostr, cons
 		else
 			ostr << "i_this->";
 		ostr << i_method.name() << "(";
-		ostr << write_cxx_params_decl( i_method, false, [&]( const CXXParam &p ){ return p.name(); } );
+		ostr << write_cxx_params_decl( i_method, false, []( const CXXParam &p ){ return p.name(); } );
 		ostr << " );\n";
 	}
 	ostr << "}";

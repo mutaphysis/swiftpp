@@ -17,8 +17,9 @@ const char kCXX_OBJC_PROTOCOLS_H_TEMPLATE[] = R"(
 #define H_CXX_OBJC_PROTOCOLS
 
 #import <Foundation/Foundation.h>
-#import <AppKit/AppKit.h>
 
+<{#objc_class_proto}>@class <{objc_class_proto_name}>;
+<{/objc_class_proto}>
 <{#has_enums}>// enums definition
 <{#enums}>
 typedef NS_ENUM(<{enum_name}>_,<{enum_type}>)
@@ -26,8 +27,7 @@ typedef NS_ENUM(<{enum_name}>_,<{enum_type}>)
 <{#enum_values}>
 <{enum_name}>_<{enum_value_name}>,
 <{/enum_values}>
-};
-<{/enums}><{/has_enums}>
+};<{/enums}><{/has_enums}>
 
 // Objective-C proxy protocols for each classes
 
@@ -67,14 +67,15 @@ const char kCXX_OBJC_PROXIES_MM_TEMPLATE[] = R"(
 #include <string>
 #include <vector>
 #include <map>
+#include <cassert>
 
 <{#includes_for_cxx_types}>
 #include "<{include_name}>"
 <{/includes_for_cxx_types}>
 namespace swift_converter
 {
-	<{#converters}><{converter_decl}>;
-	<{/converters}>}
+<{#converters}>  <{converter_decl}>;
+<{/converters}>}
 
 <{#classes}>
 //********************************
@@ -96,9 +97,9 @@ void <{class_name}>_subclass_delete( <{class_name}>_subclass *i_this );
 
 - (void)dealloc
 {
-	<{class_name}>_subclass_delete( _this );
+  <{class_name}>_subclass_delete( _this );
 #if !__has_feature(objc_arc)
-	[super dealloc];
+  [super dealloc];
 #endif
 }
 <{#methods}>
@@ -120,9 +121,9 @@ const char kCXX_SUBCLASSES_MM_TEMPLATE[] = R"(
 template<typename T>
 struct LinkSaver
 {
-	T saved, &link;
-	LinkSaver( T &i_link ) : saved( i_link ), link( i_link ) { link = nil; }
-	~LinkSaver() { link = saved; }
+  T saved, &link;
+  LinkSaver( T &i_link ) : saved( i_link ), link( i_link ) { link = nil; }
+  ~LinkSaver() { link = saved; }
 };
 
 // the wrapping sub-classes
@@ -131,12 +132,11 @@ struct LinkSaver
 class <{class_name}>_subclass : public <{class_name}>
 {
 public:
-	id<<{class_name}>_protocol> _link;
-	
-	<{#methods}>
-	<{cpp_method_impl}>
-	<{/methods}>
-};
+  id<<{class_name}>_protocol> _link;
+
+<{#methods}>
+<{cpp_method_impl}>
+<{/methods}>};
 
 <{/classes}>
 // the c implementations
@@ -144,7 +144,7 @@ public:
 <{#classes}>
 void <{class_name}>_subclass_delete( <{class_name}>_subclass *i_this )
 {
-	delete i_this;
+  delete i_this;
 }
 
 <{#methods}>

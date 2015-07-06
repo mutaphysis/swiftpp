@@ -23,21 +23,21 @@
 */
 struct CodeTemplateModel
 {
-	// for a name, just a callback that write to the stream
-	std::unordered_map<std::string,std::function<void ( llvm::raw_ostream & )>> names;
-	
 	// for a section, a number of items (0 mean don't show) and an indexed callback that
 	// provide another model for each item in the section.
 	
-	struct Section { size_t nb; std::function<void ( size_t, CodeTemplateModel & )> callback; };
+	struct ListSection { size_t nb; std::function<void ( size_t, CodeTemplateModel & )> callback; };
 
 	//! convinience function for boolean section
-	inline static Section BoolSection( bool on, std::function<void ( CodeTemplateModel & )> callback )
+	inline static ListSection BoolSection( bool on, std::function<void ( CodeTemplateModel & )> callback )
 	{
-		return Section{ size_t(on?1:0), [=]( size_t, CodeTemplateModel &m ){ callback( m ); } };
+		return ListSection{ size_t(on?1:0), [callback]( size_t, CodeTemplateModel &m ){ callback( m ); } };
 	}
 
-	std::unordered_map<std::string,Section> sections;
+	std::unordered_map<std::string,ListSection> sections;
+
+	// for a name, just a callback that write to the stream
+	std::unordered_map<std::string,std::function<void ( llvm::raw_ostream & )>> names;
 };
 
 /*!
