@@ -60,7 +60,7 @@ class ShapeView : NSView
 		}
 		
 		// handle input
-		var	pt = self.convertPoint( theEvent.locationInWindow, fromView: nil )
+		let	pt = self.convertPoint( theEvent.locationInWindow, fromView: nil )
 
 		if _currentPath == nil
 		{
@@ -76,7 +76,7 @@ class ShapeView : NSView
 	override func mouseDragged(theEvent: NSEvent)
 	{
 		// just append to the current path and redraw
-		var	pt = self.convertPoint( theEvent.locationInWindow, fromView: nil )
+		let	pt = self.convertPoint( theEvent.locationInWindow, fromView: nil )
 		
 		_currentPath!.lineToPoint( pt );
 		self.needsDisplay = true
@@ -85,7 +85,7 @@ class ShapeView : NSView
 	override func mouseUp(theEvent: NSEvent)
 	{
 		// just append to the current path and redraw
-		var	pt = self.convertPoint( theEvent.locationInWindow, fromView: nil )
+		let	pt = self.convertPoint( theEvent.locationInWindow, fromView: nil )
 
 		_currentPath!.lineToPoint( pt );
 		
@@ -114,6 +114,8 @@ class ShapeView : NSView
 		// by a user defined converter, see cxx-converter.mm
 		override func shapeDetected( name: String!, path: NSBezierPath! )
 		{
+			super.shapeDetected( name, path: path )
+			
 			// we guessed one shape, record it!
 			_view._coolPathList.append( path! )
 			_view.report( name )
@@ -122,7 +124,6 @@ class ShapeView : NSView
 	
 	func report( name: String )
 	{
-		println( name )
 		_textView.textStorage?.appendAttributedString( NSAttributedString( string: name + "\n" ) )
 	}
 	

@@ -10,6 +10,7 @@
 #include "ShapeDetector.h"
 #include "DetectCorners.h"
 #include "GeometryUtils.h"
+#include <iostream>
 
 namespace
 {
@@ -418,6 +419,7 @@ void ShapeDetector::report( const std::string &i_name, const std::vector<CGPoint
 }
 
 
-void ShapeDetector::shapeDetected( const std::string & /*i_name*/, const Path2D & /*i_path*/ )
+void ShapeDetector::shapeDetected( const std::string &i_name, const Path2D & /*i_path*/ )
 {
+	std::cout << i_name << std::endl;
 }

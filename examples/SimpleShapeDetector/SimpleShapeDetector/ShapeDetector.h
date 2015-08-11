@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+#define swift __attribute__((annotate("swift")))
+
 /*!
    @brief detect shapes from polylines.
 	

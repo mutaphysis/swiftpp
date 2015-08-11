@@ -11,7 +11,7 @@
 
 const char kCXX_OBJC_PROTOCOLS_H_TEMPLATE[] = R"(
 // generated cxx-objc-protocols.h
-//  pure Objective-C, cannot contain any C++\n"
+//  pure Objective-C, cannot contain any C++
 
 #ifndef H_CXX_OBJC_PROTOCOLS
 #define H_CXX_OBJC_PROTOCOLS

@@ -42,13 +42,13 @@ Building
 
 You will need a clang/llvm install to be able to compile swiftpp itself.  Look in setup_llvm.txt for instructions.
 I worked with llvm trunk and try to use the latest Xcode to track the latest swift version. When things get more stable, I'll try to settle on an llvm version.
-As of this writing I have llvm revision #230189 and Xcode 6.3 beta.
+As of this writing I have llvm revision #243874 and Xcode 7 beta 5.
 
 If clang/llvm is installed at the same path as in setup_llvm.txt (/opt/llvm), you can then open and compile swiftpp.xcodeproj. You will have to edit the project's paths otherwise.
 
 That's it, you should now have a tool named swiftpp at the repository root level.
 
-Note that if do an non-optimised (debug) build of clang/llvm, the swiftpp pre-compiler might run very slow.
+Note that if you do an non-optimised (debug) build of clang/llvm, the swiftpp pre-compiler might run very slow.
 
 
 Usage
@@ -106,7 +106,7 @@ OK, pretty cool! But at this point I have to ask myself what exactly have I crea
 
 In that perspective it is more similar to swig, the C/C++ interface generator, so why not use swig? Well, the 2 major advantages of swiftpp are 1) it does not require a special "interface file", the C++ class interface itself is the definition, thanks to clang parsing and 2) swig does NOT (officially) support Objective-C, making it unsuitable for the task.
 
-Another tool that was released while I was working on this is djinni (see https://github.com/dropbox/djinni). It uses a custom idl (Interface Definition Language) to automatically generate bridges and support C++, Java and Objective-C, I haven't tried using it with swift yet.
+Another tool that was released while I was working on this is djinni (see https://github.com/dropbox/djinni). It uses a custom idl (Interface Definition Language) to automatically generate bridges and support C++, Java and Objective-C. Unfortunately, djinni make heavy use of Objective-C++ and you cannot import Objective-C++ interface in swift, has to be pure Objective-C.
 
 License
 =======

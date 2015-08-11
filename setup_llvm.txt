@@ -36,7 +36,7 @@ then
 	svn up
 else
 	cd "$BUILD_DIR" || exit -1
-	svn co http://llvm.org/svn/llvm-project/llvm/tags/RELEASE_360/final llvm || exit -1
+	svn co http://llvm.org/svn/llvm-project/llvm/trunk llvm || exit -1
 fi
 
 echo "---> getting latest clang"
@@ -46,7 +46,7 @@ then
 	svn up
 else
 	cd "$BUILD_DIR/llvm/tools" || exit -1
-	svn co http://llvm.org/svn/llvm-project/cfe/tags/RELEASE_360/final clang || exit -1
+	svn co http://llvm.org/svn/llvm-project/cfe/trunk clang || exit -1
 fi
 
 echo "---> getting latest clang/tools/extra"
@@ -56,7 +56,7 @@ then
 	svn up
 else
 	cd "$BUILD_DIR/llvm/tools/clang/tools" || exit -1
-	svn co http://llvm.org/svn/llvm-project/clang-tools-extra/tags/RELEASE_360/final extra || exit -1
+	svn co http://llvm.org/svn/llvm-project/clang-tools-extra/trunk extra || exit -1
 fi
 
 echo "---> getting latest compiler-rt"
@@ -66,7 +66,7 @@ then
 	svn up
 else
 	cd "$BUILD_DIR/llvm/projects" || exit -1
-	svn co http://llvm.org/svn/llvm-project/compiler-rt/tags/RELEASE_360/final compiler-rt || exit -1
+	svn co http://llvm.org/svn/llvm-project/compiler-rt/trunk compiler-rt || exit -1
 fi
 
 echo "---> getting latest libc++"
@@ -76,12 +76,14 @@ then
 	svn up
 else
 	cd "$BUILD_DIR" || exit -1
-	svn co http://llvm.org/svn/llvm-project/libcxx/tags/RELEASE_360/final libcxx || exit -1
+	svn co http://llvm.org/svn/llvm-project/libcxx/trunk libcxx || exit -1
 fi
 
 echo "---> building clang/llvm"
-cd "$BUILD_DIR/llvm" || exit -1
-./configure --prefix="$INSTALL_DIR" #--enable-optimized
+cd "$BUILD_DIR" || exit -1
+mkdir llvm_build
+cd llvm_build || exit -1
+../llvm/configure --prefix="$INSTALL_DIR" #--enable-optimized
 JOBS=`sysctl -n hw.logicalcpu`
 JOBS=`echo "if ($JOBS > 1) $JOBS - 1 else $JOBS" | bc`
 make -j$JOBS

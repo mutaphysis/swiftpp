@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 47;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -153,7 +153,7 @@
 				};
 			};
 			buildConfigurationList = 26B8842019ABF54300CCD8B3 /* Build configuration list for PBXProject "swiftpp" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 6.3";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -322,10 +322,6 @@
 					"-lLLVMBitWriter",
 					"-lLLVMIRReader",
 					"-lLLVMAsmParser",
-					"-lLLVMR600CodeGen",
-					"-lLLVMR600Desc",
-					"-lLLVMR600Info",
-					"-lLLVMR600AsmPrinter",
 					"-lLLVMSystemZDisassembler",
 					"-lLLVMSystemZCodeGen",
 					"-lLLVMSystemZAsmParser",
@@ -429,10 +425,6 @@
 					"-lLLVMBitWriter",
 					"-lLLVMIRReader",
 					"-lLLVMAsmParser",
-					"-lLLVMR600CodeGen",
-					"-lLLVMR600Desc",
-					"-lLLVMR600Info",
-					"-lLLVMR600AsmPrinter",
 					"-lLLVMSystemZDisassembler",
 					"-lLLVMSystemZCodeGen",
 					"-lLLVMSystemZAsmParser",
@@ -568,10 +560,6 @@
 					"-lLLVMBitWriter",
 					"-lLLVMIRReader",
 					"-lLLVMAsmParser",
-					"-lLLVMR600CodeGen",
-					"-lLLVMR600Desc",
-					"-lLLVMR600Info",
-					"-lLLVMR600AsmPrinter",
 					"-lLLVMSystemZDisassembler",
 					"-lLLVMSystemZCodeGen",
 					"-lLLVMSystemZAsmParser",
@@ -675,10 +663,6 @@
 					"-lLLVMBitWriter",
 					"-lLLVMIRReader",
 					"-lLLVMAsmParser",
-					"-lLLVMR600CodeGen",
-					"-lLLVMR600Desc",
-					"-lLLVMR600Info",
-					"-lLLVMR600AsmPrinter",
 					"-lLLVMSystemZDisassembler",
 					"-lLLVMSystemZCodeGen",
 					"-lLLVMSystemZAsmParser",

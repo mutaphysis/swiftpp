@@ -175,7 +175,6 @@ void SwiftppObjcOutput::write_cxx_objc_protocols_h( llvm::raw_ostream &ostr ) co
 			if ( itype != nullptr )
 			{
 				auto v = itype->getPointeeType().getAsString();
-				std::cout << v << std::endl;
 				if ( std::find( objcClassNames.begin(), objcClassNames.end(), v ) == objcClassNames.end() )
 					objcClassNames.push_back( v );
 			}
