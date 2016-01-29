@@ -75,6 +75,7 @@ class SwiftppObjcOutput : public SwiftppOutput
 		void write_c_proxy_method_impl( llvm::raw_ostream &ostr, const std::string &i_className, const CXXMethod &i_method ) const;
 
 		void write_cpp_method_impl( llvm::raw_ostream &ostr, const std::string &i_className, const CXXMethod &i_method ) const;
+		void write_forward_cpp_method_impl( llvm::raw_ostream &ostr, const std::string &i_className, const CXXMethod &i_method ) const;
 };
 
 #endif

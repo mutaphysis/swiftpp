@@ -1,12 +1,6 @@
 Note
 ====
-I no longer work on this project. A few weeks ago I realised that there was
-a major flaw in the way that virtual calls are forwarded between C++ and swift.
-__**It is not thread safe and not re-entrant**__. This would lead to undefined
-behavior for any non-trivial use.
-
-Hopefully, now that swift is open-source, someone can come with a better solution.
-I would be interested to hear about it, or maybe lend a hand.
+Re-entrency and thread safety has been fixed in the C++ / swift bridge. Update to that latest version.
 
 swiftpp
 =======

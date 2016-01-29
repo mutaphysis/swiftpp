@@ -83,12 +83,10 @@ echo "---> building clang/llvm"
 cd "$BUILD_DIR" || exit -1
 mkdir llvm_build
 cd llvm_build || exit -1
-../llvm/configure --prefix="$INSTALL_DIR" #--enable-optimized
-JOBS=`sysctl -n hw.logicalcpu`
-JOBS=`echo "if ($JOBS > 1) $JOBS - 1 else $JOBS" | bc`
-make -j$JOBS
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR" ../llvm
+ninja
 echo "---> installing clang/llvm"
-make install
+ninja install
 cd "$INSTALL_DIR"/bin
 ln -s clang++ c++
 ln -s clang cc

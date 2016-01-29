@@ -263,6 +263,7 @@ void SwiftppObjcOutput::write_cxx_subclasses_mm( llvm::raw_ostream &ostr ) const
 									std::advance( methodPtr, i );
 									o_model.names["cpp_method_impl"] = [this,classPtr,methodPtr]( llvm::raw_ostream &ostr ){ this->write_cpp_method_impl( ostr, classPtr->name(), *methodPtr ); };
 									o_model.names["c_proxy_method_impl"] = [this,classPtr,methodPtr]( llvm::raw_ostream &ostr ){ this->write_c_proxy_method_impl( ostr, classPtr->name(), *methodPtr ); };
+									o_model.names["forward_cpp_method_impl"] = [this,classPtr,methodPtr]( llvm::raw_ostream &ostr ){ this->write_forward_cpp_method_impl( ostr, classPtr->name(), *methodPtr ); };
 								} };
 					} };
 	
@@ -348,21 +349,6 @@ void SwiftppObjcOutput::write_cpp_method_impl( llvm::raw_ostream &ostr, const st
 		if ( i_method.isConst() )
 			ostr << " const";
 		ostr << "\n  {\n";
-		ostr << "    if ( _link == nil )\n";
-		if ( i_method.isPureVirtual() )
-		{
-			ostr << "    abort(); // pure-virtual call!\n";
-		}
-		else
-		{
-			ostr << "      ";
-			if ( not i_method.returnType()->isVoidType() )
-				ostr << "return ";
-			ostr << i_className << "::" << i_method.name() << "(";
-			ostr << write_cxx_params_decl( i_method, false, []( const CXXParam &p ){ return p.name(); } );
-			ostr << " );\n";
-			ostr << "    else\n  ";
-		}
 		std::string s;
 		s.append( "[_link " );
 		s.append( i_method.name() );
@@ -391,6 +377,34 @@ void SwiftppObjcOutput::write_cpp_method_impl( llvm::raw_ostream &ostr, const st
 	}
 }
 
+void SwiftppObjcOutput::write_forward_cpp_method_impl( llvm::raw_ostream &ostr, const std::string &i_className, const CXXMethod &i_method ) const
+{
+	if ( i_method.isConstructor() )
+	{
+//		ostr << "  " << i_method.name() << "_subclass( id<" << i_className << "_protocol> i_link";
+//		ostr << write_cxx_params_decl( i_method, true, [this]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+//		ostr << " )\n   : " << i_className << "(";
+//		ostr << write_cxx_params_decl( i_method, false, []( const CXXParam &p ){ return p.name(); } );
+//		ostr << " ),\n    _link( i_link ){}";
+	}
+	else if ( i_method.isVirtual() )
+	{
+		ostr << "  inline ";
+		ostr << type2String( i_method.returnType() ) << " forward_" << i_method.name() << "(";
+		ostr << write_cxx_params_decl( i_method, false, [this]( const CXXParam &p ){ return this->type2String( p.type() ) + " " + p.name(); } );
+		ostr << " )";
+		if ( i_method.isConst() )
+			ostr << " const";
+		ostr << "\n  {\n";
+		ostr << "    ";
+		if ( not i_method.returnType()->isVoidType() )
+			ostr << "return ";
+		ostr << i_className << "::" << i_method.name() << "(";
+		ostr << write_cxx_params_decl( i_method, false, []( const CXXParam &p ){ return p.name(); } );
+		ostr << ");\n  }";
+	}
+}
+
 void SwiftppObjcOutput::write_c_proxy_method_impl( llvm::raw_ostream &ostr, const std::string &i_className, const CXXMethod &i_method ) const
 {
 	if ( i_method.isConstructor() )
@@ -411,13 +425,13 @@ void SwiftppObjcOutput::write_c_proxy_method_impl( llvm::raw_ostream &ostr, cons
 	}
 	else
 	{
-		if ( i_method.isVirtual() )
-			ostr << "  LinkSaver<id<" << i_className << "_protocol>> s( i_this->_link );\n";
 		ostr << "  ";
 		if ( not i_method.returnType()->isVoidType() )
 			ostr << "return ";
 		if ( i_method.isStatic() )
 			ostr << i_className << "::";
+		else if ( i_method.isVirtual() )
+			ostr << "i_this->forward_";
 		else
 			ostr << "i_this->";
 		ostr << i_method.name() << "(";
