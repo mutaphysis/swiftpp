@@ -12,6 +12,6 @@ std::string Simple::method1( const std::string &i_s )
 	}
 	else
 	{
-		return "";
+		return i_s;
 	}
 }

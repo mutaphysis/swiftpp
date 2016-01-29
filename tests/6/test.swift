@@ -12,8 +12,10 @@ class MySimple : Simple
 		{
 			return s + super.method1( " corr" )
 		}
-		
-		return ""
+		else
+		{
+			return s
+		}
     }
 }
 
