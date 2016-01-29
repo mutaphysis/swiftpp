@@ -1,9 +1,9 @@
 
 SWIFTPP=../../swiftpp
 SDKPATH=$(shell xcrun --show-sdk-path)
-SWIFTCFLAGS=-target x86_64-apple-macosx10.9 -Onone -g -F $(SDKPATH)/System/Library/Frameworks -I$(SDKPATH)/usr/include
-CPPFLAGS=-std=c++11 -mmacosx-version-min=10.9 -isysroot $(SDKPATH)
-LDFLAGS=-L$(SDKPATH)/../../../../../Toolchains/XcodeDefault.xctoolchain/usr/lib/swift_static/macosx -fobjc-link-runtime -lc++ -isysroot $(SDKPATH) -mmacosx-version-min=10.9 -Xlinker -force_load_swift_libs -lswiftRuntime -lcurses -Xlinker -force_load -Xlinker $(SDKPATH)/../../../../../Toolchains/XcodeDefault.xctoolchain/usr/lib/arc/libarclite_macosx.a
+SWIFTCFLAGS=-target x86_64-apple-macosx10.11 -Onone -g -F $(SDKPATH)/System/Library/Frameworks -I$(SDKPATH)/usr/include
+CPPFLAGS=-std=c++11 -mmacosx-version-min=10.11 -isysroot $(SDKPATH)
+LDFLAGS=-L$(SDKPATH)/../../../../../Toolchains/XcodeDefault.xctoolchain/usr/lib/swift_static/macosx -fobjc-link-runtime -lc++ -isysroot $(SDKPATH) -mmacosx-version-min=10.11 -Xlinker -force_load_swift_libs -lswiftRuntime -lcurses -Xlinker -force_load -Xlinker $(SDKPATH)/../../../../../Toolchains/XcodeDefault.xctoolchain/usr/lib/arc/libarclite_macosx.a
 
 all: app
 	./app
