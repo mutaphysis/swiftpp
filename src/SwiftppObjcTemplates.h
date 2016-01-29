@@ -118,14 +118,6 @@ const char kCXX_SUBCLASSES_MM_TEMPLATE[] = R"(
 #import "cxx-objc-protocols.h"
 #include "<{bridge_include}>"
 
-template<typename T>
-struct LinkSaver
-{
-  T saved, &link;
-  LinkSaver( T &i_link ) : saved( i_link ), link( i_link ) { link = nil; }
-  ~LinkSaver() { link = saved; }
-};
-
 // the wrapping sub-classes
 
 <{#classes}>
@@ -136,6 +128,8 @@ public:
 
 <{#methods}>
 <{cpp_method_impl}>
+<{/methods}><{#methods}>
+<{forward_cpp_method_impl}>
 <{/methods}>};
 
 <{/classes}>
