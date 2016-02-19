@@ -8,8 +8,8 @@ LDFLAGS=-L$(SDKPATH)/../../../../../Toolchains/XcodeDefault.xctoolchain/usr/lib/
 all: app
 	./app
 
-#classes/cxx-objc-proxies.h: classes.h
-#	$(SWIFTPP) classes.h
+classes/cxx-objc-proxies.h: classes.h
+	$(SWIFTPP) classes.h
 
 test.o: test.swift classes/cxx-objc-proxies.h
 	xcrun swiftc $(SWIFTCFLAGS) -module-name test -c test.swift -import-objc-header bridging-header.h

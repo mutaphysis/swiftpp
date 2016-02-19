@@ -25,9 +25,6 @@ then
 	sudo chown -R $USER:staff "$INSTALL_DIR"
 fi
 
-echo "---> cleaning up previous install"
-rm -rf "$INSTALL_DIR"/*
-
 # get or update the sources
 echo "---> getting latest llvm"
 if [ -e "$BUILD_DIR/llvm/.svn" ]
@@ -79,8 +76,12 @@ else
 	svn co http://llvm.org/svn/llvm-project/libcxx/trunk libcxx || exit -1
 fi
 
+echo "---> cleaning up previous install"
+rm -rf "$INSTALL_DIR"/*
+
 echo "---> building clang/llvm"
 cd "$BUILD_DIR" || exit -1
+rm -rf llvm_build
 mkdir llvm_build
 cd llvm_build || exit -1
 cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH="$INSTALL_DIR" ../llvm

@@ -19,5 +19,10 @@ class MySimple : Simple
     }
 }
 
+print( "\u{1B}[32m" )
+print( "--> 6. re-entrency" )
+
 let s1 = MySimple()
 print( s1.method1( "This" ) )
+
+print( "\u{1B}[0m" )

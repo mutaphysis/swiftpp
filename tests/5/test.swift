@@ -1,6 +1,9 @@
 
 import Foundation
 
+print( "\u{1B}[32m" )
+print( "--> 5. enum" )
+
 let s = Simple1()
 
 for i : Int32 in 1...7
@@ -23,3 +26,5 @@ for i : Int32 in 1...7
 			println( "Sunday" );
 	}
 }
+
+print( "\u{1B}[0m" )
