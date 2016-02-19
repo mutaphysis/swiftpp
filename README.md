@@ -94,7 +94,10 @@ Path2D from( NSBezierPath *s );
 If your exported class (MyCXXClass) uses types that are not compatible
 with the swift world, they will be auto converted using those converters.
 Converter names are not important, type inference is used to select the
-right one.  std::string/NSString converters are built-in.
+right one.  There are also some builtin conversions:
+ - std::string - NSString
+ - std::vector - NSArray
+ - std::map/std::unordered_map - NSDictionary
 
 If swiftpp is already built you can try an extremely basic example in
 examples/SimpleShapeDetector
@@ -116,7 +119,7 @@ examples/SimpleShapeDetector to see how it's done...
 5. cxx-objc-proxies.h need to be #imported in the Objective-C bridge
    header (PROJECT_NAME-Bridging-Header.h)
 
-Those are one-time project setup, should work from now on everytime you
+Those are one-time project setup, should work from now on, everytime you
 compile.
 
 Refer to examples/SimpleShapeDetector !
@@ -124,13 +127,13 @@ Refer to examples/SimpleShapeDetector !
 Notes
 =====
 
-OK, pretty cool! But at this point I have to ask myself what exactly have
-I created? With all the code and potential conversion that run in the
-generated code between C++ and swift, performance-wise, this is not
-exactly a "bridge" as in Objective-C/swift bridge. Still, this is a
-usefull, auto-generated communication channel between the 2, and the
-communication protocol used is defined by a straight C++ class, no
-special syntax required.
+OK, pretty cool!
+
+But, performance-wise, with all the data conversion that goes on between
+the 2 sides, this is not exactly a "bridge" as in the Objective-C/swift
+bridge. Still, this is a usefull, auto-generated communication channel
+between the 2, and the communication protocol used is defined by a
+straight C++ class, no special syntax or idl required.
 
 In that perspective it is more similar to swig, the C/C++ interface
 generator, so why not use swig? Well, the 2 major advantages of swiftpp
@@ -142,9 +145,7 @@ task.
 Another tool that was released while I was working on this is djinni
 (see https://github.com/dropbox/djinni). It uses a custom idl (Interface
 Definition Language) to automatically generate bridges and support C++,
-Java and Objective-C. Unfortunately, djinni make heavy use of
-Objective-C++ and you cannot import Objective-C++ interface in swift, has
-to be pure Objective-C.
+Java and Objective-C.
 
 License
 =======
