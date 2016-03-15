@@ -8,7 +8,6 @@
 
 import Cocoa
 
-
 class ShapeView : NSView
 {
 	var _timer : NSTimer?
@@ -137,7 +136,7 @@ class ShapeView : NSView
 		// 2- call detect: this will call the override for each shape detected
 		// note: _currentPath is an NSBezierPath, it will be converted to the appropriate C++
 		//  type by a user defined converter, see cxx-converter.mm
-		shapeDetector.detect( _currentPath )
+		shapeDetector.detect( _currentPath! )
 		
 		// clear current path and redraw
 		_currentPath = nil
