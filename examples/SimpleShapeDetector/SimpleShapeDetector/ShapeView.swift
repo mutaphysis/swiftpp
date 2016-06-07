@@ -91,7 +91,7 @@ class ShapeView : NSView
 		self.needsDisplay = true
 		
 		// start a timer, after some time we'll try to guess what the user did.
-		_timer = NSTimer.scheduledTimerWithTimeInterval( 1, target:self, selector:"onTimer", userInfo:nil, repeats:false )
+		_timer = NSTimer.scheduledTimerWithTimeInterval( 1, target:self, selector:#selector(ShapeView.onTimer), userInfo:nil, repeats:false )
 	}
 	
 	// ShapeDetector does not have the best API
@@ -104,6 +104,7 @@ class ShapeView : NSView
 		init( view: ShapeView )
 		{
 			_view = view
+			super.init( timeout: 1 )
 		}
 		
 		// this override will be called for each shape detected by ShapeDetector

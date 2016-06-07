@@ -38,6 +38,11 @@ struct CodeTemplateModel
 
 	// for a name, just a callback that write to the stream
 	std::unordered_map<std::string,std::function<void ( llvm::raw_ostream & )>> names;
+	
+	inline static std::function<void ( llvm::raw_ostream & )> Name( std::string s )
+	{
+		return [s]( llvm::raw_ostream &ostr ){ ostr << s; };
+	}
 };
 
 /*!

@@ -41,9 +41,9 @@ add_executable ( swiftpp
 					src/SwiftppASTVisitor.h
 					src/SwiftppData.cpp
 					src/SwiftppData.h
-					src/SwiftppObjcOutput.cpp
-					src/SwiftppObjcOutput.h
-					src/SwiftppObjcTemplates.h
+					src/SwiftBridgeOutput.cpp
+					src/SwiftBridgeOutput.h
+					src/SwiftBridgeTmpl.h
 					src/SwiftppOutput.cpp
 					src/SwiftppOutput.h
 					src/Version.h

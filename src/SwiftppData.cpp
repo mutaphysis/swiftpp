@@ -63,6 +63,12 @@ bool CXXParam::operator<( const CXXParam &i_other ) const
 			< std::make_tuple(i_other._name,clang::QualType::getAsString(i_other._type.split()));
 }
 
+bool CXXParam::operator==( const CXXParam &i_other ) const
+{
+	return std::make_tuple(_name,clang::QualType::getAsString(_type.split()))
+			== std::make_tuple(i_other._name,clang::QualType::getAsString(i_other._type.split()));
+}
+
 #if 0
 #pragma mark-
 #endif
@@ -88,6 +94,11 @@ bool CXXMethod::operator<( const CXXMethod &i_other ) const
 	return std::tie(/*_isConst,*/_name,_params) < std::tie(/*i_other._isConst,*/i_other._name,i_other._params);
 }
 
+bool CXXMethod::operator==( const CXXMethod &i_other ) const
+{
+	return std::tie(/*_isConst,*/_name,_params) == std::tie(/*i_other._isConst,*/i_other._name,i_other._params);
+}
+
 #if 0
 #pragma mark-
 #endif
@@ -100,30 +111,36 @@ CXXClass::CXXClass( const std::string &i_name )
 void CXXClass::addMethod( const CXXMethod &i_method )
 {
 	if ( i_method.name()[0] == '~' )
-		return; // ignore destructor, they're called automatically
+		return; // ignore destructor
 	
-	auto res = _methods.insert( i_method );
-	
-	// mark constructor
-	if ( res.first->name() == name() )
-		res.first->setIsConstructor();
+	if ( i_method.name() == name() )
+	{
+		if ( std::find( _constructors.begin(), _constructors.end(), i_method ) == _constructors.end() )
+			_constructors.push_back( i_method );
+	}
+	else
+	{
+		if ( std::find( _methods.begin(), _methods.end(), i_method ) == _methods.end() )
+		{
+			if ( i_method.isVirtual() )
+				_virtualMethodIndexes.push_back( _methods.size() );
+			_methods.push_back( i_method );
+		}
+	}
 }
 
 void CXXClass::addMissingConstructor()
 {
-	for ( auto m : _methods )
+	if ( _constructors.empty() )
 	{
-		if ( m.isConstructor() )
-			return;
+		// no constructor, synthesize one
+		CXXMethod defaultConstructor( CXXMethod::type_t::kNormal, CXXMethod::access_t::kPublic,
+									 false,
+									 name(),
+									 clang::QualType() );
+	
+		addMethod( defaultConstructor );
 	}
-	
-	// no constructor, synthesize one
-	CXXMethod defaultConstructor( CXXMethod::type_t::kNormal, CXXMethod::access_t::kPublic,
-								 false,
-								 name(),
-								 clang::QualType() );
-	
-	addMethod( defaultConstructor );
 }
 
 #if 0
@@ -174,6 +191,19 @@ void SwiftppData::addMissingConstructors()
 void SwiftppData::addEnum( const CXXEnum &i_enum )
 {
 	_enums.push_back( i_enum );
+}
+
+std::set<std::string> SwiftppData::allObjcTypes() const
+{
+	std::set<std::string> res;
+	for ( auto &tc : _converters )
+	{
+		if ( clang::isa<clang::ObjCObjectPointerType>( tc.to() ) )
+			res.insert( clang::QualType::getAsString(tc.to().getTypePtr()->getPointeeType().split()) );
+		if ( clang::isa<clang::ObjCObjectPointerType>( tc.from() ) )
+			res.insert( clang::QualType::getAsString(tc.from().getTypePtr()->getPointeeType().split()) );
+	}
+	return res;
 }
 
 std::string SwiftppData::formatIncludeName( const std::string &i_filepath ) const

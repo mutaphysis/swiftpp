@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		261D2CC61C951D4900AA265C /* cxx-objc-proxies.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26B20BD819BB359700763063 /* cxx-objc-proxies.mm */; };
-		261D2CC81C95822000AA265C /* ShapeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 261D2CC71C95822000AA265C /* ShapeDetector.swift */; };
 		263B31D719BB2912006F7D14 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263B31D619BB2912006F7D14 /* main.swift */; };
 		263B31D919BB2912006F7D14 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263B31D819BB2912006F7D14 /* AppDelegate.swift */; };
 		263B31DB19BB2912006F7D14 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 263B31DA19BB2912006F7D14 /* Images.xcassets */; };
@@ -19,10 +17,11 @@
 		263B31FF19BB2CAF006F7D14 /* ShapeDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 263B31FA19BB2CAF006F7D14 /* ShapeDetector.cpp */; };
 		263B320119BB2CD7006F7D14 /* ShapeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263B320019BB2CD7006F7D14 /* ShapeView.swift */; };
 		263B320519BB2D76006F7D14 /* cxx-converter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 263B320419BB2D76006F7D14 /* cxx-converter.mm */; };
+		26EE12F91D06D82000E9832B /* cxx-bridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26EE12F71D06D82000E9832B /* cxx-bridge.mm */; };
+		26EE12FA1D06D82000E9832B /* cxx-bridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26EE12F81D06D82000E9832B /* cxx-bridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		261D2CC71C95822000AA265C /* ShapeDetector.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShapeDetector.swift; sourceTree = "<group>"; };
 		263B31D119BB2912006F7D14 /* SimpleShapeDetector.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleShapeDetector.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		263B31D519BB2912006F7D14 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		263B31D619BB2912006F7D14 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -42,10 +41,9 @@
 		263B320219BB2D5E006F7D14 /* cxx-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "cxx-Bridging-Header.h"; sourceTree = "<group>"; };
 		263B320319BB2D76006F7D14 /* cxx-converter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cxx-converter.h"; sourceTree = "<group>"; };
 		263B320419BB2D76006F7D14 /* cxx-converter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "cxx-converter.mm"; sourceTree = "<group>"; };
-		26B20BD619BB359700763063 /* cxx-objc-protocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cxx-objc-protocols.h"; sourceTree = "<group>"; };
-		26B20BD719BB359700763063 /* cxx-objc-proxies.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cxx-objc-proxies.h"; sourceTree = "<group>"; };
-		26B20BD819BB359700763063 /* cxx-objc-proxies.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "cxx-objc-proxies.mm"; sourceTree = "<group>"; };
-		26B20BD919BB359700763063 /* cxx-subclasses.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "cxx-subclasses.mm"; sourceTree = "<group>"; };
+		26EE12F61D06D82000E9832B /* cxx-bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cxx-bridge.h"; sourceTree = "<group>"; };
+		26EE12F71D06D82000E9832B /* cxx-bridge.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "cxx-bridge.mm"; sourceTree = "<group>"; };
+		26EE12F81D06D82000E9832B /* cxx-bridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "cxx-bridge.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,7 +87,6 @@
 				263B31FA19BB2CAF006F7D14 /* ShapeDetector.cpp */,
 				263B31FB19BB2CAF006F7D14 /* ShapeDetector.h */,
 				263B320019BB2CD7006F7D14 /* ShapeView.swift */,
-				261D2CC71C95822000AA265C /* ShapeDetector.swift */,
 				263B31D819BB2912006F7D14 /* AppDelegate.swift */,
 				263B31DA19BB2912006F7D14 /* Images.xcassets */,
 				263B31DC19BB2912006F7D14 /* MainMenu.xib */,
@@ -113,10 +110,9 @@
 		26B20BD519BB359700763063 /* cxx-bridge */ = {
 			isa = PBXGroup;
 			children = (
-				26B20BD619BB359700763063 /* cxx-objc-protocols.h */,
-				26B20BD719BB359700763063 /* cxx-objc-proxies.h */,
-				26B20BD819BB359700763063 /* cxx-objc-proxies.mm */,
-				26B20BD919BB359700763063 /* cxx-subclasses.mm */,
+				26EE12F61D06D82000E9832B /* cxx-bridge.h */,
+				26EE12F71D06D82000E9832B /* cxx-bridge.mm */,
+				26EE12F81D06D82000E9832B /* cxx-bridge.swift */,
 			);
 			name = "cxx-bridge";
 			path = "cxx-Bridging-Header";
@@ -129,6 +125,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 263B31ED19BB2912006F7D14 /* Build configuration list for PBXNativeTarget "SimpleShapeDetector" */;
 			buildPhases = (
+				2653F77519BBFAAB00A52D5E /* Run Script */,
 				263B31CD19BB2912006F7D14 /* Sources */,
 				263B31CE19BB2912006F7D14 /* Frameworks */,
 				263B31CF19BB2912006F7D14 /* Resources */,
@@ -187,6 +184,23 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		2653F77519BBFAAB00A52D5E /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "echo \"swiftpp\"\n$PROJECT_DIR/../../swiftpp '-Dswift=__attribute__((annotate(\"swift\")))' \"$PROJECT_DIR/SimpleShapeDetector/cxx-Bridging-Header.h\"";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		263B31CD19BB2912006F7D14 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -197,10 +211,10 @@
 				263B31FF19BB2CAF006F7D14 /* ShapeDetector.cpp in Sources */,
 				263B31D719BB2912006F7D14 /* main.swift in Sources */,
 				263B31FC19BB2CAF006F7D14 /* DetectCorners.cpp in Sources */,
+				26EE12F91D06D82000E9832B /* cxx-bridge.mm in Sources */,
 				263B31FE19BB2CAF006F7D14 /* Path2D.cpp in Sources */,
-				261D2CC61C951D4900AA265C /* cxx-objc-proxies.mm in Sources */,
-				261D2CC81C95822000AA265C /* ShapeDetector.swift in Sources */,
 				263B31FD19BB2CAF006F7D14 /* GeometryUtils.cpp in Sources */,
+				26EE12FA1D06D82000E9832B /* cxx-bridge.swift in Sources */,
 				263B320119BB2CD7006F7D14 /* ShapeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

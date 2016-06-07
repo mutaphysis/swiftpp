@@ -27,17 +27,17 @@ class substringref
 	
 		substringref( const char *i_begin, const char *i_end )
 			: _begin( i_begin ), _end( i_end ){}
+
+		inline size_t size() const { return end() - begin(); }
+		inline bool empty() const { return begin() == end(); }
 	
-		size_t size() const;
-		bool empty() const;
+		inline const char *begin() const { return _begin; }
+		inline const char *end() const { return _end; }
 	
-		const char *begin() const;
-		const char *end() const;
+		inline void pop_front() { assert( not empty() ); ++_begin; }
+		inline void pop_back() { assert( not empty() ); --_end; }
 	
-		void pop_front();
-		void pop_back();
-	
-		char back() const;
+		inline char back() const { assert( not empty() ); return *(end()-1); }
 	
 		bool operator==( const substringref &i_other ) const;
 	
@@ -46,11 +46,4 @@ class substringref
 		const char *_end = nullptr;
 };
 
-inline size_t substringref::size() const { return end() - begin(); }
-inline bool substringref::empty() const { return begin() == end(); }
-inline const char *substringref::begin() const { return _begin; }
-inline const char *substringref::end() const { return _end; }
-inline void substringref::pop_front() { assert( not empty() ); ++_begin; }
-inline void substringref::pop_back() { assert( not empty() ); --_end; }
-inline char substringref::back() const { assert( not empty() ); return *(end()-1); }
 #endif

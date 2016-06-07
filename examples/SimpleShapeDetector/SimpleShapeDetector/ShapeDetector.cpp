@@ -31,7 +31,7 @@ bool aboutTheSame( const CGPoint &a, const CGPoint &b, CGFloat epsilon )
 
 }
 
-ShapeDetector::ShapeDetector()
+ShapeDetector::ShapeDetector(int)
 {
 }
 

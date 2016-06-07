@@ -14,7 +14,7 @@
 #include <iostream>
 
 #include "SwiftppASTConsumer.h"
-#include "SwiftppObjcOutput.h"
+#include "SwiftBridgeOutput.h"
 #include "Version.h"
 
 namespace

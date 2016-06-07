@@ -23,6 +23,42 @@ namespace
 		return (i_end - i_ptr) >= 2 and i_ptr[0] == '}' and i_ptr[1] == '>';
 	}
 	inline void skipCloseTag( const char *&ptr ) { ptr += 2; } // }>
+	
+	bool matchingCloseTag( const substringref &a, const substringref &b )
+	{
+		// a is an open tag, strip all attribures
+		auto col = std::find( a.begin(), a.end(), ':' );
+		if ( col == a.end() )
+			return a == b;
+		else
+			return substringref( a.begin(), col ) == b;
+	}
+	std::string decode( const substringref &s )
+	{
+		std::string res;
+		res.reserve( s.size() );
+		for ( auto c = s.begin(); c != s.end(); ++c )
+		{
+			if ( *c == '\\' )
+			{
+				++c;
+				if ( c == s.end() )
+					break;
+				switch ( *c )
+				{
+					case '\\': res.push_back( '\\' ); break;
+					case 'r': res.push_back( '\r' ); break;
+					case 'n': res.push_back( '\n' ); break;
+					case 't': res.push_back( '\t' ); break;
+					default: break;
+				}
+			}
+			else
+				res.push_back( *c );
+		}
+		return res;
+	}
+
 }
 
 CodeTemplate::CodeTemplate( const substringref &i_tmpl )
@@ -61,18 +97,51 @@ void CodeTemplate::render( const substringref &i_tmpl, llvm::raw_ostream &ostr )
 			if ( endOpenSectionTag != nullptr )
 			{
 				// looking for the end of a section
-				if ( startTag[2] == '/' and substringref( startOpenSectionTag + 3, endOpenSectionTag - 2 ) == substringref( startTag + 3, endTag - 2 ) )
+				substringref openTag( startOpenSectionTag + 3, endOpenSectionTag - 2 );
+				if ( startTag[2] == '/' and matchingCloseTag( openTag, substringref( startTag + 3, endTag - 2 ) ) )
 				{
-					substringref sectionName( startOpenSectionTag + 3, endOpenSectionTag - 2 );
-
 					// this allow nicer formatting in the template
 					if ( *endOpenSectionTag == '\n' )
 						++endOpenSectionTag;
 
+					std::string sep, prefix;
+					substringref sectionName( openTag );
+					auto col = std::find( openTag.begin(), openTag.end(), ':' );
+					if ( col != openTag.end() )
+					{
+						sectionName = substringref( openTag.begin(), col );
+						
+						// looking for 'prefix'
+						const char prefixStr[] = "prefix(";
+						auto it = std::search( col + 1, openTag.end(), std::begin(prefixStr), std::end(prefixStr) - 1 );
+						if ( it != openTag.end() )
+						{
+							it += sizeof(prefixStr)-1;
+							auto l = std::find( it, openTag.end(), ')' );
+							if ( l != openTag.end() )
+								prefix = decode( substringref( it, l ) );
+						}
+						
+						// looking for 'separator('
+						const char sepStr[] = "separator(";
+						it = std::search( col + 1, openTag.end(), std::begin(sepStr), std::end(sepStr) - 1 );
+						if ( it != openTag.end() )
+						{
+							it += sizeof(sepStr)-1;
+							auto l = std::find( it, openTag.end(), ')' );
+							if ( l != openTag.end() )
+								sep = decode( substringref( it, l ) );
+						}
+					}
+					
+					ostr << prefix;
+					
 					CodeTemplateModel m;
 					size_t i = 0;
 					while ( resolveSection( sectionName, i, m ) )
 					{
+						if ( i > 0 )
+							ostr << sep;
 						_context.push_front( m );
 						render( substringref( endOpenSectionTag, startTag ), ostr );
 						_context.pop_front();
@@ -101,7 +170,10 @@ void CodeTemplate::render( const substringref &i_tmpl, llvm::raw_ostream &ostr )
 		{
 			startTag = ptr;
 			if ( endOpenSectionTag == nullptr )
+			{
 				ostr.write( last, startTag - last );
+				ostr.flush();
+			}
 			skipOpenTag( ptr );
 		}
 		else

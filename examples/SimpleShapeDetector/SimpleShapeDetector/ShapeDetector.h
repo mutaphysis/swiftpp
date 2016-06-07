@@ -31,7 +31,7 @@
 class swift ShapeDetector
 {
 	public:
-		ShapeDetector();
+		ShapeDetector( int i_timeout );
 		virtual ~ShapeDetector();
 	
 		void detect( const Path2D &i_paths );
