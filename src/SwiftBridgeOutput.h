@@ -29,7 +29,7 @@ class SwiftppObjcOutput : public SwiftppOutput
 	
 		//! return the C type corresponding to the C++ type, according to the available converters
 		std::string type2SwiftTypeString( const clang::QualType &i_cxxtype ) const;
-		std::string type2SwiftCompatibleCTypeString( const clang::QualType &i_cxxtype ) const;
+		std::string param_swift_c_type( const clang::QualType &i_cxxtype ) const;
 	
 		/*!
 		 @brief Write a function call that convert i_code to a C++ type.
@@ -37,14 +37,14 @@ class SwiftppObjcOutput : public SwiftppOutput
 		 i_code is an expression of a C type convertible to i_cxxtype. This will return a string
 		 that is a function call converting i_code to the C++ type.
 		 example:
-		 paramAsCXXType( p )
+		 param_as_cxx_type( p )
 		 return: "std::string( name )"
 		 
 		 @param[in] i_cxxtype type of i_code
 		 @param[in] i_code expression of type i_cxxtype
 		 @return     a function call converting i_code
 		*/
-		std::string paramAsCXXType( const CXXParam &i_param ) const;
+		std::string param_as_cxx_type( const CXXParam &i_param ) const;
 	
 		std::string returnConverterForCType2CXXType( const clang::QualType &i_cxxtype ) const;
 		std::string returnConverterForCXXType2CType( const clang::QualType &i_cxxtype ) const;
@@ -56,14 +56,14 @@ class SwiftppObjcOutput : public SwiftppOutput
 		 i_code is an expression of type i_cxxtype. This will return a string
 		 that is a function call converting i_code to a C type.
 		 example:
-		 paramAsCType( {std::string}, "variable" )
+		 param_as_c_type( {std::string}, "variable" )
 		 return: "variable.c_str()"
 		 
 		 @param[in] i_cxxtype type of i_code
 		 @param[in] i_code expression that can be converted to type i_cxxtype
 		 @return     a function call converting i_code
 		*/
-		std::string paramAsCType( const CXXParam &i_param ) const;
+		std::string param_as_c_type( const CXXParam &i_param ) const;
 
 		std::string converterForCType2SwiftType( const clang::QualType &i_cxxtype, const std::string &i_code ) const;
 };

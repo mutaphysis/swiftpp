@@ -103,7 +103,7 @@ CodeTemplate::CodeTemplate( const substringref &i_tmpl )
 		_tmpl.pop_back();
 }
 
-void CodeTemplate::render( const CodeTemplateModel &i_model, llvm::raw_ostream &ostr )
+void CodeTemplate::render( const CodeTemplateModel &i_model, ostream &ostr )
 {
 	_context.push_front( i_model );
 	render( _tmpl, ostr );
@@ -112,7 +112,7 @@ void CodeTemplate::render( const CodeTemplateModel &i_model, llvm::raw_ostream &
 	_context.clear();
 }
 
-void CodeTemplate::render( const substringref &i_tmpl, llvm::raw_ostream &ostr )
+void CodeTemplate::render( const substringref &i_tmpl, ostream &ostr )
 {
 	auto last = i_tmpl.begin();
 	auto ptr = last;
@@ -205,7 +205,7 @@ void CodeTemplate::render( const substringref &i_tmpl, llvm::raw_ostream &ostr )
 		ostr.write( last, ptr - last );
 }
 
-void CodeTemplate::resolveName( const std::string &i_prefix, const substringref &i_name, llvm::raw_ostream &ostr )
+void CodeTemplate::resolveName( const std::string &i_prefix, const substringref &i_name, ostream &ostr )
 {
 	std::string name( i_name.begin(), i_name.end() );
 	for ( auto m : _context )
@@ -214,7 +214,10 @@ void CodeTemplate::resolveName( const std::string &i_prefix, const substringref 
 		if ( it != m.names.end() )
 		{
 			ostr << i_prefix;
-			it->second( ostr );
+			if ( it->second.callback )
+				it->second.callback( ostr );
+			else
+				ostr << it->second.text;
 		}
 	}
 }
@@ -229,7 +232,8 @@ bool CodeTemplate::resolveSection( const substringref &i_name, size_t i_index, C
 		{
 			if ( i_index >= it->second.nb )
 				return false;
-			it->second.callback( i_index, o_model );
+			if ( it->second.callback )
+				it->second.callback( i_index, o_model );
 			return true;
 		}
 	}

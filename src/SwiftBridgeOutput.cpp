@@ -63,15 +63,15 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 				ostr << "@class " << it << ";\n";
 			}
 		};
-	model.names["bridge_include"] = CodeTemplateModel::Name( data->formatIncludeName( _inputFile ) );
-	model.names["ns"] = CodeTemplateModel::Name( NS_PREFIX );
-	model.names["std_string_size"] = CodeTemplateModel::Name( std::to_string( sizeof( std::string ) ) );
+	model.names["bridge_include"] = data->formatIncludeName( _inputFile );
+	model.names["ns"] = NS_PREFIX;
+	model.names["std_string_size"] = std::to_string( sizeof( std::string ) );
 	
 	auto classes = [this, data]( size_t i, CodeTemplateModel &o_model )
 		{
 			auto classPtr = &(data->classes()[i]);
 
-			o_model.names["class_name"] = CodeTemplateModel::Name( classPtr->name() );
+			o_model.names["class_name"] = classPtr->name();
 
 			// constructors
 			o_model.sections["constructors"] = CodeTemplateModel::ListSection{ classPtr->constructors().size(),
@@ -83,11 +83,11 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 							[this,constructor]( size_t i, CodeTemplateModel &o_model )
 							{
 								auto param = &(constructor->params()[i]);
-								o_model.names["param_name"] = CodeTemplateModel::Name( param->name() );
-								o_model.names["param_c_type"] = CodeTemplateModel::Name( this->param_c_type( param->type() ) );
-								o_model.names["param_cxx_type"] = CodeTemplateModel::Name( this->param_cxx_type( param->type() ) );
-								o_model.names["param_clean_name"] = CodeTemplateModel::Name( param->cleanName() );
-								o_model.names["param_swift_type"] = CodeTemplateModel::Name( this->type2SwiftTypeString( param->type() ) );
+								o_model.names["param_name"] = param->name();
+								o_model.names["param_c_type"] = this->param_c_type( param->type() );
+								o_model.names["param_cxx_type"] = this->param_cxx_type( param->type() );
+								o_model.names["param_clean_name"] = param->cleanName();
+								o_model.names["param_swift_type"] = this->type2SwiftTypeString( param->type() );
 							}
 						};
 					}
@@ -98,27 +98,27 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 				[this,classPtr]( size_t i, CodeTemplateModel &o_model )
 				{
 					auto method = classPtr->virtualMethods()[i];
-						o_model.names["name"] = CodeTemplateModel::Name( method->name() );
-						o_model.names["return_c_type"] = CodeTemplateModel::Name( this->return_c_type( method->returnType() ) );
-						o_model.names["return_cxx_type"] = CodeTemplateModel::Name( this->return_cxx_type( method->returnType() ) );
-						o_model.names["return_converter_c_to_cxx"] = CodeTemplateModel::Name( this->returnConverterForCType2CXXType( method->returnType() ) );
-						o_model.names["return_converter_c_to_swift"] = CodeTemplateModel::Name( this->returnConverterForCType2SwiftType( method->returnType() ) );
+						o_model.names["name"] = method->name();
+						o_model.names["return_c_type"] = this->return_c_type( method->returnType() );
+						o_model.names["return_cxx_type"] = this->return_cxx_type( method->returnType() );
+						o_model.names["return_converter_c_to_cxx"] = this->returnConverterForCType2CXXType( method->returnType() );
+						o_model.names["return_converter_c_to_swift"] = this->returnConverterForCType2SwiftType( method->returnType() );
 						if ( not method->returnType()->isVoidType() )
 						{
 							o_model.sections["has_return_value"] = CodeTemplateModel::BoolSection( true );
-							o_model.names["return_swift_c_type"] = CodeTemplateModel::Name( this->return_swift_c_type( method->returnType() ) );
+							o_model.names["return_swift_c_type"] = this->return_swift_c_type( method->returnType() );
 						}
-						o_model.names["return_converter_swift_to_c"] = CodeTemplateModel::Name( this->return_converter_swift_to_c( method->returnType() ) );
+						o_model.names["return_converter_swift_to_c"] = this->return_converter_swift_to_c( method->returnType() );
 						o_model.sections["params"] = CodeTemplateModel::ListSection{ method->params().size(),
 							[this,method]( size_t i, CodeTemplateModel &o_model )
 							{
 								auto param = &(method->params()[i]);
-								o_model.names["param_name"] = CodeTemplateModel::Name( param->name() );
-								o_model.names["param_c_type"] = CodeTemplateModel::Name( this->param_c_type( param->type() ) );
-								o_model.names["param_cxx_type"] = CodeTemplateModel::Name( this->param_cxx_type( param->type() ) );
-								o_model.names["param_as_c_type"] = CodeTemplateModel::Name( this->paramAsCType( *param ) );
-								o_model.names["param_swift_c_type"] = CodeTemplateModel::Name( this->type2SwiftCompatibleCTypeString( param->type() ) );
-								o_model.names["param_clean_name"] = CodeTemplateModel::Name( param->cleanName() );
+								o_model.names["param_name"] = param->name();
+								o_model.names["param_c_type"] = this->param_c_type( param->type() );
+								o_model.names["param_cxx_type"] = this->param_cxx_type( param->type() );
+								o_model.names["param_as_c_type"] = this->param_as_c_type( *param );
+								o_model.names["param_swift_c_type"] = this->param_swift_c_type( param->type() );
+								o_model.names["param_clean_name"] = param->cleanName();
 								o_model.names["param_as_swift_type"] = [this,i,param]( llvm::raw_ostream &ostr )
 									{
 										if ( i != 0 )
@@ -135,26 +135,26 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 					[this,classPtr]( size_t i, CodeTemplateModel &o_model )
 					{
 						auto method = classPtr->nonStaticMethods()[i];
-						o_model.names["name"] = CodeTemplateModel::Name( method->name() );
-						o_model.names["return_c_type"] = CodeTemplateModel::Name( this->return_c_type( method->returnType() ) );
-						o_model.names["return_cxx_type"] = CodeTemplateModel::Name( this->return_cxx_type( method->returnType() ) );
+						o_model.names["name"] = method->name();
+						o_model.names["return_c_type"] = this->return_c_type( method->returnType() );
+						o_model.names["return_cxx_type"] = this->return_cxx_type( method->returnType() );
 						if ( not method->returnType()->isVoidType() )
 						{
 							o_model.sections["has_return_value"] = CodeTemplateModel::BoolSection( true );
-							o_model.names["return_swift_type"] = CodeTemplateModel::Name( this->type2SwiftTypeString( method->returnType() ) );
-							o_model.names["return_converter_cxx_to_c"] = CodeTemplateModel::Name( this->returnConverterForCXXType2CType( method->returnType() ) );
-							o_model.names["return_converter_c_to_swift"] = CodeTemplateModel::Name( this->returnConverterForCType2SwiftType( method->returnType() ) );
+							o_model.names["return_swift_type"] = this->type2SwiftTypeString( method->returnType() );
+							o_model.names["return_converter_cxx_to_c"] = this->returnConverterForCXXType2CType( method->returnType() );
+							o_model.names["return_converter_c_to_swift"] = this->returnConverterForCType2SwiftType( method->returnType() );
 						}
 						o_model.sections["params"] = CodeTemplateModel::ListSection{ method->params().size(),
 							[this,method]( size_t i, CodeTemplateModel &o_model )
 							{
 								auto param = &(method->params()[i]);
-								o_model.names["param_name"] = CodeTemplateModel::Name( param->name() );
-								o_model.names["param_c_type"] = CodeTemplateModel::Name( this->param_c_type( param->type() ) );
-								o_model.names["param_cxx_type"] = CodeTemplateModel::Name( this->param_cxx_type( param->type() ) );
-								o_model.names["param_as_cxx_type"] = CodeTemplateModel::Name( this->paramAsCXXType( *param ) );
-								o_model.names["param_clean_name"] = CodeTemplateModel::Name( param->cleanName() );
-								o_model.names["param_swift_type"] = CodeTemplateModel::Name( this->type2SwiftTypeString( param->type() ) );
+								o_model.names["param_name"] = param->name();
+								o_model.names["param_c_type"] = this->param_c_type( param->type() );
+								o_model.names["param_cxx_type"] = this->param_cxx_type( param->type() );
+								o_model.names["param_as_cxx_type"] = this->param_as_cxx_type( *param );
+								o_model.names["param_clean_name"] = param->cleanName();
+								o_model.names["param_swift_type"] = this->type2SwiftTypeString( param->type() );
 							}
 						};
 					}
@@ -165,26 +165,26 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 					[this,classPtr]( size_t i, CodeTemplateModel &o_model )
 					{
 						auto method = classPtr->staticMethods()[i];
-						o_model.names["name"] = CodeTemplateModel::Name( method->name() );
-						o_model.names["return_cxx_type"] = CodeTemplateModel::Name( this->return_cxx_type( method->returnType() ) );
-						o_model.names["return_c_type"] = CodeTemplateModel::Name( this->return_c_type( method->returnType() ) );
+						o_model.names["name"] = method->name();
+						o_model.names["return_cxx_type"] = this->return_cxx_type( method->returnType() );
+						o_model.names["return_c_type"] = this->return_c_type( method->returnType() );
 						if ( not method->returnType()->isVoidType() )
 						{
 							o_model.sections["has_return_value"] = CodeTemplateModel::BoolSection( true );
-							o_model.names["return_swift_type"] = CodeTemplateModel::Name( this->type2SwiftTypeString( method->returnType() ) );
-							o_model.names["return_converter_cxx_to_c"] = CodeTemplateModel::Name( this->returnConverterForCXXType2CType( method->returnType() ) );
-							o_model.names["return_converter_c_to_swift"] = CodeTemplateModel::Name( this->returnConverterForCType2SwiftType( method->returnType() ) );
+							o_model.names["return_swift_type"] = this->type2SwiftTypeString( method->returnType() );
+							o_model.names["return_converter_cxx_to_c"] = this->returnConverterForCXXType2CType( method->returnType() );
+							o_model.names["return_converter_c_to_swift"] = this->returnConverterForCType2SwiftType( method->returnType() );
 						}
 						o_model.sections["params"] = CodeTemplateModel::ListSection{ method->params().size(),
 							[this,method]( size_t i, CodeTemplateModel &o_model )
 							{
 								auto param = &(method->params()[i]);
-								o_model.names["param_name"] = CodeTemplateModel::Name( param->name() );
-								o_model.names["param_c_type"] = CodeTemplateModel::Name( this->param_c_type( param->type() ) );
-								o_model.names["param_cxx_type"] = CodeTemplateModel::Name( this->param_cxx_type( param->type() ) );
-								o_model.names["param_as_cxx_type"] = CodeTemplateModel::Name( this->paramAsCXXType( *param ) );
-								o_model.names["param_clean_name"] = CodeTemplateModel::Name( param->cleanName() );
-								o_model.names["param_swift_type"] = CodeTemplateModel::Name( this->type2SwiftTypeString( param->type() ) );
+								o_model.names["param_name"] = param->name();
+								o_model.names["param_c_type"] = this->param_c_type( param->type() );
+								o_model.names["param_cxx_type"] = this->param_cxx_type( param->type() );
+								o_model.names["param_as_cxx_type"] = this->param_as_cxx_type( *param );
+								o_model.names["param_clean_name"] = param->cleanName();
+								o_model.names["param_swift_type"] = this->type2SwiftTypeString( param->type() );
 							}
 						};
 					}
@@ -236,7 +236,7 @@ std::string SwiftppObjcOutput::type2SwiftTypeString( const clang::QualType &i_cx
 	return cxxtype;
 }
 
-std::string SwiftppObjcOutput::type2SwiftCompatibleCTypeString( const clang::QualType &i_cxxtype ) const
+std::string SwiftppObjcOutput::param_swift_c_type( const clang::QualType &i_cxxtype ) const
 {
 	std::string cxxtype( type2UndecoratedCXXTypeString( i_cxxtype ) );
 	
@@ -296,7 +296,7 @@ void SwiftppObjcOutput::write_cxx_bridge_swift( CodeTemplateModel &i_model, llvm
 	renderer.render( i_model, ostr );
 }
 
-std::string SwiftppObjcOutput::paramAsCXXType( const CXXParam &i_param ) const
+std::string SwiftppObjcOutput::param_as_cxx_type( const CXXParam &i_param ) const
 {
 	std::string cxxtype( type2UndecoratedCXXTypeString( i_param.type() ) );
 	
@@ -436,7 +436,7 @@ std::string SwiftppObjcOutput::returnConverterForCType2SwiftType( const clang::Q
 	return std::string();
 }
 
-std::string SwiftppObjcOutput::paramAsCType( const CXXParam &i_param ) const
+std::string SwiftppObjcOutput::param_as_c_type( const CXXParam &i_param ) const
 {
 	std::string cxxtype( type2UndecoratedCXXTypeString( i_param.type() ) );
 	

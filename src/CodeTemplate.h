@@ -15,6 +15,8 @@
 #include <deque>
 #include <unordered_map>
 
+using ostream = llvm::raw_ostream;
+
 /*!
    @brief A user provided model to fill template's sections.
 
@@ -31,18 +33,34 @@ struct CodeTemplateModel
 	//! convinience function for boolean section
 	inline static ListSection BoolSection( bool on )
 	{
-		return ListSection{ size_t(on?1:0), []( size_t, CodeTemplateModel & ){} };
+		return ListSection{ size_t(on?1:0), nullptr };
 	}
 
 	std::unordered_map<std::string,ListSection> sections;
 
 	// for a name, just a callback that write to the stream
-	std::unordered_map<std::string,std::function<void ( llvm::raw_ostream & )>> names;
-	
-	inline static std::function<void ( llvm::raw_ostream & )> Name( std::string s )
+	struct CallbackOrString
 	{
-		return [s]( llvm::raw_ostream &ostr ){ ostr << s; };
-	}
+		CallbackOrString(){}
+		CallbackOrString( const std::string &i_text ) : text( i_text ){}
+		CallbackOrString( const std::function<void ( ostream & )> &i_callback ) : callback( i_callback ){}
+		
+		CallbackOrString &operator=( const std::string &i_text )
+		{
+			text = i_text;
+			callback = nullptr;
+			return *this;
+		}
+		CallbackOrString &operator=( const std::function<void ( ostream & )> &i_callback )
+		{
+			callback = i_callback;
+			return *this;
+		}
+		
+		std::function<void ( ostream & )> callback;
+		std::string text;
+	};
+	std::unordered_map<std::string,CallbackOrString> names;
 };
 
 /*!
@@ -55,15 +73,15 @@ class CodeTemplate
 	public:
 		CodeTemplate( const substringref &i_tmpl );
 	
-		void render( const CodeTemplateModel &i_model, llvm::raw_ostream &ostr );
+		void render( const CodeTemplateModel &i_model, ostream &ostr );
 	
 	private:
 		substringref _tmpl;
 		std::deque<CodeTemplateModel> _context;
 
-		void render( const substringref &i_tmpl, llvm::raw_ostream &ostr );
+		void render( const substringref &i_tmpl, ostream &ostr );
 
-		void resolveName( const std::string &i_prefix, const substringref &i_name, llvm::raw_ostream &ostr );
+		void resolveName( const std::string &i_prefix, const substringref &i_name, ostream &ostr );
 		bool resolveSection( const substringref &i_name, size_t i_index, CodeTemplateModel &o_model );
 };
 
