@@ -17,19 +17,19 @@ class SwiftppOutput;
 
 class SwiftppASTConsumer : public clang::ASTConsumer
 {
-	private:
-		clang::CompilerInstance &_ci;
-		SwiftppData _data;
-		std::shared_ptr<SwiftppOutput> _output;
-		std::string _inputFile;
-	
-		virtual void HandleTranslationUnit( clang::ASTContext &i_ctx ) override;
+  private:
+	clang::CompilerInstance &_ci;
+	SwiftppData _data;
+	std::shared_ptr<SwiftppOutput> _output;
+	std::string _inputFile;
 
-	public:
-		SwiftppASTConsumer( clang::CompilerInstance &i_ci,
-								const SwiftppOptions &i_options,
-								const std::shared_ptr<SwiftppOutput> &i_output,
-								llvm::StringRef i_inputFile );
+	virtual void HandleTranslationUnit( clang::ASTContext &i_ctx ) override;
+
+  public:
+	SwiftppASTConsumer( clang::CompilerInstance &i_ci,
+							const SwiftppOptions &i_options,
+							const std::shared_ptr<SwiftppOutput> &i_output,
+							llvm::StringRef i_inputFile );
 };
 
 #endif

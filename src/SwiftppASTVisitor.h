@@ -15,14 +15,14 @@ class SwiftppData;
 
 class SwiftppASTVisitor : public clang::RecursiveASTVisitor<SwiftppASTVisitor>
 {
-	public:
-		SwiftppASTVisitor( SwiftppData &io_data );
-	
-		bool VisitCXXRecordDecl( clang::CXXRecordDecl *i_decl );
-		bool VisitFunctionDecl( clang::FunctionDecl *i_decl );
-	
-	private:
-		SwiftppData &_data;
+  public:
+	SwiftppASTVisitor( SwiftppData &io_data );
+
+	bool VisitCXXRecordDecl( clang::CXXRecordDecl *i_decl );
+	bool VisitFunctionDecl( clang::FunctionDecl *i_decl );
+
+  private:
+	SwiftppData &_data;
 };
 
 #endif

@@ -16,12 +16,12 @@ namespace
 //! Handle individual classes
 class SwiftppClassVisitor : public clang::RecursiveASTVisitor<SwiftppClassVisitor>
 {
-	public:
-		SwiftppClassVisitor( CXXClass &io_class );
-		bool VisitCXXMethodDecl( clang::CXXMethodDecl *i_decl );
-	
-	private:
-		CXXClass &_class;
+  public:
+	SwiftppClassVisitor( CXXClass &io_class );
+	bool VisitCXXMethodDecl( clang::CXXMethodDecl *i_decl );
+
+  private:
+	CXXClass &_class;
 };
 
 SwiftppClassVisitor::SwiftppClassVisitor( CXXClass &io_class )

@@ -70,19 +70,19 @@ struct CodeTemplateModel
 */
 class CodeTemplate
 {
-	public:
-		CodeTemplate( const substringref &i_tmpl );
-	
-		void render( const CodeTemplateModel &i_model, ostream &ostr );
-	
-	private:
-		substringref _tmpl;
-		std::deque<CodeTemplateModel> _context;
+  public:
+	CodeTemplate( const substringref &i_tmpl );
 
-		void render( const substringref &i_tmpl, ostream &ostr );
+	void render( const CodeTemplateModel &i_model, ostream &ostr );
 
-		void resolveName( const std::string &i_prefix, const substringref &i_name, ostream &ostr );
-		bool resolveSection( const substringref &i_name, size_t i_index, CodeTemplateModel &o_model );
+  private:
+	substringref _tmpl;
+	std::deque<CodeTemplateModel> _context;
+
+	void render( const substringref &i_tmpl, ostream &ostr );
+
+	void resolveName( const std::string &i_prefix, const substringref &i_name, ostream &ostr );
+	bool resolveSection( const substringref &i_name, size_t i_index, CodeTemplateModel &o_model );
 };
 
 #endif

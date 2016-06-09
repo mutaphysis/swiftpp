@@ -24,22 +24,22 @@
 */
 class TypeConverter
 {
-	public:
-		TypeConverter( const std::string &i_name, const clang::QualType &i_to, const clang::QualType &i_from );
-	
-		//! function name
-		inline const std::string &name() const { return _name; }
-		//! returned type
-		inline const clang::QualType &to() const { return _to; }
-		//! input type
-		inline const clang::QualType &from() const { return _from; }
-	
-	private:
-		std::string _name; //!< function name
-		clang::QualType _to; //!< returned type
-		clang::QualType _from; //!< input type
+  public:
+	TypeConverter( const std::string &i_name, const clang::QualType &i_to, const clang::QualType &i_from );
 
-		std::string _body;
+	//! function name
+	inline const std::string &name() const { return _name; }
+	//! returned type
+	inline const clang::QualType &to() const { return _to; }
+	//! input type
+	inline const clang::QualType &from() const { return _from; }
+
+  private:
+	std::string _name; //!< function name
+	clang::QualType _to; //!< returned type
+	clang::QualType _from; //!< input type
+
+	std::string _body;
 };
 
 /*!
@@ -49,23 +49,23 @@ class TypeConverter
 */
 class CXXParam
 {
-	public:
-		CXXParam( const clang::QualType &i_type, const std::string &i_name );
-		
-		//! parameter name
-		inline const std::string &name() const { return _name; }
-		//! parameter type
-		inline const clang::QualType &type() const { return _type; }
+  public:
+	CXXParam( const clang::QualType &i_type, const std::string &i_name );
 	
-		//! attempt to get a clean name, without any notation prefix
-		std::string cleanName() const;
+	//! parameter name
+	inline const std::string &name() const { return _name; }
+	//! parameter type
+	inline const clang::QualType &type() const { return _type; }
 
-		bool operator<( const CXXParam &i_other ) const;
-		bool operator==( const CXXParam &i_other ) const;
-	
-	private:
-		clang::QualType _type; //!< parameter type
-		std::string _name; //!< parameter name
+	//! attempt to get a clean name, without any notation prefix
+	std::string cleanName() const;
+
+	bool operator<( const CXXParam &i_other ) const;
+	bool operator==( const CXXParam &i_other ) const;
+
+  private:
+	clang::QualType _type; //!< parameter type
+	std::string _name; //!< parameter name
 };
 
 /*!
@@ -75,35 +75,35 @@ class CXXParam
 */
 class CXXMethod
 {
-	public:
-		enum class type_t { kNormal, kVirtual, kPureVirtual, kStatic };
-		enum class access_t { kPublic, kProtected };
-		CXXMethod( type_t i_type, access_t i_access,
-							bool i_isConst,
-							const std::string &i_name,
-							const clang::QualType &i_returnType );
-	
-		void addParam( const CXXParam &i_param );
-	
-		inline const std::string &name() const { return _name; }
-		inline const clang::QualType &returnType() const { return _returnType; }
-		inline const std::vector<CXXParam> &params() const { return _params; }
-	
-		inline bool isStatic() const { return _type == type_t::kStatic; }
-		inline bool isVirtual() const { return _type == type_t::kVirtual or _type == type_t::kPureVirtual ; }
-		inline bool isPureVirtual() const { return _type == type_t::kPureVirtual ; }
-		inline bool isConst() const { return _isConst; }
-	
-		bool operator<( const CXXMethod &i_other ) const;
-		bool operator==( const CXXMethod &i_other ) const;
-	
-	private:
-		bool _isConst = false;
-		type_t _type = type_t::kNormal; //!< see enum
-		access_t _access = access_t::kPublic;
-		std::string _name;
-		clang::QualType _returnType;
-		std::vector<CXXParam> _params;
+  public:
+	enum class type_t { kNormal, kVirtual, kPureVirtual, kStatic };
+	enum class access_t { kPublic, kProtected };
+	CXXMethod( type_t i_type, access_t i_access,
+						bool i_isConst,
+						const std::string &i_name,
+						const clang::QualType &i_returnType );
+
+	void addParam( const CXXParam &i_param );
+
+	inline const std::string &name() const { return _name; }
+	inline const clang::QualType &returnType() const { return _returnType; }
+	inline const std::vector<CXXParam> &params() const { return _params; }
+
+	inline bool isStatic() const { return _type == type_t::kStatic; }
+	inline bool isVirtual() const { return _type == type_t::kVirtual or _type == type_t::kPureVirtual ; }
+	inline bool isPureVirtual() const { return _type == type_t::kPureVirtual ; }
+	inline bool isConst() const { return _isConst; }
+
+	bool operator<( const CXXMethod &i_other ) const;
+	bool operator==( const CXXMethod &i_other ) const;
+
+  private:
+	bool _isConst = false;
+	type_t _type = type_t::kNormal; //!< see enum
+	access_t _access = access_t::kPublic;
+	std::string _name;
+	clang::QualType _returnType;
+	std::vector<CXXParam> _params;
 };
 
 /*!
@@ -113,48 +113,48 @@ class CXXMethod
 */
 class CXXClass
 {
-	public:
-		CXXClass( const std::string &i_name );
-	
-		void addMethod( const CXXMethod &i_method );
-		void addMissingConstructor();
-	
-		inline const std::string &name() const { return _name; }
-		const std::vector<const CXXMethod *> &constructors() const;
-		const std::vector<const CXXMethod *> &methods() const;
-		const std::vector<const CXXMethod *> &nonVirtualMethods() const;
-		const std::vector<const CXXMethod *> &virtualMethods() const;
-		const std::vector<const CXXMethod *> &staticMethods() const;
-		const std::vector<const CXXMethod *> &nonStaticMethods() const;
-	
-	private:
-		std::string _name;
-		std::vector<CXXMethod> _allMethods;
-		mutable bool _valid;
-		mutable std::vector<const CXXMethod *> _methods;
-		mutable std::vector<const CXXMethod *> _constructors;
-		mutable std::vector<const CXXMethod *> _nonVirtualMethods;
-		mutable std::vector<const CXXMethod *> _virtualMethods;
-		mutable std::vector<const CXXMethod *> _staticMethods;
-		mutable std::vector<const CXXMethod *> _nonStaticMethods;
-		void update() const;
+  public:
+	CXXClass( const std::string &i_name );
+
+	void addMethod( const CXXMethod &i_method );
+	void addMissingConstructor();
+
+	inline const std::string &name() const { return _name; }
+	const std::vector<const CXXMethod *> &constructors() const;
+	const std::vector<const CXXMethod *> &methods() const;
+	const std::vector<const CXXMethod *> &nonVirtualMethods() const;
+	const std::vector<const CXXMethod *> &virtualMethods() const;
+	const std::vector<const CXXMethod *> &staticMethods() const;
+	const std::vector<const CXXMethod *> &nonStaticMethods() const;
+
+  private:
+	std::string _name;
+	std::vector<CXXMethod> _allMethods;
+	mutable bool _valid;
+	mutable std::vector<const CXXMethod *> _methods;
+	mutable std::vector<const CXXMethod *> _constructors;
+	mutable std::vector<const CXXMethod *> _nonVirtualMethods;
+	mutable std::vector<const CXXMethod *> _virtualMethods;
+	mutable std::vector<const CXXMethod *> _staticMethods;
+	mutable std::vector<const CXXMethod *> _nonStaticMethods;
+	void update() const;
 };
 
 class CXXEnum
 {
-	public:
-		CXXEnum( const std::string &i_name, bool i_isSigned );
-	
-		void addValue( const std::string &i_name, int64_t i_value );
+  public:
+	CXXEnum( const std::string &i_name, bool i_isSigned );
 
-		inline const std::string &name() const { return _name; }
-		inline bool isSigned() const { return _isSigned; }
-		inline const std::vector<std::pair<std::string,int64_t>> &values() const { return _values; }
-	
-	private:
-		std::string _name;
-		bool _isSigned = false;
-		std::vector<std::pair<std::string,int64_t>> _values;
+	void addValue( const std::string &i_name, int64_t i_value );
+
+	inline const std::string &name() const { return _name; }
+	inline bool isSigned() const { return _isSigned; }
+	inline const std::vector<std::pair<std::string,int64_t>> &values() const { return _values; }
+
+  private:
+	std::string _name;
+	bool _isSigned = false;
+	std::vector<std::pair<std::string,int64_t>> _values;
 };
 
 /*!
@@ -175,41 +175,41 @@ struct SwiftppOptions
 */
 class SwiftppData
 {
-	public:
-		SwiftppData( const SwiftppOptions &i_options );
-	
-		void addClass( const CXXClass &i_class );
-		void addConverter( const TypeConverter &i_converter );
-		void addCXXTypeIncludePath( const std::string &i_fn );
-		void addMissingConstructors();
-		void addEnum( const CXXEnum &i_enum );
-	
-		inline const std::vector<CXXClass> &classes() const { return _classes; }
-		inline const std::vector<CXXEnum> &enums() const { return _enums; }
-		inline const std::vector<TypeConverter> &converters() const { return _converters; }
-		inline const std::vector<std::string> &includesForCXXTypes() const { return _includesForCXXTypes; }
-	
-		std::set<std::string> allObjcTypes() const;
-		bool anyObjcTypes() const;
-	
-		inline std::string outputFolder() const { return _options.output; }
-	
-		inline const SwiftppOptions &options() const { return _options; }
-	
-		/*!
-		 @brief Format a file name for #include.
-		 
-		 @param[in] i_filepath file path
-		 @return     suitable for #include
-		*/
-		std::string formatIncludeName( const std::string &i_filepath ) const;
+  public:
+	SwiftppData( const SwiftppOptions &i_options );
 
-	private:
-		SwiftppOptions _options;
-		std::vector<TypeConverter> _converters;
-		std::vector<CXXClass> _classes;
-		std::vector<CXXEnum> _enums;
-		std::vector<std::string> _includesForCXXTypes; //!< include paths needed for some user's C++ type definition
+	void addClass( const CXXClass &i_class );
+	void addConverter( const TypeConverter &i_converter );
+	void addCXXTypeIncludePath( const std::string &i_fn );
+	void addMissingConstructors();
+	void addEnum( const CXXEnum &i_enum );
+
+	inline const std::vector<CXXClass> &classes() const { return _classes; }
+	inline const std::vector<CXXEnum> &enums() const { return _enums; }
+	inline const std::vector<TypeConverter> &converters() const { return _converters; }
+	inline const std::vector<std::string> &includesForCXXTypes() const { return _includesForCXXTypes; }
+
+	std::set<std::string> allObjcTypes() const;
+	bool anyObjcTypes() const;
+
+	inline std::string outputFolder() const { return _options.output; }
+
+	inline const SwiftppOptions &options() const { return _options; }
+
+	/*!
+	 @brief Format a file name for #include.
+	 
+	 @param[in] i_filepath file path
+	 @return     suitable for #include
+	*/
+	std::string formatIncludeName( const std::string &i_filepath ) const;
+
+  private:
+	SwiftppOptions _options;
+	std::vector<TypeConverter> _converters;
+	std::vector<CXXClass> _classes;
+	std::vector<CXXEnum> _enums;
+	std::vector<std::string> _includesForCXXTypes; //!< include paths needed for some user's C++ type definition
 };
 
 #endif
