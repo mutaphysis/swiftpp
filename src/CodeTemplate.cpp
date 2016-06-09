@@ -134,13 +134,13 @@ void CodeTemplate::render( const substringref &i_tmpl, llvm::raw_ostream &ostr )
 						}
 					}
 					
-					ostr << prefix;
-					
 					CodeTemplateModel m;
 					size_t i = 0;
 					while ( resolveSection( sectionName, i, m ) )
 					{
-						if ( i > 0 )
+						if ( i == 0 )
+							ostr << prefix;
+						else
 							ostr << sep;
 						_context.push_front( m );
 						render( substringref( endOpenSectionTag, startTag ), ostr );

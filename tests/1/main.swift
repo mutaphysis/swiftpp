@@ -1,4 +1,6 @@
 
+
+
 print( "\u{1B}[32m" )
 print( "--> 1. non-virtual, virtual not overriden and static" )
 

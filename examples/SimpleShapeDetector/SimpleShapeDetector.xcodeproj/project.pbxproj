@@ -17,8 +17,8 @@
 		263B31FF19BB2CAF006F7D14 /* ShapeDetector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 263B31FA19BB2CAF006F7D14 /* ShapeDetector.cpp */; };
 		263B320119BB2CD7006F7D14 /* ShapeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263B320019BB2CD7006F7D14 /* ShapeView.swift */; };
 		263B320519BB2D76006F7D14 /* cxx-converter.mm in Sources */ = {isa = PBXBuildFile; fileRef = 263B320419BB2D76006F7D14 /* cxx-converter.mm */; };
-		26EE12F91D06D82000E9832B /* cxx-bridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26EE12F71D06D82000E9832B /* cxx-bridge.mm */; };
-		26EE12FA1D06D82000E9832B /* cxx-bridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26EE12F81D06D82000E9832B /* cxx-bridge.swift */; };
+		26EE12F91D06D82000E9832B /* c_impl.mm in Sources */ = {isa = PBXBuildFile; fileRef = 26EE12F71D06D82000E9832B /* c_impl.mm */; };
+		26EE12FA1D06D82000E9832B /* bridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26EE12F81D06D82000E9832B /* bridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,9 +41,9 @@
 		263B320219BB2D5E006F7D14 /* cxx-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "cxx-Bridging-Header.h"; sourceTree = "<group>"; };
 		263B320319BB2D76006F7D14 /* cxx-converter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cxx-converter.h"; sourceTree = "<group>"; };
 		263B320419BB2D76006F7D14 /* cxx-converter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "cxx-converter.mm"; sourceTree = "<group>"; };
-		26EE12F61D06D82000E9832B /* cxx-bridge.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cxx-bridge.h"; sourceTree = "<group>"; };
-		26EE12F71D06D82000E9832B /* cxx-bridge.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "cxx-bridge.mm"; sourceTree = "<group>"; };
-		26EE12F81D06D82000E9832B /* cxx-bridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "cxx-bridge.swift"; sourceTree = "<group>"; };
+		26EE12F61D06D82000E9832B /* c_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "c_impl.h"; sourceTree = "<group>"; };
+		26EE12F71D06D82000E9832B /* c_impl.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "c_impl.mm"; sourceTree = "<group>"; };
+		26EE12F81D06D82000E9832B /* bridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "bridge.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,9 +110,9 @@
 		26B20BD519BB359700763063 /* cxx-bridge */ = {
 			isa = PBXGroup;
 			children = (
-				26EE12F61D06D82000E9832B /* cxx-bridge.h */,
-				26EE12F71D06D82000E9832B /* cxx-bridge.mm */,
-				26EE12F81D06D82000E9832B /* cxx-bridge.swift */,
+				26EE12F61D06D82000E9832B /* c_impl.h */,
+				26EE12F71D06D82000E9832B /* c_impl.mm */,
+				26EE12F81D06D82000E9832B /* bridge.swift */,
 			);
 			name = "cxx-bridge";
 			path = "cxx-Bridging-Header";
@@ -211,10 +211,10 @@
 				263B31FF19BB2CAF006F7D14 /* ShapeDetector.cpp in Sources */,
 				263B31D719BB2912006F7D14 /* main.swift in Sources */,
 				263B31FC19BB2CAF006F7D14 /* DetectCorners.cpp in Sources */,
-				26EE12F91D06D82000E9832B /* cxx-bridge.mm in Sources */,
+				26EE12F91D06D82000E9832B /* c_impl.mm in Sources */,
 				263B31FE19BB2CAF006F7D14 /* Path2D.cpp in Sources */,
 				263B31FD19BB2CAF006F7D14 /* GeometryUtils.cpp in Sources */,
-				26EE12FA1D06D82000E9832B /* cxx-bridge.swift in Sources */,
+				26EE12FA1D06D82000E9832B /* bridge.swift in Sources */,
 				263B320119BB2CD7006F7D14 /* ShapeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

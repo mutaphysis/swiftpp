@@ -113,24 +113,16 @@ void CXXClass::addMethod( const CXXMethod &i_method )
 	if ( i_method.name()[0] == '~' )
 		return; // ignore destructor
 	
-	if ( i_method.name() == name() )
+	if ( std::find( _allMethods.begin(), _allMethods.end(), i_method ) == _allMethods.end() )
 	{
-		if ( std::find( _constructors.begin(), _constructors.end(), i_method ) == _constructors.end() )
-			_constructors.push_back( i_method );
-	}
-	else
-	{
-		if ( std::find( _methods.begin(), _methods.end(), i_method ) == _methods.end() )
-		{
-			if ( i_method.isVirtual() )
-				_virtualMethodIndexes.push_back( _methods.size() );
-			_methods.push_back( i_method );
-		}
+		_allMethods.push_back( i_method );
+		_valid = false;
 	}
 }
 
 void CXXClass::addMissingConstructor()
 {
+	update();
 	if ( _constructors.empty() )
 	{
 		// no constructor, synthesize one
@@ -140,6 +132,68 @@ void CXXClass::addMissingConstructor()
 									 clang::QualType() );
 	
 		addMethod( defaultConstructor );
+	}
+}
+
+const std::vector<const CXXMethod *> &CXXClass::constructors() const
+{
+	update();
+	return _constructors;
+}
+const std::vector<const CXXMethod *> &CXXClass::methods() const
+{
+	update();
+	return _methods;
+}
+const std::vector<const CXXMethod *> &CXXClass::nonVirtualMethods() const
+{
+	update();
+	return _nonVirtualMethods;
+}
+const std::vector<const CXXMethod *> &CXXClass::virtualMethods() const
+{
+	update();
+	return _virtualMethods;
+}
+const std::vector<const CXXMethod *> &CXXClass::staticMethods() const
+{
+	update();
+	return _staticMethods;
+}
+const std::vector<const CXXMethod *> &CXXClass::nonStaticMethods() const
+{
+	update();
+	return _nonStaticMethods;
+}
+
+void CXXClass::update() const
+{
+	if ( not _valid )
+	{
+		_methods.clear();
+		_constructors.clear();
+		_nonVirtualMethods.clear();
+		_virtualMethods.clear();
+		_staticMethods.clear();
+		_nonStaticMethods.clear();
+		for ( auto &m : _allMethods )
+		{
+			if ( m.name() == name() )
+				_constructors.push_back( &m );
+			else
+			{
+				_methods.push_back( &m );
+				if ( m.isVirtual() )
+					_virtualMethods.push_back( &m );
+				else
+					_nonVirtualMethods.push_back( &m );
+				if ( m.isStatic() )
+					_staticMethods.push_back( &m );
+				else
+					_nonStaticMethods.push_back( &m );
+			}
+		}
+		_valid = false;
 	}
 }
 
@@ -204,6 +258,18 @@ std::set<std::string> SwiftppData::allObjcTypes() const
 			res.insert( clang::QualType::getAsString(tc.from().getTypePtr()->getPointeeType().split()) );
 	}
 	return res;
+}
+
+bool SwiftppData::anyObjcTypes() const
+{
+	for ( auto &tc : _converters )
+	{
+		if ( clang::isa<clang::ObjCObjectPointerType>( tc.to() ) )
+			return true;
+		if ( clang::isa<clang::ObjCObjectPointerType>( tc.from() ) )
+			return true;
+	}
+	return false;
 }
 
 std::string SwiftppData::formatIncludeName( const std::string &i_filepath ) const

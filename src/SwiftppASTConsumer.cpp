@@ -61,18 +61,18 @@ void SwiftppASTConsumer::HandleTranslationUnit( clang::ASTContext &i_ctx )
 	std::set<const clang::EnumDecl *> enumTypes;
 	for ( const auto &c : _data.classes() )
 	{
-		for ( const auto &m : c.methods() )
+		for ( const auto m : c.methods() )
 		{
-			if ( m.returnType().getTypePtrOrNull() == nullptr )
+			if ( m->returnType().getTypePtrOrNull() == nullptr )
 				continue;
 
-			auto td = m.returnType()->getAsTagDecl();
+			auto td = m->returnType()->getAsTagDecl();
 			if ( td == nullptr )
 				continue;
 			auto e = clang::dyn_cast<clang::EnumDecl>( td );
 			if ( e != nullptr )
 				enumTypes.insert( e->getDefinition() );
-			for ( const auto &p : m.params() )
+			for ( const auto &p : m->params() )
 			{
 				if ( p.type().getTypePtrOrNull() == nullptr )
 					continue;

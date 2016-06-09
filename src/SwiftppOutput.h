@@ -33,11 +33,14 @@ class SwiftppOutput
 
 		// utils
 
-		//! transform a QualType to a string
-		std::string type2String( const clang::QualType &i_type ) const;
+		//! transform a QualType to a c++ string
+		std::string type2CXXTypeString( const clang::QualType &i_type ) const;
 		
 		//! transform a QualType to a string, removing constness and referenced
-		std::string type2UndecoratedTypeString( const clang::QualType &i_type ) const;
+		std::string type2UndecoratedCXXTypeString( const clang::QualType &i_type ) const;
+
+		//! transform a QualType to a c string
+		std::string type2CTypeString( const clang::QualType &i_cxxtype ) const;
 
 		std::string typeNameForFunc( const clang::QualType &i_cxxtype ) const;
 		

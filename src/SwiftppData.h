@@ -120,17 +120,24 @@ class CXXClass
 		void addMissingConstructor();
 	
 		inline const std::string &name() const { return _name; }
-		inline const std::vector<CXXMethod> &constructors() const { return _constructors; }
-		inline const std::vector<CXXMethod> &methods() const { return _methods; }
-	
-		inline size_t nbOfVirtualMethods() const { return _virtualMethodIndexes.size(); }
-		inline const CXXMethod *virtualMethod( size_t i ) const { return &(_methods[_virtualMethodIndexes[i]]); }
+		const std::vector<const CXXMethod *> &constructors() const;
+		const std::vector<const CXXMethod *> &methods() const;
+		const std::vector<const CXXMethod *> &nonVirtualMethods() const;
+		const std::vector<const CXXMethod *> &virtualMethods() const;
+		const std::vector<const CXXMethod *> &staticMethods() const;
+		const std::vector<const CXXMethod *> &nonStaticMethods() const;
 	
 	private:
 		std::string _name;
-		std::vector<CXXMethod> _constructors;
-		std::vector<CXXMethod> _methods;
-		std::vector<size_t> _virtualMethodIndexes;
+		std::vector<CXXMethod> _allMethods;
+		mutable bool _valid;
+		mutable std::vector<const CXXMethod *> _methods;
+		mutable std::vector<const CXXMethod *> _constructors;
+		mutable std::vector<const CXXMethod *> _nonVirtualMethods;
+		mutable std::vector<const CXXMethod *> _virtualMethods;
+		mutable std::vector<const CXXMethod *> _staticMethods;
+		mutable std::vector<const CXXMethod *> _nonStaticMethods;
+		void update() const;
 };
 
 class CXXEnum
@@ -183,6 +190,7 @@ class SwiftppData
 		inline const std::vector<std::string> &includesForCXXTypes() const { return _includesForCXXTypes; }
 	
 		std::set<std::string> allObjcTypes() const;
+		bool anyObjcTypes() const;
 	
 		inline std::string outputFolder() const { return _options.output; }
 	

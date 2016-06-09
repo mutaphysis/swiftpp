@@ -21,9 +21,8 @@ class SwiftppObjcOutput : public SwiftppOutput
 		void write_cxx_bridge_swift( llvm::raw_ostream &ostr ) const;
 	
 		//! return the C type corresponding to the C++ type, according to the available converters
-		std::string cxxType2CTypeString( const clang::QualType &i_cxxtype ) const;
-		std::string cxxType2SwiftTypeString( const clang::QualType &i_cxxtype ) const;
-		std::string cxxType2SwiftCTypeString( const clang::QualType &i_cxxtype ) const;
+		std::string type2SwiftTypeString( const clang::QualType &i_cxxtype ) const;
+		std::string type2SwiftCompatibleCTypeString( const clang::QualType &i_cxxtype ) const;
 	
 		/*!
 		 @brief Write a function call that convert i_code to a C++ type.
