@@ -33,32 +33,62 @@ namespace
 		else
 			return substringref( a.begin(), col ) == b;
 	}
-	std::string decode( const substringref &s )
+	void parseTag( const substringref &i_tag, substringref &o_name, std::unordered_map<std::string,std::string> &o_attributes )
 	{
-		std::string res;
-		res.reserve( s.size() );
-		for ( auto c = s.begin(); c != s.end(); ++c )
+		o_attributes.clear();
+		auto col = std::find( i_tag.begin(), i_tag.end(), ':' );
+		if ( col == i_tag.end() )
 		{
-			if ( *c == '\\' )
-			{
-				++c;
-				if ( c == s.end() )
-					break;
-				switch ( *c )
-				{
-					case '\\': res.push_back( '\\' ); break;
-					case 'r': res.push_back( '\r' ); break;
-					case 'n': res.push_back( '\n' ); break;
-					case 't': res.push_back( '\t' ); break;
-					default: break;
-				}
-			}
-			else
-				res.push_back( *c );
+			o_name = i_tag;
+			return;
 		}
-		return res;
+		o_name = substringref( i_tag.begin(), col );
+		
+		auto attrNameStart = col + 1;
+		auto attrStart = attrNameStart;
+		bool inBracket = false;
+		std::string current;
+		for ( auto ptr = attrNameStart; ptr != i_tag.end(); ++ptr )
+		{
+			switch ( *ptr )
+			{
+				case '(':
+					if ( not inBracket )
+					{
+						if ( ptr == attrNameStart )
+							return; // malformed, empty name
+						attrStart = ptr;
+						inBracket = true;
+					}
+					break;
+				case ')':
+					o_attributes[std::string(attrNameStart,attrStart)] = current;
+					attrNameStart = ptr + 1;
+					inBracket = false;
+					current.clear();
+					break;
+				case '\\':
+					if ( inBracket and (ptr+1) != i_tag.end() )
+					{
+						++ptr;
+						switch ( *ptr )
+						{
+							case ')': current.push_back( ')' ); break;
+							case '\\': current.push_back( '\\' ); break;
+							case 'r': current.push_back( '\r' ); break;
+							case 'n': current.push_back( '\n' ); break;
+							case 't': current.push_back( '\t' ); break;
+							default: break;
+						}
+					}
+					break;
+				default:
+					if ( inBracket )
+						current.push_back( *ptr );
+					break;
+			}
+		}
 	}
-
 }
 
 CodeTemplate::CodeTemplate( const substringref &i_tmpl )
@@ -104,35 +134,17 @@ void CodeTemplate::render( const substringref &i_tmpl, llvm::raw_ostream &ostr )
 					if ( *endOpenSectionTag == '\n' )
 						++endOpenSectionTag;
 
+					std::unordered_map<std::string,std::string> attributes;
+					substringref sectionName;
+					parseTag( openTag, sectionName, attributes );
+					
 					std::string sep, prefix;
-					substringref sectionName( openTag );
-					auto col = std::find( openTag.begin(), openTag.end(), ':' );
-					if ( col != openTag.end() )
-					{
-						sectionName = substringref( openTag.begin(), col );
-						
-						// looking for 'prefix'
-						const char prefixStr[] = "prefix(";
-						auto it = std::search( col + 1, openTag.end(), std::begin(prefixStr), std::end(prefixStr) - 1 );
-						if ( it != openTag.end() )
-						{
-							it += sizeof(prefixStr)-1;
-							auto l = std::find( it, openTag.end(), ')' );
-							if ( l != openTag.end() )
-								prefix = decode( substringref( it, l ) );
-						}
-						
-						// looking for 'separator('
-						const char sepStr[] = "separator(";
-						it = std::search( col + 1, openTag.end(), std::begin(sepStr), std::end(sepStr) - 1 );
-						if ( it != openTag.end() )
-						{
-							it += sizeof(sepStr)-1;
-							auto l = std::find( it, openTag.end(), ')' );
-							if ( l != openTag.end() )
-								sep = decode( substringref( it, l ) );
-						}
-					}
+					auto it = attributes.find( "prefix" );
+					if ( it != attributes.end() )
+						prefix = it->second;
+					it = attributes.find( "separator" );
+					if ( it != attributes.end() )
+						sep = it->second;
 					
 					CodeTemplateModel m;
 					size_t i = 0;
@@ -160,7 +172,15 @@ void CodeTemplate::render( const substringref &i_tmpl, llvm::raw_ostream &ostr )
 			else
 			{
 				// name
-				resolveName( substringref( startTag + 2, endTag - 2 ), ostr );
+				std::unordered_map<std::string,std::string> attributes;
+				substringref name;
+				parseTag( substringref( startTag + 2, endTag - 2 ), name, attributes );
+				
+				std::string prefix;
+				auto it = attributes.find( "prefix" );
+				if ( it != attributes.end() )
+					prefix = it->second;
+				resolveName( prefix, name, ostr );
 				last = ptr + 2;
 			}
 			startTag = nullptr;
@@ -185,14 +205,17 @@ void CodeTemplate::render( const substringref &i_tmpl, llvm::raw_ostream &ostr )
 		ostr.write( last, ptr - last );
 }
 
-void CodeTemplate::resolveName( const substringref &i_name, llvm::raw_ostream &ostr )
+void CodeTemplate::resolveName( const std::string &i_prefix, const substringref &i_name, llvm::raw_ostream &ostr )
 {
 	std::string name( i_name.begin(), i_name.end() );
 	for ( auto m : _context )
 	{
 		auto it = m.names.find( name );
 		if ( it != m.names.end() )
+		{
+			ostr << i_prefix;
 			it->second( ostr );
+		}
 	}
 }
 

@@ -34,7 +34,12 @@ void SwiftppOutput::write( clang::CompilerInstance &i_ci, const std::string &i_i
 	_data = nullptr;
 }
 
-std::string SwiftppOutput::type2CXXTypeString( const clang::QualType &i_type ) const
+std::string SwiftppOutput::return_cxx_type( const clang::QualType &i_type ) const
+{
+	return param_cxx_type( i_type );
+}
+
+std::string SwiftppOutput::param_cxx_type( const clang::QualType &i_type ) const
 {
 	auto v = clang::QualType::getAsString(i_type.split());
 	if ( v == "_Bool" )
@@ -46,10 +51,10 @@ std::string SwiftppOutput::type2UndecoratedCXXTypeString( const clang::QualType 
 {
 	clang::QualType type( i_type.getNonReferenceType() );
 	type.removeLocalConst();
-	return type2CXXTypeString( type );
+	return param_cxx_type( type );
 }
 
-std::string SwiftppOutput::type2CTypeString( const clang::QualType &i_cxxtype ) const
+std::string SwiftppOutput::param_c_type( const clang::QualType &i_cxxtype ) const
 {
 	std::string cxxtype( type2UndecoratedCXXTypeString( i_cxxtype ) );
 	
@@ -66,6 +71,42 @@ std::string SwiftppOutput::type2CTypeString( const clang::QualType &i_cxxtype ) 
 	// add a few default converters
 	if ( cxxtype == "std::string" )
 		return "const char *";
+	
+	if ( isCXXVectorType( i_cxxtype ) or isCXXListType( i_cxxtype ) )
+	{
+		assert( false );
+	}
+	if ( isCXXMapType( i_cxxtype ) or isCXXUnorderedMapType( i_cxxtype ) )
+	{
+		assert( false );
+	}
+	if ( isCXXSetType( i_cxxtype ) )
+	{
+		assert( false );
+	}
+	
+	//! @todo: warn for unsupported types
+	
+	return cxxtype;
+}
+
+std::string SwiftppOutput::return_c_type( const clang::QualType &i_cxxtype ) const
+{
+	std::string cxxtype( type2UndecoratedCXXTypeString( i_cxxtype ) );
+	
+	// is there a converter?
+	for ( auto it : _data->converters() )
+	{
+		if ( cxxtype == type2UndecoratedCXXTypeString( it.from() ) )
+		{
+			// converter found, use the converted type
+			return type2UndecoratedCXXTypeString( it.to() );
+		}
+	}
+	
+	// add a few default converters
+	if ( cxxtype == "std::string" )
+		return NS_PREFIX "StringWrapper";
 	
 	if ( isCXXVectorType( i_cxxtype ) or isCXXListType( i_cxxtype ) )
 	{

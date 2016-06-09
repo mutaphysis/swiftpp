@@ -29,9 +29,9 @@ struct CodeTemplateModel
 	struct ListSection { size_t nb; std::function<void ( size_t, CodeTemplateModel & )> callback; };
 
 	//! convinience function for boolean section
-	inline static ListSection BoolSection( bool on, std::function<void ( CodeTemplateModel & )> callback )
+	inline static ListSection BoolSection( bool on )
 	{
-		return ListSection{ size_t(on?1:0), [callback]( size_t, CodeTemplateModel &m ){ callback( m ); } };
+		return ListSection{ size_t(on?1:0), []( size_t, CodeTemplateModel & ){} };
 	}
 
 	std::unordered_map<std::string,ListSection> sections;
@@ -63,7 +63,7 @@ class CodeTemplate
 
 		void render( const substringref &i_tmpl, llvm::raw_ostream &ostr );
 
-		void resolveName( const substringref &i_name, llvm::raw_ostream &ostr );
+		void resolveName( const std::string &i_prefix, const substringref &i_name, llvm::raw_ostream &ostr );
 		bool resolveSection( const substringref &i_name, size_t i_index, CodeTemplateModel &o_model );
 };
 

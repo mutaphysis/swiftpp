@@ -16,6 +16,8 @@ namespace clang
 class CompilerInstance;
 }
 
+#define NS_PREFIX "swiftpp_"
+
 class SwiftppOutput
 {
 	public:
@@ -34,13 +36,15 @@ class SwiftppOutput
 		// utils
 
 		//! transform a QualType to a c++ string
-		std::string type2CXXTypeString( const clang::QualType &i_type ) const;
-		
+		std::string param_cxx_type( const clang::QualType &i_type ) const;
+		std::string return_cxx_type( const clang::QualType &i_cxxtype ) const;
+	
 		//! transform a QualType to a string, removing constness and referenced
 		std::string type2UndecoratedCXXTypeString( const clang::QualType &i_type ) const;
 
 		//! transform a QualType to a c string
-		std::string type2CTypeString( const clang::QualType &i_cxxtype ) const;
+		std::string param_c_type( const clang::QualType &i_cxxtype ) const;
+		std::string return_c_type( const clang::QualType &i_cxxtype ) const;
 
 		std::string typeNameForFunc( const clang::QualType &i_cxxtype ) const;
 		

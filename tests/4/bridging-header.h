@@ -1,1 +1,1 @@
-#import "classes/cxx-objc-proxies.h"
+#import "classes/cxx-bridge.h"

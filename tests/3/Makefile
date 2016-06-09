@@ -8,23 +8,20 @@ LDFLAGS=-L$(SDKPATH)/../../../../../Toolchains/XcodeDefault.xctoolchain/usr/lib/
 all: app
 	./app
 
-classes/cxx-objc-proxies.h: classes.h
+classes/c_impl.h: classes.h
 	$(SWIFTPP) classes.h
 
-test.o: test.swift classes/cxx-objc-proxies.h
-	xcrun swiftc $(SWIFTCFLAGS) -module-name test -c test.swift -import-objc-header bridging-header.h
+main.o: main.swift classes/c_impl.h
+	xcrun swiftc $(SWIFTCFLAGS) -module-name test -c main.swift -c classes/bridge.swift -import-objc-header bridging-header.h
 
 classes.o: classes.h classes.cpp
 	xcrun cc -x c++ -c classes.cpp $(CPPFLAGS)
 
-cxx-objc-proxies.o: classes/cxx-objc-proxies.h
-	xcrun cc -x objective-c++ -c classes/cxx-objc-proxies.mm $(CPPFLAGS) -fobjc-arc
+c_impl.o: classes/c_impl.h
+	xcrun cc -x c++ -c classes/c_impl.cpp -I. $(CPPFLAGS)
 
-cxx-subclasses.o: classes/cxx-objc-proxies.h
-	xcrun cc -x objective-c++ -c classes/cxx-subclasses.mm -I. $(CPPFLAGS) -fobjc-arc
-
-app: test.o classes.o cxx-objc-proxies.o cxx-subclasses.o
-	xcrun c++ -o app test.o classes.o cxx-objc-proxies.o cxx-subclasses.o $(LDFLAGS) -fobjc-arc
+app: main.o classes.o c_impl.o bridge.o
+	xcrun c++ -o app c_impl.o bridge.o main.o classes.o $(LDFLAGS) -fobjc-arc
 
 clean:
 	rm -rf app *.o classes
