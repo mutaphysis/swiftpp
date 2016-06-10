@@ -23,6 +23,8 @@ class SwiftppASTVisitor : public clang::RecursiveASTVisitor<SwiftppASTVisitor>
 
   private:
 	SwiftppData &_data;
+
+	void VisitCXXRecordDeclImpl( clang::CXXRecordDecl *i_decl );
 };
 
 #endif

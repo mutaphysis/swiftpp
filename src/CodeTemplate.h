@@ -61,6 +61,13 @@ struct CodeTemplateModel
 		std::string text;
 	};
 	std::unordered_map<std::string,CallbackOrString> names;
+	
+	inline void clear()
+	{
+		sections.clear();
+		names.clear();
+	}
+	void dump( int i_indent = 0 ) const;
 };
 
 /*!
@@ -83,6 +90,8 @@ class CodeTemplate
 
 	void resolveName( const std::string &i_prefix, const substringref &i_name, ostream &ostr );
 	bool resolveSection( const substringref &i_name, size_t i_index, CodeTemplateModel &o_model );
+	
+	void dumpContext() const;
 };
 
 #endif

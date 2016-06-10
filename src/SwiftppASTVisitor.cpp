@@ -102,7 +102,19 @@ bool SwiftppASTVisitor::VisitCXXRecordDecl( clang::CXXRecordDecl *i_decl )
 	if ( not swiftAttrFound )
 		return true;
 	
+	VisitCXXRecordDeclImpl( i_decl );
+	return true;
+}
+
+void SwiftppASTVisitor::VisitCXXRecordDeclImpl( clang::CXXRecordDecl *i_decl )
+{
 	std::string qualName( i_decl->getQualifiedNameAsString() );
+	
+	for ( auto &it : _data.classes() )
+	{
+		if ( it.name() == qualName )
+			return; // already done
+	}
 	
 	CXXClass c( qualName );
 	SwiftppClassVisitor classVisitor( c );
@@ -148,14 +160,15 @@ bool SwiftppASTVisitor::VisitCXXRecordDecl( clang::CXXRecordDecl *i_decl )
 			{
 				auto super = t->getAsCXXRecordDecl();
 				if ( super != nullptr )
+				{
 					c.addBase( super->getQualifiedNameAsString() );
+					VisitCXXRecordDeclImpl( super );
+				}
 			}
 		}
 	}
 	
 	_data.addClass( c );
-	
-	return true;
 }
 
 bool SwiftppASTVisitor::VisitFunctionDecl( clang::FunctionDecl *i_decl )

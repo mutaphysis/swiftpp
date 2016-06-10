@@ -117,6 +117,8 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 							o_model.sections["has_return_value"] = CodeTemplateModel::BoolSection( true );
 							o_model.names["return_swift_c_type"] = this->return_swift_c_type( method->returnType() );
 						}
+						else
+							o_model.sections["has_return_value"] = CodeTemplateModel::BoolSection( false );
 						o_model.names["return_converter_swift_to_c"] = this->return_converter_swift_to_c( method->returnType() );
 						o_model.sections["params"] = CodeTemplateModel::ListSection{ method->params().size(),
 							[this,method]( size_t i, CodeTemplateModel &o_model )
@@ -140,11 +142,14 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 			};
 			
 			// methods
-			o_model.sections["methods"] = CodeTemplateModel::ListSection{ classPtr->nonStaticMethods().size(),
+			o_model.sections["methods"] = CodeTemplateModel::ListSection{ classPtr->methods().size(),
 					[this,classPtr]( size_t i, CodeTemplateModel &o_model )
 					{
-						auto method = classPtr->nonStaticMethods()[i];
+						auto method = classPtr->methods()[i];
 						o_model.names["name"] = method->name();
+						o_model.sections["is_static"] = CodeTemplateModel::BoolSection( method->isStatic() );
+						o_model.sections["is_non_static"] = CodeTemplateModel::BoolSection( not method->isStatic() );
+						o_model.sections["is_protected"] = CodeTemplateModel::BoolSection( method->access() == CXXMethod::access_t::kProtected );
 						o_model.names["return_c_type"] = this->return_c_type( method->returnType() );
 						o_model.names["return_cxx_type"] = this->return_cxx_type( method->returnType() );
 						if ( not method->returnType()->isVoidType() )
@@ -154,36 +159,8 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 							o_model.names["return_converter_cxx_to_c"] = this->returnConverterForCXXType2CType( method->returnType() );
 							o_model.names["return_converter_c_to_swift"] = this->returnConverterForCType2SwiftType( method->returnType() );
 						}
-						o_model.sections["params"] = CodeTemplateModel::ListSection{ method->params().size(),
-							[this,method]( size_t i, CodeTemplateModel &o_model )
-							{
-								auto param = &(method->params()[i]);
-								o_model.names["param_name"] = param->name();
-								o_model.names["param_c_type"] = this->param_c_type( param->type() );
-								o_model.names["param_cxx_type"] = this->param_cxx_type( param->type() );
-								o_model.names["param_as_cxx_type"] = this->param_as_cxx_type( *param );
-								o_model.names["param_clean_name"] = param->cleanName();
-								o_model.names["param_swift_type"] = this->type2SwiftTypeString( param->type() );
-							}
-						};
-					}
-				};
-
-			// static methods
-			o_model.sections["static_methods"] = CodeTemplateModel::ListSection{ classPtr->staticMethods().size(),
-					[this,classPtr]( size_t i, CodeTemplateModel &o_model )
-					{
-						auto method = classPtr->staticMethods()[i];
-						o_model.names["name"] = method->name();
-						o_model.names["return_cxx_type"] = this->return_cxx_type( method->returnType() );
-						o_model.names["return_c_type"] = this->return_c_type( method->returnType() );
-						if ( not method->returnType()->isVoidType() )
-						{
-							o_model.sections["has_return_value"] = CodeTemplateModel::BoolSection( true );
-							o_model.names["return_swift_type"] = this->type2SwiftTypeString( method->returnType() );
-							o_model.names["return_converter_cxx_to_c"] = this->returnConverterForCXXType2CType( method->returnType() );
-							o_model.names["return_converter_c_to_swift"] = this->returnConverterForCType2SwiftType( method->returnType() );
-						}
+						else
+							o_model.sections["has_return_value"] = CodeTemplateModel::BoolSection( false );
 						o_model.sections["params"] = CodeTemplateModel::ListSection{ method->params().size(),
 							[this,method]( size_t i, CodeTemplateModel &o_model )
 							{

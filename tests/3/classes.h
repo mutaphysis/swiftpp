@@ -9,12 +9,12 @@
 
 #define swift __attribute__((annotate("swift")))
 
-class swift Simple1
+class Simple1
 {
 	public:
 		void method1();
 		virtual std::string method2();
-		
+
 	protected:
 		std::string _test;
 };

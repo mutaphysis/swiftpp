@@ -160,16 +160,6 @@ const std::vector<const CXXMethod *> &CXXClass::virtualMethods() const
 	update();
 	return _virtualMethods;
 }
-const std::vector<const CXXMethod *> &CXXClass::staticMethods() const
-{
-	update();
-	return _staticMethods;
-}
-const std::vector<const CXXMethod *> &CXXClass::nonStaticMethods() const
-{
-	update();
-	return _nonStaticMethods;
-}
 
 void CXXClass::update() const
 {
@@ -179,8 +169,6 @@ void CXXClass::update() const
 		_constructors.clear();
 		_nonVirtualMethods.clear();
 		_virtualMethods.clear();
-		_staticMethods.clear();
-		_nonStaticMethods.clear();
 		for ( auto &m : _allMethods )
 		{
 			if ( m.name() == name() )
@@ -192,10 +180,6 @@ void CXXClass::update() const
 					_virtualMethods.push_back( &m );
 				else
 					_nonVirtualMethods.push_back( &m );
-				if ( m.isStatic() )
-					_staticMethods.push_back( &m );
-				else
-					_nonStaticMethods.push_back( &m );
 			}
 		}
 		_valid = false;

@@ -9,6 +9,7 @@
 #include "CodeTemplate.h"
 #include <string>
 #include <cassert>
+#include <iostream>
 
 namespace
 {
@@ -106,6 +107,7 @@ CodeTemplate::CodeTemplate( const substringref &i_tmpl )
 void CodeTemplate::render( const CodeTemplateModel &i_model, ostream &ostr )
 {
 	_context.push_front( i_model );
+	//dumpContext();
 	render( _tmpl, ostr );
 	
 	// cleanup context
@@ -131,7 +133,7 @@ void CodeTemplate::render( const substringref &i_tmpl, ostream &ostr )
 				if ( startTag[2] == '/' and matchingCloseTag( openTag, substringref( startTag + 3, endTag - 2 ) ) )
 				{
 					// this allow nicer formatting in the template
-					if ( *endOpenSectionTag == '\n' )
+					if ( *(startOpenSectionTag-1) == '\n' and *endOpenSectionTag == '\n' )
 						++endOpenSectionTag;
 
 					std::unordered_map<std::string,std::string> attributes;
@@ -155,12 +157,17 @@ void CodeTemplate::render( const substringref &i_tmpl, ostream &ostr )
 						else
 							ostr << sep;
 						_context.push_front( m );
+						//dumpContext();
 						render( substringref( endOpenSectionTag, startTag ), ostr );
 						_context.pop_front();
+						//dumpContext();
 						++i;
+						m.clear();
 					}
 					startOpenSectionTag = endOpenSectionTag = nullptr;
 					last = endTag;
+					if ( *(startTag-1) == '\n' and *endTag == '\n' )
+						++last;
 				}
 			}
 			else if ( startTag[2] == '#' )
@@ -192,7 +199,7 @@ void CodeTemplate::render( const substringref &i_tmpl, ostream &ostr )
 			if ( endOpenSectionTag == nullptr )
 			{
 				ostr.write( last, startTag - last );
-				ostr.flush();
+				//ostr.flush();
 			}
 			skipOpenTag( ptr );
 		}
@@ -218,6 +225,7 @@ void CodeTemplate::resolveName( const std::string &i_prefix, const substringref 
 				it->second.callback( ostr );
 			else
 				ostr << it->second.text;
+			return;
 		}
 	}
 }
@@ -238,4 +246,50 @@ bool CodeTemplate::resolveSection( const substringref &i_name, size_t i_index, C
 		}
 	}
 	return false;
+}
+
+void CodeTemplate::dumpContext() const
+{
+	std::cout << "------------" << std::endl;
+	for ( auto it = _context.rbegin(); it != _context.rend(); ++it )
+	{
+		std::cout << "------------" << std::endl;
+		it->dump();
+	}
+}
+
+void CodeTemplateModel::dump( int i_indent ) const
+{
+	for ( auto &it : sections )
+	{
+		std::cout << std::string( i_indent, ' ' ) << it.first << " : " << it.second.nb << std::endl;
+		for ( size_t i = 0; i < it.second.nb; ++i )
+		{
+			std::cout << std::string( i_indent + 2, ' ' ) << i << "-" << std::endl;
+			if ( it.second.callback )
+			{
+				CodeTemplateModel m;
+				it.second.callback( i, m );
+				m.dump( i_indent + 4 );
+			}
+			else
+			{
+				std::cout << std::string( i_indent + 4, ' ' ) << "empty" << std::endl;
+			}
+		}
+	}
+	for ( auto &it : names )
+	{
+		std::cout << std::string( i_indent, ' ' ) << it.first << " : ";
+		if ( it.second.callback )
+		{
+			std::string data;
+			llvm::raw_string_ostream os( data );
+			it.second.callback( os );
+			os.flush();
+			std::cout << "\"" << data << "\"" << std::endl;
+		}
+		else
+			std::cout << "\"" << it.second.text << "\"" << std::endl;
+	}
 }

@@ -93,6 +93,8 @@ class CXXMethod
 	inline bool isVirtual() const { return _type == type_t::kVirtual or _type == type_t::kPureVirtual ; }
 	inline bool isPureVirtual() const { return _type == type_t::kPureVirtual ; }
 	inline bool isConst() const { return _isConst; }
+	
+	inline access_t access() const { return _access; }
 
 	bool operator<( const CXXMethod &i_other ) const;
 	bool operator==( const CXXMethod &i_other ) const;
@@ -128,8 +130,6 @@ class CXXClass
 	const std::vector<const CXXMethod *> &methods() const;
 	const std::vector<const CXXMethod *> &nonVirtualMethods() const;
 	const std::vector<const CXXMethod *> &virtualMethods() const;
-	const std::vector<const CXXMethod *> &staticMethods() const;
-	const std::vector<const CXXMethod *> &nonStaticMethods() const;
 
   private:
 	std::string _name;
@@ -140,8 +140,6 @@ class CXXClass
 	mutable std::vector<const CXXMethod *> _constructors;
 	mutable std::vector<const CXXMethod *> _nonVirtualMethods;
 	mutable std::vector<const CXXMethod *> _virtualMethods;
-	mutable std::vector<const CXXMethod *> _staticMethods;
-	mutable std::vector<const CXXMethod *> _nonStaticMethods;
 	void update() const;
 };
 
