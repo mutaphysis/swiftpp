@@ -118,8 +118,12 @@ class CXXClass
 
 	void addMethod( const CXXMethod &i_method );
 	void addMissingConstructor();
+	void addBase( const std::string &i_base );
 
 	inline const std::string &name() const { return _name; }
+	
+	inline const std::vector<std::string> &bases() const { return _bases; }
+
 	const std::vector<const CXXMethod *> &constructors() const;
 	const std::vector<const CXXMethod *> &methods() const;
 	const std::vector<const CXXMethod *> &nonVirtualMethods() const;
@@ -129,6 +133,7 @@ class CXXClass
 
   private:
 	std::string _name;
+	std::vector<std::string> _bases;
 	std::vector<CXXMethod> _allMethods;
 	mutable bool _valid;
 	mutable std::vector<const CXXMethod *> _methods;

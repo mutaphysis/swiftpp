@@ -138,6 +138,21 @@ bool SwiftppASTVisitor::VisitCXXRecordDecl( clang::CXXRecordDecl *i_decl )
 		}
 	}
 	
+	for ( auto base = i_decl->bases_begin(); base != i_decl->bases_end(); ++base )
+	{
+		// skip private bases
+		if ( base->getAccessSpecifier() != clang::AS_private and base->getAccessSpecifier() != clang::AS_none )
+		{
+			auto t = base->getType().getTypePtrOrNull();
+			if ( t != nullptr )
+			{
+				auto super = t->getAsCXXRecordDecl();
+				if ( super != nullptr )
+					c.addBase( super->getQualifiedNameAsString() );
+			}
+		}
+	}
+	
 	_data.addClass( c );
 	
 	return true;

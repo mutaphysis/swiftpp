@@ -135,6 +135,11 @@ void CXXClass::addMissingConstructor()
 	}
 }
 
+void CXXClass::addBase( const std::string &i_base )
+{
+	_bases.push_back( i_base );
+}
+
 const std::vector<const CXXMethod *> &CXXClass::constructors() const
 {
 	update();

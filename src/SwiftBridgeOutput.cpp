@@ -65,13 +65,22 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 		};
 	model.names["bridge_include"] = data->formatIncludeName( _inputFile );
 	model.names["ns"] = NS_PREFIX;
-	model.names["std_string_size"] = std::to_string( sizeof( std::string ) );
+	model.names["std_string_size"] = std::to_string( sizeof( void * ) * 3 );
 	
 	auto classes = [this, data]( size_t i, CodeTemplateModel &o_model )
 		{
 			auto classPtr = &(data->classes()[i]);
 
 			o_model.names["class_name"] = classPtr->name();
+
+			// bases
+			o_model.sections["base_classes"] = CodeTemplateModel::ListSection{ classPtr->bases().size(),
+					[this,classPtr]( size_t i, CodeTemplateModel &o_model )
+					{
+						auto base_name = classPtr->bases()[i];
+						o_model.names["base_name"] = base_name;
+					}
+				};
 
 			// constructors
 			o_model.sections["constructors"] = CodeTemplateModel::ListSection{ classPtr->constructors().size(),
