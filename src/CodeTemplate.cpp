@@ -156,6 +156,7 @@ void CodeTemplate::render( const substringref &i_tmpl, ostream &ostr )
 							ostr << prefix;
 						else
 							ostr << sep;
+						m.names["index"] = std::to_string( i );
 						_context.push_front( m );
 						//dumpContext();
 						render( substringref( endOpenSectionTag, startTag ), ostr );

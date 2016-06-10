@@ -213,8 +213,38 @@ std::string SwiftppObjcOutput::type2SwiftTypeString( const clang::QualType &i_cx
 	{
 		assert( false );
 	}
+	if ( cxxtype == "bool" )
+		return "CBool";
+	if ( cxxtype == "char" or cxxtype == "signed char" )
+		return "CChar";
+	if ( cxxtype == "unsigned char" )
+		return "CUnsignedChar";
+	if ( cxxtype == "short" )
+		return "CShort";
+	if ( cxxtype == "unsigned short" )
+		return "CUnsignedShort";
 	if ( cxxtype == "int" )
 		return "CInt";
+	if ( cxxtype == "unsigned int" )
+		return "CUnsignedInt";
+	if ( cxxtype == "long" )
+		return "CLong";
+	if ( cxxtype == "unsigned long" )
+		return "CUnsignedLong";
+	if ( cxxtype == "long long" )
+		return "CLongLong";
+	if ( cxxtype == "unsigned long long" )
+		return "CUnsignedLongLong";
+	if ( cxxtype == "wchar_t" )
+		return "CWideChar";
+	if ( cxxtype == "char16_t" )
+		return "CChar16";
+	if ( cxxtype == "char32_t" )
+		return "CChar32";
+	if ( cxxtype == "float" )
+		return "CFloat";
+	if ( cxxtype == "double" )
+		return "CDouble";
 	
 	//! @todo: warn for unsupported types
 	assert( false );

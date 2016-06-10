@@ -34,7 +34,7 @@ const char *<{ns}>StringWrapperUTF8(const <{ns}>StringWrapper * const);
 typedef struct <{ns}><{class_name}>_t <{ns}><{class_name}>;
 
 <{#constructors}>
-<{ns}><{class_name}> *<{ns}><{class_name}>_allocate(<{#params:separator(, )}><{param_c_type}> <{param_name}><{/params}>);
+<{ns}><{class_name}> *<{ns}><{class_name}>_create<{index}>(<{#params:separator(, )}><{param_c_type}> <{param_name}><{/params}>);
 <{/constructors}>
 
 void <{ns}><{class_name}>_destroy(<{ns}><{class_name}> *i_cxxptr);
@@ -170,7 +170,7 @@ public:
 extern "C" {
 
 <{#constructors}>
-<{ns}><{class_name}> *<{ns}><{class_name}>_allocate(<{#params:separator(, )}><{param_c_type}> <{param_name}><{/params}>)
+<{ns}><{class_name}> *<{ns}><{class_name}>_create<{index}>(<{#params:separator(, )}><{param_c_type}> <{param_name}><{/params}>)
 {
   return (<{ns}><{class_name}> *)new <{ns}><{class_name}>_overrider(<{#params:separator(, )}><{param_name}><{/params}>);
 }
@@ -229,7 +229,7 @@ class <{class_name}> {
 
 <{#constructors}>
   init(<{#params:separator(, )}><{param_clean_name}>: <{param_swift_type}><{/params}>) {
-    self._super = <{ns}><{class_name}>_allocate(<{#params:separator(, )}><{param_clean_name}><{/params}>)
+    self._super = <{ns}><{class_name}>_create<{index}>(<{#params:separator(, )}><{param_clean_name}><{/params}>)
 
     <{ns}><{class_name}>_setup_subclass( self._super,
       UnsafePointer(Unmanaged.passUnretained(self).toOpaque())<{#virtual_methods:prefix(,)separator(,\n        )}>
