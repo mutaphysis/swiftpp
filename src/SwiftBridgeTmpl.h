@@ -28,6 +28,18 @@ typedef struct
 void <{ns}>StringWrapper_destroy(<{ns}>StringWrapper);
 const char *<{ns}>StringWrapperUTF8(const <{ns}>StringWrapper * const);
 
+<{#has_enums}>
+#ifndef __cplusplus
+<{#enums}>
+enum <{enum_name}>
+{
+<{#enum_values:separator(,\n  )}>
+<{one_name}> = <{one_value}><{/enum_values}>
+};
+<{/enums}>
+#endif
+<{/has_enums}>
+
 <{#classes}>
 // <{class_name}>
 // ------------------------
@@ -48,7 +60,6 @@ void <{ns}><{class_name}>_setup_subclass(<{ns}><{class_name}> *i_cxxptr, const v
 
 <{#methods}>
 <{#is_non_static}>
-<{return_c_type}> <{ns}><{class_name}>_<{name}>(<{ns}><{class_name}> *i_cxxptr<{#params:prefix(, )separator(, )}><{param_c_type}> <{param_name}><{/params}>);
 <{return_c_type}> <{ns}><{class_name}>_<{name}>_forward(<{ns}><{class_name}> *i_cxxptr<{#params:prefix(, )separator(, )}><{param_c_type}> <{param_name}><{/params}>);
 <{/is_non_static}>
 <{#is_static}>
@@ -120,7 +131,7 @@ extern "C" {
 void <{ns}>StringWrapper_destroy(<{ns}>StringWrapper cs)
 {
   if (cs.storage[sizeof(cs)-1] != 1)
-	  delete [] *((char **)cs.storage);
+    delete [] *((char **)cs.storage);
 }
 const char *<{ns}>StringWrapperUTF8(const <{ns}>StringWrapper * const cs)
 {
@@ -140,7 +151,7 @@ class <{ns}><{class_name}>_forwarder : public <{class_name}>
   public:
 <{#methods}>
 <{#is_protected}>
-    using <{class_name}>::<{name}>(<{#params:separator(, )}><{param_cxx_type}> <{param_name}><{/params}>);
+    using <{class_name}>::<{name}>;
 <{/is_protected}>
 <{/methods}>
 };
@@ -188,13 +199,9 @@ void <{ns}><{class_name}>_setup_subclass(<{ns}><{class_name}> *i_cxxptr, const v
 
 <{#methods}>
 <{#is_non_static}>
-<{return_c_type}> <{ns}><{class_name}>_<{name}>(<{ns}><{class_name}> *i_cxxptr<{#params:prefix(, )separator(, )}><{param_c_type}> <{param_name}><{/params}>)
-{
-  <{#has_return_value}>return <{return_converter_cxx_to_c}>(<{/has_return_value}>((<{ns}><{class_name}>_forwarder*)i_cxxptr)-><{name}>(<{#params:separator(, )}><{param_as_cxx_type}><{/params}>)<{#has_return_value}>)<{/has_return_value}>;
-}
 <{return_c_type}> <{ns}><{class_name}>_<{name}>_forward(<{ns}><{class_name}> *i_cxxptr<{#params:prefix(, )separator(, )}><{param_c_type}> <{param_name}><{/params}>)
 {
-  <{#has_return_value}>return <{return_converter_cxx_to_c}>(<{/has_return_value}>((<{ns}><{class_name}>_forwarder*)i_cxxptr)-><{class_name}>::<{name}>(<{#params:separator(, )}><{param_as_cxx_type}><{/params}>)<{#has_return_value}>)<{/has_return_value}>;
+  <{#has_return_value}>return <{return_converter_cxx_to_c}>(<{/has_return_value}>((<{ns}><{class_name}>_forwarder*)i_cxxptr)-><{ns}><{class_name}>_forwarder::<{name}>(<{#params:separator(, )}><{param_as_cxx_type}><{/params}>)<{#has_return_value}>)<{/has_return_value}>;
 }
 <{/is_non_static}>
 <{#is_static}>
@@ -212,7 +219,9 @@ void <{ns}><{class_name}>_setup_subclass(<{ns}><{class_name}> *i_cxxptr, const v
 const char kCXX_BRIDGE_SWIFT_TEMPLATE[] = R"(
 // generated bridge.swift
 
-//import Cocoa // fixme
+<{#frameworks}>
+import <{framework_name}>
+<{/frameworks}>
 
 func <{ns}>StringWrapper2SwiftString( cs : <{ns}>StringWrapper ) -> String {
   var cs = cs

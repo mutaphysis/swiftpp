@@ -112,12 +112,12 @@ class ShapeView : NSView
 		// converted from std::string to NSString by swiftpp builtin converter
 		// and path it will be converted from a C++ type to NSBezierPath
 		// by a user defined converter, see cxx-converter.mm
-		override func shapeDetected( name: String!, path: NSBezierPath! )
+		override func shapeDetected( name: String, path: NSBezierPath )
 		{
 			super.shapeDetected( name, path: path )
 			
 			// we guessed one shape, record it!
-			_view._coolPathList.append( path! )
+			_view._coolPathList.append( path )
 			_view.report( name )
 		}
 	}

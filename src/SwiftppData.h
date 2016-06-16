@@ -11,7 +11,6 @@
 
 #include <string>
 #include <vector>
-#include <set>
 #include <clang/AST/Type.h>
 
 /*!
@@ -184,6 +183,7 @@ class SwiftppData
 	void addClass( const CXXClass &i_class );
 	void addConverter( const TypeConverter &i_converter );
 	void addCXXTypeIncludePath( const std::string &i_fn );
+	void addObjCTypeIncludePath( const std::string &i_fn );
 	void addMissingConstructors();
 	void addEnum( const CXXEnum &i_enum );
 
@@ -191,8 +191,9 @@ class SwiftppData
 	inline const std::vector<CXXEnum> &enums() const { return _enums; }
 	inline const std::vector<TypeConverter> &converters() const { return _converters; }
 	inline const std::vector<std::string> &includesForCXXTypes() const { return _includesForCXXTypes; }
+	inline const std::vector<std::string> &objCFrameworks() const { return _objCFrameworks; }
 
-	std::set<std::string> allObjcTypes() const;
+	std::vector<std::string> allObjcTypes() const;
 	bool anyObjcTypes() const;
 
 	inline std::string outputFolder() const { return _options.output; }
@@ -213,6 +214,7 @@ class SwiftppData
 	std::vector<CXXClass> _classes;
 	std::vector<CXXEnum> _enums;
 	std::vector<std::string> _includesForCXXTypes; //!< include paths needed for some user's C++ type definition
+	std::vector<std::string> _objCFrameworks; //!< Objective-C frameworks needed for some type definition
 };
 
 #endif

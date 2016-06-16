@@ -67,6 +67,31 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 	model.names["ns"] = NS_PREFIX;
 	model.names["std_string_size"] = std::to_string( sizeof( void * ) * 3 );
 	
+	model.sections["frameworks"] = CodeTemplateModel::ListSection{ data->objCFrameworks().size(),
+					[data]( size_t i, CodeTemplateModel &o_model )
+					{
+						auto framework_name = data->objCFrameworks()[i];
+						o_model.names["framework_name"] = framework_name;
+					}
+				};
+	
+	model.sections["has_enums"] = CodeTemplateModel::BoolSection( not data->enums().empty() );
+	model.sections["enums"] = CodeTemplateModel::ListSection{ data->enums().size(),
+			[data]( size_t i, CodeTemplateModel &o_model )
+			{
+				auto e = &(data->enums()[i]);
+				o_model.names["enum_name"] = e->name();
+				o_model.sections["enum_values"] = CodeTemplateModel::ListSection{ e->values().size(),
+						[e]( size_t i, CodeTemplateModel &o_model )
+						{
+							auto &v = e->values()[i];
+							o_model.names["one_name"] = v.first;
+							o_model.names["one_value"] = std::to_string( v.second );
+						}
+					};
+			}
+		};
+
 	auto classes = [this, data]( size_t i, CodeTemplateModel &o_model )
 		{
 			auto classPtr = &(data->classes()[i]);
@@ -96,7 +121,7 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 								o_model.names["param_c_type"] = this->param_c_type( param->type() );
 								o_model.names["param_cxx_type"] = this->param_cxx_type( param->type() );
 								o_model.names["param_clean_name"] = param->cleanName();
-								o_model.names["param_swift_type"] = this->type2SwiftTypeString( param->type() );
+								o_model.names["param_swift_type"] = this->param_swift_type( param->type() );
 							}
 						};
 					}
@@ -155,7 +180,7 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 						if ( not method->returnType()->isVoidType() )
 						{
 							o_model.sections["has_return_value"] = CodeTemplateModel::BoolSection( true );
-							o_model.names["return_swift_type"] = this->type2SwiftTypeString( method->returnType() );
+							o_model.names["return_swift_type"] = this->return_swift_type( method->returnType() );
 							o_model.names["return_converter_cxx_to_c"] = this->returnConverterForCXXType2CType( method->returnType() );
 							o_model.names["return_converter_c_to_swift"] = this->returnConverterForCType2SwiftType( method->returnType() );
 						}
@@ -170,7 +195,7 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 								o_model.names["param_cxx_type"] = this->param_cxx_type( param->type() );
 								o_model.names["param_as_cxx_type"] = this->param_as_cxx_type( *param );
 								o_model.names["param_clean_name"] = param->cleanName();
-								o_model.names["param_swift_type"] = this->type2SwiftTypeString( param->type() );
+								o_model.names["param_swift_type"] = this->param_swift_type( param->type() );
 							}
 						};
 					}
@@ -178,6 +203,16 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 		};
 	
 	model.sections["classes"] = CodeTemplateModel::ListSection{ data->classes().size(), classes };
+}
+
+std::string SwiftppObjcOutput::param_swift_type( const clang::QualType &i_cxxtype ) const
+{
+	return type2SwiftTypeString( i_cxxtype );
+}
+
+std::string SwiftppObjcOutput::return_swift_type( const clang::QualType &i_cxxtype ) const
+{
+	return type2SwiftTypeString( i_cxxtype );
 }
 
 std::string SwiftppObjcOutput::type2SwiftTypeString( const clang::QualType &i_cxxtype ) const
@@ -245,6 +280,8 @@ std::string SwiftppObjcOutput::type2SwiftTypeString( const clang::QualType &i_cx
 		return "CFloat";
 	if ( cxxtype == "double" )
 		return "CDouble";
+	if ( strncmp( cxxtype.c_str(), "enum ", 5 ) == 0 )
+		return cxxtype.substr( 5 );
 	
 	//! @todo: warn for unsupported types
 	assert( false );

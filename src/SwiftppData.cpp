@@ -9,7 +9,22 @@
 #include "SwiftppData.h"
 #include <iostream>
 #include <clang/AST/Decl.h>
+#include <regex>
 
+namespace
+{
+
+template<typename T>
+void insertSorted( std::vector<T> &io_vec, const T &v )
+{
+	auto it = std::find( io_vec.begin(), io_vec.end(), v );
+	if ( it == io_vec.end() )
+		io_vec.push_back( v );
+	else if ( *it != v )
+		io_vec.insert( it, v );
+}
+
+}
 TypeConverter::TypeConverter( const std::string &i_name, const clang::QualType &i_to, const clang::QualType &i_from )
 	: _name( i_name ),
 		_to( i_to ),
@@ -222,7 +237,17 @@ void SwiftppData::addConverter( const TypeConverter &i_converter )
 
 void SwiftppData::addCXXTypeIncludePath( const std::string &i_fn )
 {
-	_includesForCXXTypes.push_back( i_fn );
+	insertSorted( _includesForCXXTypes, i_fn );
+}
+
+void SwiftppData::addObjCTypeIncludePath( const std::string &i_fn )
+{
+	std::regex re( ".*/Frameworks/(.*)\\.framework/.*" );
+	std::smatch what;
+	if ( std::regex_match( i_fn, what, re )  )
+	{
+		insertSorted( _objCFrameworks, std::string(what[1]) );
+	}
 }
 
 void SwiftppData::addMissingConstructors()
@@ -236,15 +261,15 @@ void SwiftppData::addEnum( const CXXEnum &i_enum )
 	_enums.push_back( i_enum );
 }
 
-std::set<std::string> SwiftppData::allObjcTypes() const
+std::vector<std::string> SwiftppData::allObjcTypes() const
 {
-	std::set<std::string> res;
+	std::vector<std::string> res;
 	for ( auto &tc : _converters )
 	{
 		if ( clang::isa<clang::ObjCObjectPointerType>( tc.to() ) )
-			res.insert( clang::QualType::getAsString(tc.to().getTypePtr()->getPointeeType().split()) );
+			insertSorted( res, clang::QualType::getAsString(tc.to().getTypePtr()->getPointeeType().split()) );
 		if ( clang::isa<clang::ObjCObjectPointerType>( tc.from() ) )
-			res.insert( clang::QualType::getAsString(tc.from().getTypePtr()->getPointeeType().split()) );
+			insertSorted( res, clang::QualType::getAsString(tc.from().getTypePtr()->getPointeeType().split()) );
 	}
 	return res;
 }

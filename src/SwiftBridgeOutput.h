@@ -29,6 +29,8 @@ class SwiftppObjcOutput : public SwiftppOutput
 
 	//! return the C type corresponding to the C++ type, according to the available converters
 	std::string type2SwiftTypeString( const clang::QualType &i_cxxtype ) const;
+	std::string param_swift_type( const clang::QualType &i_cxxtype ) const;
+	std::string return_swift_type( const clang::QualType &i_cxxtype ) const;
 	std::string param_swift_c_type( const clang::QualType &i_cxxtype ) const;
 
 	/*!

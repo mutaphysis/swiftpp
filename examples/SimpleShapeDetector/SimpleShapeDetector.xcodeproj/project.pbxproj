@@ -41,9 +41,9 @@
 		263B320219BB2D5E006F7D14 /* cxx-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "cxx-Bridging-Header.h"; sourceTree = "<group>"; };
 		263B320319BB2D76006F7D14 /* cxx-converter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "cxx-converter.h"; sourceTree = "<group>"; };
 		263B320419BB2D76006F7D14 /* cxx-converter.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "cxx-converter.mm"; sourceTree = "<group>"; };
-		26EE12F61D06D82000E9832B /* c_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "c_impl.h"; sourceTree = "<group>"; };
-		26EE12F71D06D82000E9832B /* c_impl.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "c_impl.mm"; sourceTree = "<group>"; };
-		26EE12F81D06D82000E9832B /* bridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "bridge.swift"; sourceTree = "<group>"; };
+		26EE12F61D06D82000E9832B /* c_impl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = c_impl.h; sourceTree = "<group>"; };
+		26EE12F71D06D82000E9832B /* c_impl.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = c_impl.mm; sourceTree = "<group>"; };
+		26EE12F81D06D82000E9832B /* bridge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = bridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */

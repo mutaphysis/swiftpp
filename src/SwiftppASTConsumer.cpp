@@ -10,6 +10,7 @@
 #include "SwiftppASTVisitor.h"
 #include "SwiftppOutput.h"
 #include <clang/AST/ASTContext.h>
+#include <iostream>
 
 SwiftppASTConsumer::SwiftppASTConsumer( clang::CompilerInstance &i_ci,
 										const SwiftppOptions &i_options,
@@ -35,24 +36,33 @@ void SwiftppASTConsumer::HandleTranslationUnit( clang::ASTContext &i_ctx )
 	auto data = &_data;
 	auto collectInclude = [data]( clang::ASTContext &i_ctx, const clang::QualType &i_type )
 		{
-			auto decl = i_type->getAsCXXRecordDecl();
-			if ( decl != nullptr )
+			auto cxxdecl = i_type.getCanonicalType()->getAsCXXRecordDecl();
+			if ( cxxdecl != nullptr )
 			{
-				auto loc = decl->clang::Decl::getLocStart();
+				auto loc = cxxdecl->clang::Decl::getLocStart();
 			    clang::PresumedLoc ploc = i_ctx.getSourceManager().getPresumedLoc( loc );
 			    if ( not ploc.isInvalid() )
 				{
 					data->addCXXTypeIncludePath( ploc.getFilename() );
 				}
 			}
+			else
+			{
+				if ( i_type->isObjCObjectPointerType() )
+				{
+					auto qtype = i_type.getTypePtr()->getPointeeType();
+					auto decl = qtype->getAsObjCInterfaceType()->getInterface();
+					auto loc = decl->clang::Decl::getLocStart();
+					clang::PresumedLoc ploc = i_ctx.getSourceManager().getPresumedLoc( loc );
+					data->addObjCTypeIncludePath( ploc.getFilename() );
+				}
+			}
 		};
 	
 	for ( auto converter : _data.converters() )
 	{
-		if ( not converter.to().getCanonicalType()->isObjCObjectPointerType() )
-			collectInclude( i_ctx, converter.to() );
-		if ( not converter.from().getCanonicalType()->isObjCObjectPointerType() )
-			collectInclude( i_ctx, converter.from() );
+		collectInclude( i_ctx, converter.to() );
+		collectInclude( i_ctx, converter.from() );
 	}
 	
 	_data.addMissingConstructors();
