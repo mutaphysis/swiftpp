@@ -86,15 +86,15 @@ you are exporting to swift, swiftpp rely on a header
 should be made visible to the Objective-C/swift side.
 
 cxx-Bridging-Header.h will be parsed by swiftpp and every
-class that are annotated with the "swift" keyword will be exported.
+class that are annotated with the "swiftpp" keyword will be exported.
 
 example:
 
 ```C++
-class __attribute__((annotate("swift"))) MyCXXClass { ... };
+class __attribute__((annotate("swiftpp"))) MyCXXClass { ... };
 ```
 
- * You can use a #define swift __attribute__((annotate("swift"))) to
+ * You can use a #define swiftpp __attribute__((annotate("swiftpp"))) to
  simplify the syntax
 
 Then, you will be able to instanciate or subclass MyCXXClass in swift.

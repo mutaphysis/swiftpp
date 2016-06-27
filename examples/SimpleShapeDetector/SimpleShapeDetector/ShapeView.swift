@@ -10,7 +10,7 @@ import Cocoa
 
 class ShapeView : NSView
 {
-	var _timer : NSTimer?
+	var _timer : Timer?
 	var _currentPath : NSBezierPath?
 	var _coolPathList : [NSBezierPath] = []
 	
@@ -27,15 +27,15 @@ class ShapeView : NSView
         super.init(frame: frame)
     }
 
-    override func drawRect(dirtyRect: NSRect)
+    override func draw(_ dirtyRect: NSRect)
 	{
-        super.drawRect(dirtyRect)
+        super.draw(dirtyRect)
 		
 		// draw some instructions
-		NSAttributedString( string: "Draw some\nsimple shapes" ).drawAtPoint( CGPoint( x: 5, y: 5 ) );
+		AttributedString( string: "Draw some\nsimple shapes" ).draw( at: CGPoint( x: 5, y: 5 ) );
 
 		// draw each already detected paths
-		NSColor.blackColor().set()
+		NSColor.black().set()
 		for p in _coolPathList
 		{
 			p.stroke()
@@ -44,12 +44,12 @@ class ShapeView : NSView
 		// draw the path that the user is currently building
 		if let p = _currentPath
 		{
-			NSColor.redColor().set();
+			NSColor.red().set();
 			p.stroke()
 		}
     }
 	
-	override func mouseDown(theEvent: NSEvent)
+	override func mouseDown(_ theEvent: NSEvent)
 	{
 		// stop the timer
 		if let t = _timer
@@ -59,39 +59,39 @@ class ShapeView : NSView
 		}
 		
 		// handle input
-		let	pt = self.convertPoint( theEvent.locationInWindow, fromView: nil )
+		let	pt = self.convert( theEvent.locationInWindow, from: nil )
 
 		if _currentPath == nil
 		{
 			_currentPath = NSBezierPath()
 			_currentPath!.lineWidth = 10
-			_currentPath!.lineCapStyle = .RoundLineCapStyle
-			_currentPath!.lineJoinStyle = .RoundLineJoinStyle
+			_currentPath!.lineCapStyle = .roundLineCapStyle
+			_currentPath!.lineJoinStyle = .roundLineJoinStyle
 		}
-		_currentPath!.moveToPoint( pt )
+		_currentPath!.move( to: pt )
 		self.needsDisplay = true
 	}
 	
-	override func mouseDragged(theEvent: NSEvent)
+	override func mouseDragged(_ theEvent: NSEvent)
 	{
 		// just append to the current path and redraw
-		let	pt = self.convertPoint( theEvent.locationInWindow, fromView: nil )
+		let	pt = self.convert( theEvent.locationInWindow, from: nil )
 		
-		_currentPath!.lineToPoint( pt );
+		_currentPath!.line( to: pt );
 		self.needsDisplay = true
 	}
 
-	override func mouseUp(theEvent: NSEvent)
+	override func mouseUp(_ theEvent: NSEvent)
 	{
 		// just append to the current path and redraw
-		let	pt = self.convertPoint( theEvent.locationInWindow, fromView: nil )
+		let	pt = self.convert( theEvent.locationInWindow, from: nil )
 
-		_currentPath!.lineToPoint( pt );
+		_currentPath!.line( to: pt );
 		
 		self.needsDisplay = true
 		
 		// start a timer, after some time we'll try to guess what the user did.
-		_timer = NSTimer.scheduledTimerWithTimeInterval( 1, target:self, selector:#selector(ShapeView.onTimer), userInfo:nil, repeats:false )
+		_timer = Timer.scheduledTimer( timeInterval: 1, target:self, selector:#selector(ShapeView.onTimer), userInfo:nil, repeats:false )
 	}
 	
 	// ShapeDetector does not have the best API
@@ -114,7 +114,7 @@ class ShapeView : NSView
 		// by a user defined converter, see cxx-converter.mm
 		override func shapeDetected( name: String, path: NSBezierPath )
 		{
-			super.shapeDetected( name, path: path )
+			super.shapeDetected( name: name, path: path )
 			
 			// we guessed one shape, record it!
 			_view._coolPathList.append( path )
@@ -122,9 +122,9 @@ class ShapeView : NSView
 		}
 	}
 	
-	func report( name: String )
+	func report( _ name: String )
 	{
-		_textView.textStorage?.appendAttributedString( NSAttributedString( string: name + "\n" ) )
+		_textView.textStorage?.append( AttributedString( string: name + "\n" ) )
 	}
 	
 	func onTimer()
@@ -137,7 +137,7 @@ class ShapeView : NSView
 		// 2- call detect: this will call the override for each shape detected
 		// note: _currentPath is an NSBezierPath, it will be converted to the appropriate C++
 		//  type by a user defined converter, see cxx-converter.mm
-		shapeDetector.detect( _currentPath! )
+		shapeDetector.detect( paths: _currentPath! )
 		
 		// clear current path and redraw
 		_currentPath = nil

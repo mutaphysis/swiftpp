@@ -7,17 +7,17 @@
 
 #include <string>
 
-#define swift __attribute__((annotate("swift")))
+#define swiftpp __attribute__((annotate("swiftpp")))
 
-class swift Simple
+class swiftpp Simple
 {
 	public:
 		void method1();
 		virtual void method2();
 		void method3();
-		
+
 		static void method4();
-	
+
 	private:
 		std::string _test;
 };

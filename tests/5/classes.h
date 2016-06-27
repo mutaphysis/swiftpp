@@ -7,7 +7,7 @@
 
 #include <string>
 
-#define swift __attribute__((annotate("swift")))
+#define swiftpp __attribute__((annotate("swiftpp")))
 
 enum class Weekday_t
 {
@@ -20,11 +20,11 @@ enum class Weekday_t
 	kSunday
 };
 
-class swift Simple1
+class swiftpp Simple1
 {
 	public:
 		Simple1();
-		
+
 		Weekday_t method( int index );
 };
 

@@ -299,7 +299,7 @@ std::string SwiftppObjcOutput::param_swift_c_type( const clang::QualType &i_cxxt
 		{
 			// converter found, use the converted type
 			if ( clang::isa<clang::ObjCObjectPointerType>( it.to() ) )
-				return clang::QualType::getAsString(it.to().getTypePtr()->getPointeeType().split()) + "!";
+				return clang::QualType::getAsString(it.to().getTypePtr()->getPointeeType().split()) + "?";
 
 			return type2UndecoratedCXXTypeString( it.to() );
 		}
@@ -538,6 +538,17 @@ std::string SwiftppObjcOutput::converterForCType2SwiftType( const clang::QualTyp
 	// add a few default converters
 	if ( cxxtype == "std::string" )
 		return "String(cString:" + i_code + "!)";
+	
+	// is there a converter?
+	for ( auto converter : _data->converters() )
+	{
+		if ( cxxtype == type2UndecoratedCXXTypeString( converter.from() ) )
+		{
+			// converter found, use the converted type
+			if ( clang::isa<clang::ObjCObjectPointerType>( converter.to() ) )
+				return i_code + "!";
+		}
+	}
 	
 	clang::QualType valueType;
 	if ( isCXXVectorType( i_cxxtype, &valueType ) )

@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-#define swift __attribute__((annotate("swift")))
+#define swiftpp __attribute__((annotate("swiftpp")))
 
 /*!
    @brief detect shapes from polylines.
@@ -28,7 +28,7 @@
 		3- call detect with a path
 		4- shapeDetected() override will be called with each shape detected
 */
-class swift ShapeDetector
+class swiftpp ShapeDetector
 {
 	public:
 		ShapeDetector( int i_timeout );

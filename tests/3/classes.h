@@ -7,7 +7,7 @@
 
 #include <string>
 
-#define swift __attribute__((annotate("swift")))
+#define swiftpp __attribute__((annotate("swiftpp")))
 
 class Simple1
 {
@@ -19,7 +19,7 @@ class Simple1
 		std::string _test;
 };
 
-class swift Simple2 : public Simple1
+class swiftpp Simple2 : public Simple1
 {
 	public:
 		void method3();

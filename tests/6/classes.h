@@ -7,9 +7,9 @@
 
 #include <string>
 
-#define swift __attribute__((annotate("swift")))
+#define swiftpp __attribute__((annotate("swiftpp")))
 
-class swift Simple
+class swiftpp Simple
 {
 	public:
 		virtual std::string method1( const std::string &i_s );
