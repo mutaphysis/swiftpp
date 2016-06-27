@@ -1,20 +1,16 @@
-Note
-====
-Re-entrency and thread safety has been fixed in the C++ / swift bridge.
-Update to that latest version.
 
 swiftpp
 =======
 
-An attempt at a C++ to swift bridge.
+A C++ to swift bridge.
 
 
 Introduction
 ===========
 
-swiftpp is a clang tool that automatically generate the glue code to let
-a swift class inherit from a C++ class.  You can override C++ virtual
-methods from the swift derivative as well.
+swiftpp is a clang tool that automatically generate the glue code
+to let a swift class inherit from a C++ class.  You can override C++
+virtual methods from the swift derivative as well.
 
 Things like this become possible:
 
@@ -34,7 +30,7 @@ class swift MyCXXClass
 // source.swift
 class MySwiftClass : MyCXXClass
 {
-	override func doSomething( text: String! )
+	override func doSomething( text: String )
 	{
 		// ...
 		super.doSomething( text )
@@ -45,15 +41,22 @@ class MySwiftClass : MyCXXClass
 Building
 ========
 
-You will need a clang/llvm install to be able to compile swiftpp itself.
-Look in setup_llvm.txt for instructions. I worked with llvm trunk and try
-to use the latest Xcode to track the latest swift version. When things
-get more stable, I'll try to settle on an llvm version. As of this
-writing I have llvm revision #260064 and Xcode 7.2.1.
+You will need a clang/llvm install to be able to compile swiftpp
+itself. Look in setup_llvm.txt for instructions (or run
+setup_llvm.txt as a shell script). I worked with llvm trunk and try
+to use the latest Xcode to track the latest swift version. When
+things get more stable, I'll try to settle on an llvm version. As of
+this writing I have llvm revision #272119 and Xcode 7.3.1.
 
 If clang/llvm is installed at the same path as in setup_llvm.txt
-(/opt/llvm), you can then open and compile swiftpp.xcodeproj. You will
-have to edit the project's paths otherwise.
+(/opt/llvm), you can then compile swiftpp. CMake is the build system
+used, just run:
+```
+cmake -G Xcode
+```
+to generate an Xcode project. Open and compile swiftpp.xcodeproj.
+If llvm/clang development libraries are installed elsewhere, edit
+CMakeList.txt accordingly.
 
 That's it, you should now have a tool named swiftpp at the repository
 root level.
@@ -65,13 +68,31 @@ swiftpp pre-compiler might run very slow.
 Usage
 =====
 
-Just like the Objective-C-to-swift bridge rely on a special header (PROJECT_NAME-Bridging-Header.h) to find what Objective-C classes you are exporting to swift, swiftpp rely on a header (cxx-Bridging-Header.h in the example) to know what C++ classes should be made visible to the Objective-C/swift side.
 
-cxx-Bridging-Header.h will be parsed by swiftpp and every class that are annotated with the "swift" keyword will be exported.
+Type mapping
+============
+
+
+User defined converters
+=======================
+
+
+todo:
+
+Just like the Objective-C-to-swift bridge rely on a special header
+(PROJECT_NAME-Bridging-Header.h) to find what Objective-C classes
+you are exporting to swift, swiftpp rely on a header
+(cxx-Bridging-Header.h in the example) to know what C++ classes
+should be made visible to the Objective-C/swift side.
+
+cxx-Bridging-Header.h will be parsed by swiftpp and every
+class that are annotated with the "swift" keyword will be exported.
 
 example:
 
+```C++
 class __attribute__((annotate("swift"))) MyCXXClass { ... };
+```
 
  * You can use a #define swift __attribute__((annotate("swift"))) to
  simplify the syntax
@@ -95,9 +116,31 @@ If your exported class (MyCXXClass) uses types that are not compatible
 with the swift world, they will be auto converted using those converters.
 Converter names are not important, type inference is used to select the
 right one.  There are also some builtin conversions:
- - std::string - NSString
- - std::vector - NSArray
- - std::map/std::unordered_map - NSDictionary
+ - C types
+ - C arrays
+ - std::string
+ - std::wstring
+ - std::u16string
+ - std::u32string
+ - std::string_view
+ - std::wstring_view
+ - std::vector
+ - std::array
+ - std::any
+ - std::tuple
+ - std::variant
+ - std::map
+ - std::queue
+ - std::stack
+ - std::unordered_map
+ - std::list
+ - std::set
+ - std::forward_list
+ - std::chrono::duration
+ - std::chrono::time_point
+ - std::shared_ptr
+ - std::unique_ptr
+
 
 If swiftpp is already built you can try an extremely basic example in
 examples/SimpleShapeDetector
@@ -124,28 +167,9 @@ compile.
 
 Refer to examples/SimpleShapeDetector !
 
-Notes
-=====
+Notes on performance
+====================
 
-OK, pretty cool!
-
-But, performance-wise, with all the data conversion that goes on between
-the 2 sides, this is not exactly a "bridge" as in the Objective-C/swift
-bridge. Still, this is a usefull, auto-generated communication channel
-between the 2, and the communication protocol used is defined by a
-straight C++ class, no special syntax or idl required.
-
-In that perspective it is more similar to swig, the C/C++ interface
-generator, so why not use swig? Well, the 2 major advantages of swiftpp
-are 1) it does not require a special "interface file", the C++ class
-interface itself is the definition, thanks to clang parsing and 2) swig
-does NOT (officially) support Objective-C, making it unsuitable for the
-task.
-
-Another tool that was released while I was working on this is djinni
-(see https://github.com/dropbox/djinni). It uses a custom idl (Interface
-Definition Language) to automatically generate bridges and support C++,
-Java and Objective-C.
 
 License
 =======

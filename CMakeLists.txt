@@ -51,4 +51,7 @@ add_executable ( swiftpp
 					src/substringref.cpp
 					src/substringref.h )
 
+add_custom_command(TARGET swiftpp POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:swiftpp> ${PROJECT_SOURCE_DIR} )
+
 target_link_libraries( swiftpp ${LIBS_LIST} -lclangBasic -lclangDriver -lclangEdit -lclangFrontend -lclangLex -lclangParse -lclangAST -lclangASTMatchers -lclangAnalysis -lclangSema -lclangSerialization -lclangTooling -lclangToolingCore -lz -lcurses )

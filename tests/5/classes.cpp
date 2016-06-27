@@ -1,5 +1,4 @@
 #include "classes.h"
-#include <cassert>
 
 Simple1::Simple1()
 {

@@ -90,7 +90,7 @@ const char kCXX_BRIDGE_CPP_TEMPLATE[] = R"(
   if (l < (sizeof(cs)-1))
   {
     memcpy(cs.storage, s.c_str(), l);
-  	cs.storage[sizeof(cs)-1] = 1;
+    cs.storage[sizeof(cs)-1] = 1;
   }
   else
   {
@@ -223,27 +223,30 @@ const char kCXX_BRIDGE_SWIFT_TEMPLATE[] = R"(
 import <{framework_name}>
 <{/frameworks}>
 
-func <{ns}>StringWrapper2SwiftString( cs : <{ns}>StringWrapper ) -> String {
-  var cs = cs
-  let result = String.fromCString(<{ns}>StringWrapperUTF8(&cs))!
-  <{ns}>StringWrapper_destroy(cs)
-  return result
+extension String
+{
+  init( _ cs : swiftpp_StringWrapper )
+  {
+    var cs = cs
+    self.init(cString:swiftpp_StringWrapperUTF8(&cs))
+    swiftpp_StringWrapper_destroy(cs)
+  }
 }
 
 <{#classes}>
 // <{class_name}>
 // ------------------------
 class <{class_name}> {
-  let _super : COpaquePointer
+  let _super : OpaquePointer
 
 <{#constructors}>
   init(<{#params:separator(, )}><{param_clean_name}>: <{param_swift_type}><{/params}>) {
     self._super = <{ns}><{class_name}>_create<{index}>(<{#params:separator(, )}><{param_clean_name}><{/params}>)
 
     <{ns}><{class_name}>_setup_subclass( self._super,
-      UnsafePointer(Unmanaged.passUnretained(self).toOpaque())<{#virtual_methods:prefix(,)separator(,\n        )}>
-        { ( i_self: UnsafePointer<Void><{#params:prefix(, )separator(, )}><{param_clean_name}>: <{param_swift_c_type}><{/params}>)<{return_swift_c_type:prefix( -> )}> in
-          let _self = Unmanaged<<{class_name}>>.fromOpaque( COpaquePointer(i_self) ).takeUnretainedValue()
+      UnsafePointer(OpaquePointer(bitPattern:Unmanaged.passUnretained(self)))<{#virtual_methods:prefix(,)separator(,\n        )}>
+        { ( i_self: UnsafePointer<Void>?<{#params:prefix(, )separator(, )}><{param_clean_name}>: <{param_swift_c_type}><{/params}>)<{return_swift_c_type:prefix( -> )}> in
+          let _self = Unmanaged<<{class_name}>>.fromOpaque(OpaquePointer(i_self!)).takeUnretainedValue()
           <{#has_return_value}>return <{return_converter_swift_to_c}>(<{/has_return_value}>_self.<{name}>(<{#params:separator(, )}><{param_as_swift_type}><{/params}>)<{#has_return_value}>)<{/has_return_value}>
         }
 <{/virtual_methods}>

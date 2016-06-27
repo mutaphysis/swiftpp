@@ -157,8 +157,7 @@ void SwiftppObjcOutput::buildCodeModel( CodeTemplateModel &model )
 								o_model.names["param_clean_name"] = param->cleanName();
 								o_model.names["param_as_swift_type"] = [this,i,param]( llvm::raw_ostream &ostr )
 									{
-										if ( i != 0 )
-											ostr << param->cleanName() << ": ";
+										ostr << param->cleanName() << ":";
 										ostr << this->converterForCType2SwiftType( param->type(), param->cleanName() );
 									};
 							}
@@ -308,7 +307,7 @@ std::string SwiftppObjcOutput::param_swift_c_type( const clang::QualType &i_cxxt
 	
 	// add a few default converters
 	if ( cxxtype == "std::string" )
-		return "UnsafePointer<CChar>";
+		return "UnsafePointer<CChar>?";
 	
 	if ( isCXXVectorType( i_cxxtype ) or isCXXListType( i_cxxtype ) )
 	{
@@ -462,7 +461,7 @@ std::string SwiftppObjcOutput::returnConverterForCType2SwiftType( const clang::Q
 	
 	// add a few default converters
 	if ( cxxtype == "std::string" )
-		return NS_PREFIX "StringWrapper2SwiftString";
+		return "String";
 	
 	clang::QualType valueType;
 	if ( isCXXVectorType( i_cxxtype, &valueType ) )
@@ -538,7 +537,7 @@ std::string SwiftppObjcOutput::converterForCType2SwiftType( const clang::QualTyp
 	
 	// add a few default converters
 	if ( cxxtype == "std::string" )
-		return "String.fromCString(" + i_code + ")!";
+		return "String(cString:" + i_code + "!)";
 	
 	clang::QualType valueType;
 	if ( isCXXVectorType( i_cxxtype, &valueType ) )

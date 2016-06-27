@@ -6,11 +6,11 @@ class MySimple : Simple
     {
 	    if ( s == "This" )
 	    {
-		    return s + super.method1( " " )
+		    return s + super.method1( s: " " )
 		}
 	    else if ( s == "is" )
 		{
-			return s + super.method1( " corr" )
+			return s + super.method1( s: " corr" )
 		}
 		else
 		{
@@ -23,6 +23,6 @@ print( "\u{1B}[32m" )
 print( "--> 6. re-entrency" )
 
 let s1 = MySimple()
-print( s1.method1( "This" ) )
+print( s1.method1( s: "This" ) )
 
 print( "\u{1B}[0m" )

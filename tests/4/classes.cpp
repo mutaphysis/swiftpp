@@ -1,5 +1,4 @@
 #include "classes.h"
-#include <cassert>
 
 OneArgs::OneArgs( int a )
 	: _value( a )

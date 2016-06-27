@@ -8,7 +8,7 @@ let s = Simple1()
 
 for i : Int32 in 1...7
 {
-    switch ( s.method( i ) )
+    switch ( s.method( index: i ) )
     {
 		case kMonday:
 			print( "Monday" );
