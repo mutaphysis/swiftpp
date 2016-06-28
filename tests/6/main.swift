@@ -4,7 +4,7 @@ class MySimple : Simple
 {
     override func method1( s : String ) -> String
     {
-	    if ( s == "This" )
+	    if ( s == "this" )
 	    {
 		    return s + super.method1( s: " " )
 		}
@@ -19,10 +19,5 @@ class MySimple : Simple
     }
 }
 
-print( "\u{1B}[32m" )
-print( "--> 6. re-entrency" )
-
 let s1 = MySimple()
-print( s1.method1( s: "This" ) )
-
-print( "\u{1B}[0m" )
+print( s1.method1( s: "this" ) )
