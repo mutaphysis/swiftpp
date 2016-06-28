@@ -46,6 +46,7 @@ foreach( @tests )
 	else
 	{
 		print( color('red') );
+		print( "Failed:\n" );
 		print( "$result\n" );
 		print( color('reset') );
 	}

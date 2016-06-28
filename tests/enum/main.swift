@@ -8,19 +8,19 @@ for i : Int32 in 1...7
     switch ( s.method( index: i ) )
     {
 		case kMonday:
-			print( "Monday" );
+			print( "this", terminator: "" )
 		case kTuesday:
-			print( "Tuesday" );
+			print( " ", terminator: "" )
 		case kWednesday:
-			print( "Wednesday" );
+			print( "is", terminator: "" )
 		case kThursday:
-			print( "Thursday" );
+			print( " ", terminator: "" )
 		case kFriday:
-			print( "Friday" );
+			print( "cor", terminator: "" )
 		case kSaturday:
-			print( "Saturday" );
+			print( "re", terminator: "" )
 		case kSunday:
-			print( "Sunday" );
+			print( "ct" )
 		default:
 			break
 	}
