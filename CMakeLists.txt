@@ -3,7 +3,8 @@ project( swiftpp )
 
 # Rely on llvm-config.
 set( CONFIG_OUTPUT )
-find_program( LLVM_CONFIG "llvm-config" PATHS /opt/llvm/bin )
+find_program( LLVM_CONFIG "llvm-config"
+              PATHS /usr/local/opt/llvm/bin/ /opt/llvm/bin )
 if( LLVM_CONFIG )
 	message( STATUS "Found LLVM_CONFIG as ${LLVM_CONFIG}" )
 	execute_process(
