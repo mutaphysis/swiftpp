@@ -8,7 +8,8 @@ find_program( LLVM_CONFIG "llvm-config"
 if( LLVM_CONFIG )
 	message( STATUS "Found LLVM_CONFIG as ${LLVM_CONFIG}" )
 	execute_process(
-			COMMAND ${LLVM_CONFIG} "--libdir" "--includedir" "--libs" core bitreader option mcparser instrumentation
+			COMMAND ${LLVM_CONFIG} "--libdir" "--bindir" "--includedir" "--libs"
+														 core bitreader option mcparser instrumentation
 			RESULT_VARIABLE HAD_ERROR
 			OUTPUT_VARIABLE CONFIG_OUTPUT )
 	if( NOT HAD_ERROR )
@@ -24,12 +25,17 @@ else()
 	message( FATAL_ERROR "llvm-config not found -- ${LLVM_CONFIG}" )
 endif()
 
-list( GET CONFIG_OUTPUT 0 LIBRARY_DIR )
-list( GET CONFIG_OUTPUT 1 INCLUDE_DIR )
-list( GET CONFIG_OUTPUT 2 LIBS_LIST )
+list( GET CONFIG_OUTPUT 0 LLVM_LIBRARY_DIR )
+list( GET CONFIG_OUTPUT 1 LLVM_BIN_DIR )
+list( GET CONFIG_OUTPUT 2 LLVM_INCLUDE_DIR )
+list( GET CONFIG_OUTPUT 3 LLVM_LIBS_LIST )
 
-include_directories( "${INCLUDE_DIR}" )
-link_directories( "${LIBRARY_DIR}" )
+
+add_definitions("-DLLVM_INCLUDEDIR=\"${LLVM_LIBRARY_DIR}\"")
+add_definitions("-DLLVM_BINDIR=\"${LLVM_BIN_DIR}\"")
+
+include_directories( "${LLVM_INCLUDE_DIR}" )
+link_directories( "${LLVM_LIBRARY_DIR}" )
 
 add_definitions( -std=c++11 -fno-rtti -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS )
 
@@ -55,4 +61,5 @@ add_executable ( swiftpp
 add_custom_command(TARGET swiftpp POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:swiftpp> ${PROJECT_SOURCE_DIR} )
 
-target_link_libraries( swiftpp ${LIBS_LIST} -lclangBasic -lclangDriver -lclangEdit -lclangFrontend -lclangLex -lclangParse -lclangAST -lclangASTMatchers -lclangAnalysis -lclangSema -lclangSerialization -lclangTooling -lclangToolingCore -lz -lcurses )
+target_link_libraries( swiftpp ${LLVM_LIBS_LIST} -lclangBasic -lclangDriver -lclangEdit -lclangFrontend -lclangLex -lclangParse -lclangAST -lclangASTMatchers -lclangAnalysis -lclangSema -lclangSerialization -lclangTooling -lclangToolingCore -lz -lcurses )
+
